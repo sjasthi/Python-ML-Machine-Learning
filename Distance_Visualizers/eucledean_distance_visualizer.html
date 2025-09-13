@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euclidean Distance Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        #canvas {
+            border: 3px solid #fff;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            min-width: 150px;
+        }
+        
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .distance-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin: 10px 0;
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .examples {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .example {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .example:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Euclidean Distance Explorer</h1>
+        
+        <div class="grid-container">
+            <canvas id="canvas" width="500" height="400"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>🔵 Point A (Blue)</h3>
+                <label>X: <span id="ax-value">2</span></label>
+                <input type="range" id="ax" min="0" max="10" value="2">
+                <label>Y: <span id="ay-value">2</span></label>
+                <input type="range" id="ay" min="0" max="8" value="2">
+            </div>
+            
+            <div class="control-group">
+                <h3>🔴 Point B (Red)</h3>
+                <label>X: <span id="bx-value">6</span></label>
+                <input type="range" id="bx" min="0" max="10" value="6">
+                <label>Y: <span id="by-value">6</span></label>
+                <input type="range" id="by" min="0" max="8" value="6">
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="distance-display">
+                Euclidean Distance: <span id="distance">5.66</span> units
+            </div>
+            
+            <div class="formula">
+                Distance = √[(x₂-x₁)² + (y₂-y₁)²]<br>
+                Distance = √[(<span id="calc-x2">6</span>-<span id="calc-x1">2</span>)² + (<span id="calc-y2">6</span>-<span id="calc-y1">2</span>)²]<br>
+                Distance = √[<span id="calc-dx">4</span>² + <span id="calc-dy">4</span>²] = √<span id="calc-sum">32</span> = <span id="calc-result">5.66</span>
+            </div>
+        </div>
+        
+        <h2>📚 Try These Famous Examples:</h2>
+        <div class="examples">
+            <div class="example" onclick="setPoints(0, 0, 3, 4)">
+                <strong>3-4-5 Triangle</strong><br>
+                (0,0) to (3,4)<br>
+                Distance: 5
+            </div>
+            
+            <div class="example" onclick="setPoints(1, 1, 1, 1)">
+                <strong>Same Point</strong><br>
+                (1,1) to (1,1)<br>
+                Distance: 0
+            </div>
+            
+            <div class="example" onclick="setPoints(0, 0, 5, 0)">
+                <strong>Horizontal Line</strong><br>
+                (0,0) to (5,0)<br>
+                Distance: 5
+            </div>
+            
+            <div class="example" onclick="setPoints(2, 1, 2, 7)">
+                <strong>Vertical Line</strong><br>
+                (2,1) to (2,7)<br>
+                Distance: 6
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p><strong>💡 Tip:</strong> Move the sliders above to see how the distance changes! The green line shows the shortest path between the two points.</p>
+            <p><strong>🏃‍♂️ Real life:</strong> This is how GPS calculates "as the crow flies" distance!</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Scale factor to make the grid bigger
+        const scale = 40;
+        const offsetX = 20;
+        const offsetY = 20;
+        
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 0; x <= 10; x++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX + x * scale, offsetY);
+                ctx.lineTo(offsetX + x * scale, offsetY + 8 * scale);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y <= 8; y++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY + y * scale);
+                ctx.lineTo(offsetX + 10 * scale, offsetY + y * scale);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(offsetX, offsetY + 8 * scale);
+            ctx.lineTo(offsetX + 10 * scale, offsetY + 8 * scale);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(offsetX, offsetY);
+            ctx.lineTo(offsetX, offsetY + 8 * scale);
+            ctx.stroke();
+            
+            // Draw numbers
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // X-axis numbers
+            for (let x = 0; x <= 10; x++) {
+                ctx.fillText(x.toString(), offsetX + x * scale, offsetY + 8 * scale + 15);
+            }
+            
+            // Y-axis numbers
+            ctx.textAlign = 'right';
+            for (let y = 0; y <= 8; y++) {
+                ctx.fillText((8-y).toString(), offsetX - 5, offsetY + y * scale + 5);
+            }
+        }
+        
+        function drawPoints() {
+            const ax = parseInt(document.getElementById('ax').value);
+            const ay = parseInt(document.getElementById('ay').value);
+            const bx = parseInt(document.getElementById('bx').value);
+            const by = parseInt(document.getElementById('by').value);
+            
+            // Convert coordinates (flip Y for screen coordinates)
+            const screenAx = offsetX + ax * scale;
+            const screenAy = offsetY + (8 - ay) * scale;
+            const screenBx = offsetX + bx * scale;
+            const screenBy = offsetY + (8 - by) * scale;
+            
+            // Draw line between points
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(screenAx, screenAy);
+            ctx.lineTo(screenBx, screenBy);
+            ctx.stroke();
+            
+            // Draw right triangle to show Pythagorean theorem
+            ctx.strokeStyle = '#FFC107';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            // Horizontal line
+            ctx.beginPath();
+            ctx.moveTo(screenAx, screenAy);
+            ctx.lineTo(screenBx, screenAy);
+            ctx.stroke();
+            
+            // Vertical line
+            ctx.beginPath();
+            ctx.moveTo(screenBx, screenAy);
+            ctx.lineTo(screenBx, screenBy);
+            ctx.stroke();
+            
+            ctx.setLineDash([]); // Reset dash
+            
+            // Draw points
+            // Point A (blue)
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.arc(screenAx, screenAy, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Point B (red)
+            ctx.fillStyle = '#F44336';
+            ctx.beginPath();
+            ctx.arc(screenBx, screenBy, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`A(${ax},${ay})`, screenAx, screenAy - 15);
+            ctx.fillText(`B(${bx},${by})`, screenBx, screenBy - 15);
+            
+            // Distance labels on triangle sides
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#FF9800';
+            
+            // Horizontal distance
+            const midX = (screenAx + screenBx) / 2;
+            ctx.fillText(`${Math.abs(bx - ax)}`, midX, screenAy - 5);
+            
+            // Vertical distance
+            const midY = (screenAy + screenBy) / 2;
+            ctx.fillText(`${Math.abs(by - ay)}`, screenBx + 15, midY);
+        }
+        
+        function calculateDistance() {
+            const ax = parseInt(document.getElementById('ax').value);
+            const ay = parseInt(document.getElementById('ay').value);
+            const bx = parseInt(document.getElementById('bx').value);
+            const by = parseInt(document.getElementById('by').value);
+            
+            const dx = bx - ax;
+            const dy = by - ay;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Update display
+            document.getElementById('distance').textContent = distance.toFixed(2);
+            document.getElementById('calc-x1').textContent = ax;
+            document.getElementById('calc-y1').textContent = ay;
+            document.getElementById('calc-x2').textContent = bx;
+            document.getElementById('calc-y2').textContent = by;
+            document.getElementById('calc-dx').textContent = Math.abs(dx);
+            document.getElementById('calc-dy').textContent = Math.abs(dy);
+            document.getElementById('calc-sum').textContent = dx * dx + dy * dy;
+            document.getElementById('calc-result').textContent = distance.toFixed(2);
+        }
+        
+        function updateDisplay() {
+            // Update slider value displays
+            document.getElementById('ax-value').textContent = document.getElementById('ax').value;
+            document.getElementById('ay-value').textContent = document.getElementById('ay').value;
+            document.getElementById('bx-value').textContent = document.getElementById('bx').value;
+            document.getElementById('by-value').textContent = document.getElementById('by').value;
+            
+            drawGrid();
+            drawPoints();
+            calculateDistance();
+        }
+        
+        function setPoints(ax, ay, bx, by) {
+            document.getElementById('ax').value = ax;
+            document.getElementById('ay').value = ay;
+            document.getElementById('bx').value = bx;
+            document.getElementById('by').value = by;
+            updateDisplay();
+        }
+        
+        // Event listeners
+        document.getElementById('ax').addEventListener('input', updateDisplay);
+        document.getElementById('ay').addEventListener('input', updateDisplay);
+        document.getElementById('bx').addEventListener('input', updateDisplay);
+        document.getElementById('by').addEventListener('input', updateDisplay);
+        
+        // Initial draw
+        updateDisplay();
+    </script>
+</body>
+</html>
