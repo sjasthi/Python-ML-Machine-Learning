@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Pandas Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px 15px 0 0;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 15px 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .series-display {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .index-label, .value-label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .index-value {
+            padding: 8px 12px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #90caf9;
+        }
+
+        .data-value {
+            padding: 8px 12px;
+            background: #fff3e0;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #ffb74d;
+        }
+
+        .dataframe-display {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        th {
+            background: #6c757d;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .control-group h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        input, select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .operation-result {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .highlight {
+            background: #fff176 !important;
+            animation: pulse 1s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { background-color: #fff176; }
+            50% { background-color: #ffeb3b; }
+            100% { background-color: #fff176; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐼 Interactive Pandas Visualizer</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showSection('series')">Pandas Series</button>
+            <button class="tab" onclick="showSection('dataframe')">Pandas DataFrame</button>
+            <button class="tab" onclick="showSection('operations')">Interactive Operations</button>
+        </div>
+
+        <div class="content">
+            <!-- Series Section -->
+            <div id="series" class="section active">
+                <div class="info-box">
+                    <h3>📊 What is a Pandas Series?</h3>
+                    <p>A Series is a one-dimensional labeled array capable of holding any data type. Think of it as a column in a spreadsheet with an index (row labels) and values.</p>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Create Series</h3>
+                        <input type="text" id="seriesValues" placeholder="Enter values: 1,2,3,4,5" value="10,25,30,45,20">
+                        <input type="text" id="seriesIndex" placeholder="Index labels (optional): A,B,C,D,E" value="Mon,Tue,Wed,Thu,Fri">
+                        <button onclick="createSeries()">Create Series</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Series Operations</h3>
+                        <button onclick="showSeriesInfo()">Show Info</button>
+                        <button onclick="showSeriesStats()">Statistics</button>
+                        <button onclick="sortSeries()">Sort Values</button>
+                        <button onclick="filterSeries()">Filter > 25</button>
+                    </div>
+                </div>
+
+                <div id="seriesDisplay" class="data-display">
+                    <div class="series-display" id="seriesContent"></div>
+                </div>
+
+                <div id="seriesResult" class="operation-result" style="display:none;"></div>
+            </div>
+
+            <!-- DataFrame Section -->
+            <div id="dataframe" class="section">
+                <div class="info-box">
+                    <h3>📋 What is a Pandas DataFrame?</h3>
+                    <p>A DataFrame is a 2-dimensional labeled data structure with columns of potentially different types. Think of it as a table or spreadsheet with rows and columns.</p>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Sample DataFrames</h3>
+                        <button onclick="createStudentDF()">Student Data</button>
+                        <button onclick="createSalesDF()">Sales Data</button>
+                        <button onclick="createWeatherDF()">Weather Data</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>DataFrame Operations</h3>
+                        <button onclick="showDFInfo()">Show Info</button>
+                        <button onclick="showDFShape()">Shape & Size</button>
+                        <button onclick="showDFStats()">Statistics</button>
+                        <button onclick="showDFColumns()">Column Names</button>
+                    </div>
+                </div>
+
+                <div id="dataframeDisplay" class="data-display">
+                    <div class="dataframe-display" id="dataframeContent"></div>
+                </div>
+
+                <div id="dataframeResult" class="operation-result" style="display:none;"></div>
+            </div>
+
+            <!-- Operations Section -->
+            <div id="operations" class="section">
+                <div class="info-box">
+                    <h3>🔧 Interactive Operations</h3>
+                    <p>Practice common pandas operations on real data. Each operation shows the Python code and result!</p>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Filtering & Selection</h3>
+                        <select id="filterColumn">
+                            <option value="Age">Age</option>
+                            <option value="Score">Score</option>
+                            <option value="Grade">Grade</option>
+                        </select>
+                        <input type="number" id="filterValue" placeholder="Filter value" value="85">
+                        <button onclick="performFilter()">Filter Data</button>
+                        <button onclick="selectColumns()">Select Columns</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Aggregation</h3>
+                        <select id="aggColumn">
+                            <option value="Age">Age</option>
+                            <option value="Score">Score</option>
+                        </select>
+                        <button onclick="calculateMean()">Mean</button>
+                        <button onclick="calculateSum()">Sum</button>
+                        <button onclick="groupByGrade()">Group by Grade</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Data Manipulation</h3>
+                        <button onclick="sortByColumn()">Sort by Score</button>
+                        <button onclick="addNewColumn()">Add New Column</button>
+                        <button onclick="dropColumn()">Drop Column</button>
+                        <button onclick="resetData()">Reset Data</button>
+                    </div>
+                </div>
+
+                <div id="operationsDisplay" class="data-display">
+                    <div id="operationsContent"></div>
+                </div>
+
+                <div id="operationsCode" class="operation-result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSeries = null;
+        let currentDataFrame = null;
+
+        // Sample data
+        const studentData = {
+            'Name': ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank'],
+            'Age': [20, 21, 19, 22, 20, 21],
+            'Score': [85, 92, 78, 96, 89, 83],
+            'Grade': ['B', 'A', 'C', 'A', 'B', 'B']
+        };
+
+        // Tab switching
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Series Functions
+        function createSeries() {
+            const valuesStr = document.getElementById('seriesValues').value;
+            const indexStr = document.getElementById('seriesIndex').value;
+            
+            const values = valuesStr.split(',').map(v => parseFloat(v.trim()) || v.trim());
+            const index = indexStr ? indexStr.split(',').map(i => i.trim()) : values.map((_, i) => i);
+            
+            currentSeries = { values, index };
+            displaySeries();
+        }
+
+        function displaySeries() {
+            if (!currentSeries) return;
+            
+            const container = document.getElementById('seriesContent');
+            let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">';
+            html += '<div><div class="index-label">Index</div>';
+            html += '<div><div class="value-label">Values</div>';
+            
+            for (let i = 0; i < currentSeries.values.length; i++) {
+                html += `<div class="index-value">${currentSeries.index[i]}</div>`;
+            }
+            html += '</div><div>';
+            
+            for (let i = 0; i < currentSeries.values.length; i++) {
+                html += `<div class="data-value">${currentSeries.values[i]}</div>`;
+            }
+            html += '</div></div>';
+            
+            container.innerHTML = html;
+        }
+
+        function showSeriesInfo() {
+            if (!currentSeries) return;
+            const result = document.getElementById('seriesResult');
+            result.innerHTML = `
+                <h4>Series Information:</h4>
+                <p><strong>Length:</strong> ${currentSeries.values.length}</p>
+                <p><strong>Data Type:</strong> ${typeof currentSeries.values[0]}</p>
+                <p><strong>Index:</strong> ${currentSeries.index.join(', ')}</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function showSeriesStats() {
+            if (!currentSeries) return;
+            const numericValues = currentSeries.values.filter(v => typeof v === 'number');
+            if (numericValues.length === 0) return;
+            
+            const sum = numericValues.reduce((a, b) => a + b, 0);
+            const mean = sum / numericValues.length;
+            const sorted = [...numericValues].sort((a, b) => a - b);
+            const median = sorted.length % 2 === 0 
+                ? (sorted[sorted.length/2-1] + sorted[sorted.length/2]) / 2
+                : sorted[Math.floor(sorted.length/2)];
+            
+            const result = document.getElementById('seriesResult');
+            result.innerHTML = `
+                <h4>Series Statistics:</h4>
+                <p><strong>Count:</strong> ${numericValues.length}</p>
+                <p><strong>Sum:</strong> ${sum}</p>
+                <p><strong>Mean:</strong> ${mean.toFixed(2)}</p>
+                <p><strong>Median:</strong> ${median}</p>
+                <p><strong>Min:</strong> ${Math.min(...numericValues)}</p>
+                <p><strong>Max:</strong> ${Math.max(...numericValues)}</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function sortSeries() {
+            if (!currentSeries) return;
+            const combined = currentSeries.values.map((v, i) => ({value: v, index: currentSeries.index[i]}));
+            combined.sort((a, b) => {
+                if (typeof a.value === 'number' && typeof b.value === 'number') {
+                    return b.value - a.value;
+                }
+                return String(a.value).localeCompare(String(b.value));
+            });
+            
+            currentSeries.values = combined.map(c => c.value);
+            currentSeries.index = combined.map(c => c.index);
+            displaySeries();
+        }
+
+        function filterSeries() {
+            if (!currentSeries) return;
+            const filtered = currentSeries.values.map((v, i) => ({value: v, index: currentSeries.index[i]}))
+                .filter(item => typeof item.value === 'number' && item.value > 25);
+            
+            const result = document.getElementById('seriesResult');
+            result.innerHTML = `
+                <h4>Filtered Series (values > 25):</h4>
+                ${filtered.map(item => `<p>${item.index}: ${item.value}</p>`).join('')}
+            `;
+            result.style.display = 'block';
+        }
+
+        // DataFrame Functions
+        function createStudentDF() {
+            currentDataFrame = studentData;
+            displayDataFrame();
+        }
+
+        function createSalesDF() {
+            currentDataFrame = {
+                'Product': ['Laptop', 'Phone', 'Tablet', 'Watch', 'Headphones'],
+                'Sales': [150, 300, 80, 200, 120],
+                'Price': [999, 699, 399, 299, 199],
+                'Category': ['Electronics', 'Electronics', 'Electronics', 'Accessories', 'Accessories']
+            };
+            displayDataFrame();
+        }
+
+        function createWeatherDF() {
+            currentDataFrame = {
+                'City': ['New York', 'London', 'Tokyo', 'Sydney', 'Paris'],
+                'Temperature': [22, 15, 28, 18, 20],
+                'Humidity': [65, 80, 70, 55, 60],
+                'Condition': ['Sunny', 'Cloudy', 'Hot', 'Mild', 'Pleasant']
+            };
+            displayDataFrame();
+        }
+
+        function displayDataFrame() {
+            if (!currentDataFrame) return;
+            
+            const container = document.getElementById('dataframeContent');
+            const columns = Object.keys(currentDataFrame);
+            const rowCount = currentDataFrame[columns[0]].length;
+            
+            let html = '<table><thead><tr><th>Index</th>';
+            columns.forEach(col => html += `<th>${col}</th>`);
+            html += '</tr></thead><tbody>';
+            
+            for (let i = 0; i < rowCount; i++) {
+                html += `<tr><td><strong>${i}</strong></td>`;
+                columns.forEach(col => {
+                    html += `<td>${currentDataFrame[col][i]}</td>`;
+                });
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            
+            container.innerHTML = html;
+        }
+
+        function showDFInfo() {
+            if (!currentDataFrame) return;
+            const columns = Object.keys(currentDataFrame);
+            const rowCount = currentDataFrame[columns[0]].length;
+            
+            const result = document.getElementById('dataframeResult');
+            result.innerHTML = `
+                <h4>DataFrame Information:</h4>
+                <p><strong>Shape:</strong> (${rowCount}, ${columns.length})</p>
+                <p><strong>Columns:</strong> ${columns.join(', ')}</p>
+                <p><strong>Memory Usage:</strong> ~${rowCount * columns.length * 8} bytes</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function showDFShape() {
+            if (!currentDataFrame) return;
+            const columns = Object.keys(currentDataFrame);
+            const rowCount = currentDataFrame[columns[0]].length;
+            
+            const result = document.getElementById('dataframeResult');
+            result.innerHTML = `
+                <h4>DataFrame Shape & Size:</h4>
+                <p><strong>Shape:</strong> (${rowCount} rows, ${columns.length} columns)</p>
+                <p><strong>Size:</strong> ${rowCount * columns.length} elements</p>
+                <p><strong>Dimensions:</strong> 2</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function showDFStats() {
+            if (!currentDataFrame) return;
+            const columns = Object.keys(currentDataFrame);
+            let stats = '<h4>DataFrame Statistics:</h4>';
+            
+            columns.forEach(col => {
+                const values = currentDataFrame[col];
+                const numericValues = values.filter(v => typeof v === 'number');
+                
+                if (numericValues.length > 0) {
+                    const sum = numericValues.reduce((a, b) => a + b, 0);
+                    const mean = sum / numericValues.length;
+                    stats += `<p><strong>${col}:</strong> Mean = ${mean.toFixed(2)}, Min = ${Math.min(...numericValues)}, Max = ${Math.max(...numericValues)}</p>`;
+                } else {
+                    const unique = [...new Set(values)];
+                    stats += `<p><strong>${col}:</strong> ${unique.length} unique values: ${unique.join(', ')}</p>`;
+                }
+            });
+            
+            const result = document.getElementById('dataframeResult');
+            result.innerHTML = stats;
+            result.style.display = 'block';
+        }
+
+        function showDFColumns() {
+            if (!currentDataFrame) return;
+            const columns = Object.keys(currentDataFrame);
+            
+            const result = document.getElementById('dataframeResult');
+            result.innerHTML = `
+                <h4>DataFrame Columns:</h4>
+                <p><strong>Column Names:</strong></p>
+                <ul>${columns.map(col => `<li>${col} (${typeof currentDataFrame[col][0]})</li>`).join('')}</ul>
+            `;
+            result.style.display = 'block';
+        }
+
+        // Operations Functions
+        function performFilter() {
+            if (!currentDataFrame) {
+                createStudentDF(); // Create default data if none exists
+            }
+            
+            const column = document.getElementById('filterColumn').value;
+            const value = parseFloat(document.getElementById('filterValue').value);
+            
+            const filtered = {};
+            const columns = Object.keys(currentDataFrame);
+            const indices = [];
+            
+            // Find matching rows
+            for (let i = 0; i < currentDataFrame[column].length; i++) {
+                if (currentDataFrame[column][i] >= value) {
+                    indices.push(i);
+                }
+            }
+            
+            // Create filtered DataFrame
+            columns.forEach(col => {
+                filtered[col] = indices.map(i => currentDataFrame[col][i]);
+            });
+            
+            displayOperationResult(filtered, `df[df['${column}'] >= ${value}]`, `Filtering ${column} >= ${value}`);
+        }
+
+        function selectColumns() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const selected = {
+                'Name': currentDataFrame['Name'],
+                'Score': currentDataFrame['Score']
+            };
+            
+            displayOperationResult(selected, `df[['Name', 'Score']]`, 'Selecting specific columns');
+        }
+
+        function calculateMean() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const column = document.getElementById('aggColumn').value;
+            const values = currentDataFrame[column].filter(v => typeof v === 'number');
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            
+            const result = document.getElementById('operationsCode');
+            result.innerHTML = `
+                <h4>Calculate Mean</h4>
+                <p><strong>Python Code:</strong> <code>df['${column}'].mean()</code></p>
+                <p><strong>Result:</strong> ${mean.toFixed(2)}</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function calculateSum() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const column = document.getElementById('aggColumn').value;
+            const values = currentDataFrame[column].filter(v => typeof v === 'number');
+            const sum = values.reduce((a, b) => a + b, 0);
+            
+            const result = document.getElementById('operationsCode');
+            result.innerHTML = `
+                <h4>Calculate Sum</h4>
+                <p><strong>Python Code:</strong> <code>df['${column}'].sum()</code></p>
+                <p><strong>Result:</strong> ${sum}</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function groupByGrade() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const groups = {};
+            for (let i = 0; i < currentDataFrame['Grade'].length; i++) {
+                const grade = currentDataFrame['Grade'][i];
+                if (!groups[grade]) groups[grade] = [];
+                groups[grade].push(currentDataFrame['Score'][i]);
+            }
+            
+            let groupStats = '<h4>Group by Grade</h4><p><strong>Python Code:</strong> <code>df.groupby(\'Grade\')[\'Score\'].mean()</code></p>';
+            Object.keys(groups).forEach(grade => {
+                const mean = groups[grade].reduce((a, b) => a + b, 0) / groups[grade].length;
+                groupStats += `<p><strong>Grade ${grade}:</strong> Mean Score = ${mean.toFixed(2)}</p>`;
+            });
+            
+            const result = document.getElementById('operationsCode');
+            result.innerHTML = groupStats;
+            result.style.display = 'block';
+        }
+
+        function sortByColumn() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const indices = Array.from({length: currentDataFrame['Score'].length}, (_, i) => i);
+            indices.sort((a, b) => currentDataFrame['Score'][b] - currentDataFrame['Score'][a]);
+            
+            const sorted = {};
+            Object.keys(currentDataFrame).forEach(col => {
+                sorted[col] = indices.map(i => currentDataFrame[col][i]);
+            });
+            
+            displayOperationResult(sorted, `df.sort_values('Score', ascending=False)`, 'Sorting by Score (descending)');
+        }
+
+        function addNewColumn() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const newDF = {...currentDataFrame};
+            newDF['Pass'] = currentDataFrame['Score'].map(score => score >= 80 ? 'Yes' : 'No');
+            
+            displayOperationResult(newDF, `df['Pass'] = df['Score'] >= 80`, 'Adding new column based on condition');
+        }
+
+        function dropColumn() {
+            if (!currentDataFrame) createStudentDF();
+            
+            const newDF = {...currentDataFrame};
+            delete newDF['Age'];
+            
+            displayOperationResult(newDF, `df.drop('Age', axis=1)`, 'Dropping Age column');
+        }
+
+        function resetData() {
+            createStudentDF();
+            const result = document.getElementById('operationsCode');
+            result.style.display = 'none';
+        }
+
+        function displayOperationResult(data, code, description) {
+            // Display the modified DataFrame
+            const container = document.getElementById('operationsContent');
+            const columns = Object.keys(data);
+            const rowCount = data[columns[0]].length;
+            
+            let html = '<table><thead><tr><th>Index</th>';
+            columns.forEach(col => html += `<th>${col}</th>`);
+            html += '</tr></thead><tbody>';
+            
+            for (let i = 0; i < rowCount; i++) {
+                html += `<tr><td><strong>${i}</strong></td>`;
+                columns.forEach(col => {
+                    html += `<td>${data[col][i]}</td>`;
+                });
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            
+            // Show the code
+            const result = document.getElementById('operationsCode');
+            result.innerHTML = `
+                <h4>${description}</h4>
+                <p><strong>Python Code:</strong> <code>${code}</code></p>
+            `;
+            result.style.display = 'block';
+        }
+
+        // Initialize with sample data
+        window.onload = function() {
+            createSeries();
+            createStudentDF();
+        };
+    </script>
+</body>
+</html>
