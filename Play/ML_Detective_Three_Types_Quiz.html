@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Detective Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .ml-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .ml-type {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .regression { border-left-color: #667eea; }
+        .classification { border-left-color: #38a169; }
+        .clustering { border-left-color: #e53e3e; }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .quiz-title {
+            color: #4a5568;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .explanation-box {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .prediction-result {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question-counter {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 15px;
+            text-align: left;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .correct-answer {
+            background: #c6f6d5 !important;
+            border-color: #38a169 !important;
+        }
+
+        .wrong-answer {
+            background: #fed7d7 !important;
+            border-color: #e53e3e !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .ml-types {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕵️ Machine Learning Detective Quiz 🤖</h1>
+            <p>Can you identify which type of machine learning each problem needs?</p>
+            
+            <div class="ml-types">
+                <div class="ml-type regression">
+                    <strong>📈 Regression</strong><br>
+                    Predicting continuous numbers<br>
+                    <em>(prices, temperatures, scores)</em>
+                </div>
+                <div class="ml-type classification">
+                    <strong>🏷️ Classification</strong><br>
+                    Sorting into known categories<br>
+                    <em>(spam/not spam, cat/dog)</em>
+                </div>
+                <div class="ml-type clustering">
+                    <strong>🔍 Clustering</strong><br>
+                    Finding hidden groups<br>
+                    <em>(customer segments, music genres)</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-card">
+            <h2 class="quiz-title">🏆 Test Your ML Detective Skills!</h2>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="quizProgress"></div>
+            </div>
+
+            <div id="quizContainer">
+                <div class="explanation-box" id="quizQuestion">
+                    <div class="question-counter" id="questionCounter">Question 1 of 10</div>
+                    <p id="questionText">Ready to become a Machine Learning Detective? Read each scenario carefully and decide what type of ML problem it represents!</p>
+                </div>
+
+                <div id="quizOptions" style="margin: 20px 0;"></div>
+
+                <button class="btn" id="startQuizBtn" onclick="startQuiz()">🚀 Start Quiz</button>
+                <button class="btn" id="nextQuestionBtn" onclick="nextQuestion()" style="display: none;">➡️ Next Question</button>
+            </div>
+
+            <div id="quizResults" style="display: none;">
+                <div class="prediction-result">
+                    <h3>🎉 Quiz Complete!</h3>
+                    <p id="finalScore"></p>
+                    <div id="scoreBreakdown" style="margin: 20px 0; font-size: 16px;"></div>
+                    <button class="btn" onclick="restartQuiz()">🔄 Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentQuizQuestion = 0;
+        let quizScore = 0;
+        let regressionScore = 0;
+        let classificationScore = 0;
+        let clusteringScore = 0;
+
+        // Quiz questions - ML Problem Type Classification
+        const quizQuestions = [
+            {
+                question: "Netflix wants to predict how many stars (1-5) a user will give to a movie they haven't watched yet. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 0,
+                type: "regression",
+                explanation: "This is REGRESSION because we're predicting a continuous numerical rating (1-5 stars). We want to estimate a specific number, not put movies into categories."
+            },
+            {
+                question: "A school wants to automatically sort emails into 'Spam' or 'Not Spam' folders. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 1,
+                type: "classification",
+                explanation: "This is CLASSIFICATION because we're putting emails into predefined categories (Spam vs Not Spam). We're not predicting numbers or finding unknown groups."
+            },
+            {
+                question: "A store wants to find groups of customers who shop similarly (without knowing what groups exist beforehand). What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 2,
+                type: "clustering",
+                explanation: "This is CLUSTERING because we're finding hidden patterns and grouping customers without knowing the groups in advance. We're discovering segments like 'budget shoppers' or 'luxury buyers'."
+            },
+            {
+                question: "You want to predict the exact price of a used car based on its age, mileage, and brand. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 0,
+                type: "regression",
+                explanation: "This is REGRESSION because we're predicting a continuous dollar amount. Car prices can be any value (like $12,450.75), not just categories."
+            },
+            {
+                question: "An app wants to identify whether a photo contains a 'Dog', 'Cat', or 'Bird'. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 1,
+                type: "classification",
+                explanation: "This is CLASSIFICATION because we're sorting photos into predefined animal categories. Each photo gets assigned to exactly one class."
+            },
+            {
+                question: "Spotify wants to discover different music genres by analyzing song features (without knowing the genre names first). What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 2,
+                type: "clustering",
+                explanation: "This is CLUSTERING because we're finding natural groups in music without predefined categories. The algorithm might discover groups like 'upbeat pop' or 'mellow rock' on its own."
+            },
+            {
+                question: "A doctor wants to predict a patient's blood pressure (like 120/80) based on their age, weight, and exercise habits. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 0,
+                type: "regression",
+                explanation: "This is REGRESSION because blood pressure is a continuous numerical measurement. We're predicting specific numbers, not categories like 'high' or 'low'."
+            },
+            {
+                question: "A bank wants to decide whether to approve or deny a loan application. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 1,
+                type: "classification",
+                explanation: "This is CLASSIFICATION because there are two predefined outcomes: 'Approve' or 'Deny'. We're categorizing applications, not predicting continuous values."
+            },
+            {
+                question: "A social media company wants to find different types of user communities (like gamers, foodies, travelers) without defining these groups ahead of time. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 2,
+                type: "clustering",
+                explanation: "This is CLUSTERING because we're discovering natural user groups without knowing what communities exist. The algorithm finds patterns and creates groups like 'gaming enthusiasts' automatically."
+            },
+            {
+                question: "You want to predict how many minutes it will take to walk to school based on weather, your walking speed, and route. What type of ML problem is this?",
+                options: ["Regression", "Classification", "Clustering"],
+                correct: 0,
+                type: "regression",
+                explanation: "This is REGRESSION because we're predicting a continuous time value (like 12.5 minutes). Time is a numerical measurement, not a category."
+            }
+        ];
+
+        // Quiz functions
+        function startQuiz() {
+            currentQuizQuestion = 0;
+            quizScore = 0;
+            regressionScore = 0;
+            classificationScore = 0;
+            clusteringScore = 0;
+            document.getElementById('startQuizBtn').style.display = 'none';
+            document.getElementById('quizResults').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = quizQuestions[currentQuizQuestion];
+            document.getElementById('questionCounter').textContent = `Question ${currentQuizQuestion + 1} of ${quizQuestions.length}`;
+            document.getElementById('questionText').textContent = question.question;
+            
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsDiv.appendChild(button);
+            });
+            
+            updateQuizProgress();
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = quizQuestions[currentQuizQuestion];
+            const options = document.getElementById('quizOptions').children;
+            
+            // Disable all buttons
+            Array.from(options).forEach(btn => btn.disabled = true);
+            
+            if (selectedIndex === question.correct) {
+                options[selectedIndex].className = 'option-btn correct-answer';
+                quizScore++;
+                
+                // Track category scores
+                if (question.type === 'regression') regressionScore++;
+                else if (question.type === 'classification') classificationScore++;
+                else if (question.type === 'clustering') clusteringScore++;
+            } else {
+                options[selectedIndex].className = 'option-btn wrong-answer';
+                options[question.correct].className = 'option-btn correct-answer';
+            }
+            
+            // Show explanation
+            setTimeout(() => {
+                document.getElementById('questionText').innerHTML = 
+                    question.question + '<br><br><strong>💡 ' + question.explanation + '</strong>';
+                document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+            }, 1000);
+        }
+
+        function nextQuestion() {
+            currentQuizQuestion++;
+            
+            if (currentQuizQuestion >= quizQuestions.length) {
+                showQuizResults();
+            } else {
+                document.getElementById('nextQuestionBtn').style.display = 'none';
+                showQuestion();
+            }
+        }
+
+        function updateQuizProgress() {
+            const progress = (currentQuizQuestion / quizQuestions.length) * 100;
+            document.getElementById('quizProgress').style.width = progress + '%';
+        }
+
+        function showQuizResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('quizResults').style.display = 'block';
+            
+            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+            let message = '';
+            let emoji = '';
+            
+            if (percentage >= 80) {
+                message = 'Amazing! You\'re a machine learning detective master!';
+                emoji = '🏆';
+            } else if (percentage >= 60) {
+                message = 'Great job! You understand ML problem types well!';
+                emoji = '🌟';
+            } else {
+                message = 'Good try! Review the concepts and try again!';
+                emoji = '💪';
+            }
+            
+            // Calculate category performance
+            const regressionPercent = Math.round((regressionScore / 4) * 100);
+            const classificationPercent = Math.round((classificationScore / 3) * 100);
+            const clusteringPercent = Math.round((clusteringScore / 3) * 100);
+            
+            document.getElementById('finalScore').innerHTML = 
+                `${emoji} You scored ${quizScore}/${quizQuestions.length} (${percentage}%)<br>${message}`;
+            
+            document.getElementById('scoreBreakdown').innerHTML = `
+                <strong>📊 Your Performance by Category:</strong><br>
+                📈 Regression Problems: ${regressionScore}/4 (${regressionPercent}%)<br>
+                🏷️ Classification Problems: ${classificationScore}/3 (${classificationPercent}%)<br>
+                🔍 Clustering Problems: ${clusteringScore}/3 (${clusteringPercent}%)
+            `;
+        }
+
+        function restartQuiz() {
+            document.getElementById('startQuizBtn').style.display = 'inline-block';
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('quizResults').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('questionText').textContent = 'Ready to become a Machine Learning Detective? Read each scenario carefully and decide what type of ML problem it represents!';
+            document.getElementById('quizOptions').innerHTML = '';
+            document.getElementById('quizProgress').style.width = '0%';
+            document.getElementById('questionCounter').textContent = 'Question 1 of 10';
+        }
+    </script>
+</body>
+</html>
