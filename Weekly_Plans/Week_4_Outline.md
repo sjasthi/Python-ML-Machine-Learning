@@ -32,6 +32,12 @@ Complete these video tutorials to reinforce the concepts:
 - **Focus:** Comprehensive overview of the three main ML problem types
 - **Key Learning:** Real-world applications and examples of each type
 
+### 3. Clustering | Kids Explain Data Science
+- **Link:** [https://www.youtube.com/watch?v=2BG0XQfBbGU](https://www.youtube.com/watch?v=2BG0XQfBbGU)
+- **Duration:** Check video for runtime
+- **Focus:** Kid-friendly explanation of clustering concepts and applications
+- **Key Learning:** How clustering works to find hidden patterns and group similar data points
+
 ---
 
 ## 📝 Quiz
