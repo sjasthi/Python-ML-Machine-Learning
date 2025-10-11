@@ -114,7 +114,7 @@ Submit the following to [submission platform]:
 
 ---
 
-## Bonus Challenge (Optional +3 points)
+## Bonus Challenge (Optional)
 
 Create a **second model** that demonstrates overfitting:
 - Train a model with only 5 examples per class
