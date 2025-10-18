@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manhattan Distance Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        #canvas {
+            border: 3px solid #fff;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            min-width: 150px;
+        }
+        
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .distance-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin: 10px 0;
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .comparison {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px;
+            min-width: 180px;
+            text-align: center;
+        }
+        
+        .examples {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .example {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .example:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .path-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .path-button {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .path-button:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .path-button.active {
+            background: rgba(255, 255, 255, 0.6);
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Manhattan Distance Explorer</h1>
+        
+        <div class="grid-container">
+            <canvas id="canvas" width="500" height="400"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>🔵 Point A (Blue)</h3>
+                <label>X: <span id="ax-value">2</span></label>
+                <input type="range" id="ax" min="0" max="10" value="2">
+                <label>Y: <span id="ay-value">2</span></label>
+                <input type="range" id="ay" min="0" max="8" value="2">
+            </div>
+            
+            <div class="control-group">
+                <h3>🔴 Point B (Red)</h3>
+                <label>X: <span id="bx-value">6</span></label>
+                <input type="range" id="bx" min="0" max="10" value="6">
+                <label>Y: <span id="by-value">6</span></label>
+                <input type="range" id="by" min="0" max="8" value="6">
+            </div>
+        </div>
+        
+        <div class="path-toggle">
+            <h3>📍 Choose Manhattan Path Style:</h3>
+            <button class="path-button active" onclick="setPathType('horizontal')">Horizontal First</button>
+            <button class="path-button" onclick="setPathType('vertical')">Vertical First</button>
+            <button class="path-button" onclick="setPathType('both')">Show Both Paths</button>
+        </div>
+        
+        <div class="info-panel">
+            <div class="distance-display">
+                Manhattan Distance: <span id="distance">8</span> blocks
+            </div>
+            
+            <div class="formula">
+                Distance = |x₂-x₁| + |y₂-y₁|<br>
+                Distance = |<span id="calc-x2">6</span>-<span id="calc-x1">2</span>| + |<span id="calc-y2">6</span>-<span id="calc-y1">2</span>|<br>
+                Distance = <span id="calc-dx">4</span> + <span id="calc-dy">4</span> = <span id="calc-result">8</span> blocks
+            </div>
+            
+            <div class="comparison">
+                <div class="comparison-item">
+                    <strong>🏢 Manhattan Distance</strong><br>
+                    <span id="manhattan-dist">8</span> blocks<br>
+                    <small>(City blocks)</small>
+                </div>
+                <div class="comparison-item">
+                    <strong>✈️ Euclidean Distance</strong><br>
+                    <span id="euclidean-dist">5.66</span> units<br>
+                    <small>(As the crow flies)</small>
+                </div>
+            </div>
+        </div>
+        
+        <h2>🗽 Try These NYC Examples:</h2>
+        <div class="examples">
+            <div class="example" onclick="setPoints(1, 1, 4, 5)">
+                <strong>Short Walk</strong><br>
+                (1,1) to (4,5)<br>
+                7 blocks
+            </div>
+            
+            <div class="example" onclick="setPoints(0, 0, 0, 8)">
+                <strong>Avenue Walk</strong><br>
+                (0,0) to (0,8)<br>
+                8 blocks
+            </div>
+            
+            <div class="example" onclick="setPoints(0, 4, 10, 4)">
+                <strong>Street Walk</strong><br>
+                (0,4) to (10,4)<br>
+                10 blocks
+            </div>
+            
+            <div class="example" onclick="setPoints(1, 1, 9, 7)">
+                <strong>Cross Town</strong><br>
+                (1,1) to (9,7)<br>
+                14 blocks
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p><strong>💡 Key Concept:</strong> Manhattan distance is like walking through a city grid - you can't cut through buildings!</p>
+            <p><strong>🚕 Real life:</strong> This is how taxi drivers calculate distance in cities like New York!</p>
+            <p><strong>🎯 Notice:</strong> Multiple paths can have the same Manhattan distance, but there's only one Euclidean distance.</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Scale factor to make the grid bigger
+        const scale = 40;
+        const offsetX = 20;
+        const offsetY = 20;
+        let pathType = 'horizontal'; // 'horizontal', 'vertical', 'both'
+        
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 0; x <= 10; x++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX + x * scale, offsetY);
+                ctx.lineTo(offsetX + x * scale, offsetY + 8 * scale);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y <= 8; y++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY + y * scale);
+                ctx.lineTo(offsetX + 10 * scale, offsetY + y * scale);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(offsetX, offsetY + 8 * scale);
+            ctx.lineTo(offsetX + 10 * scale, offsetY + 8 * scale);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(offsetX, offsetY);
+            ctx.lineTo(offsetX, offsetY + 8 * scale);
+            ctx.stroke();
+            
+            // Draw numbers
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // X-axis numbers
+            for (let x = 0; x <= 10; x++) {
+                ctx.fillText(x.toString(), offsetX + x * scale, offsetY + 8 * scale + 15);
+            }
+            
+            // Y-axis numbers
+            ctx.textAlign = 'right';
+            for (let y = 0; y <= 8; y++) {
+                ctx.fillText((8-y).toString(), offsetX - 5, offsetY + y * scale + 5);
+            }
+        }
+        
+        function drawManhattanPath() {
+            const ax = parseInt(document.getElementById('ax').value);
+            const ay = parseInt(document.getElementById('ay').value);
+            const bx = parseInt(document.getElementById('bx').value);
+            const by = parseInt(document.getElementById('by').value);
+            
+            // Convert coordinates (flip Y for screen coordinates)
+            const screenAx = offsetX + ax * scale;
+            const screenAy = offsetY + (8 - ay) * scale;
+            const screenBx = offsetX + bx * scale;
+            const screenBy = offsetY + (8 - by) * scale;
+            
+            // Draw Euclidean distance for comparison (light gray, dashed)
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(screenAx, screenAy);
+            ctx.lineTo(screenBx, screenBy);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset dash
+            
+            // Draw Manhattan path(s)
+            ctx.lineWidth = 4;
+            
+            if (pathType === 'horizontal' || pathType === 'both') {
+                // Horizontal first path
+                ctx.strokeStyle = pathType === 'both' ? '#FF6B6B' : '#FF4444';
+                ctx.beginPath();
+                ctx.moveTo(screenAx, screenAy);
+                ctx.lineTo(screenBx, screenAy); // Horizontal
+                ctx.lineTo(screenBx, screenBy); // Vertical
+                ctx.stroke();
+            }
+            
+            if (pathType === 'vertical' || pathType === 'both') {
+                // Vertical first path
+                ctx.strokeStyle = pathType === 'both' ? '#4CAF50' : '#FF4444';
+                ctx.beginPath();
+                ctx.moveTo(screenAx, screenAy);
+                ctx.lineTo(screenAx, screenBy); // Vertical
+                ctx.lineTo(screenBx, screenBy); // Horizontal
+                ctx.stroke();
+            }
+            
+            // Draw points
+            // Point A (blue)
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            ctx.arc(screenAx, screenAy, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Point B (red)
+            ctx.fillStyle = '#F44336';
+            ctx.beginPath();
+            ctx.arc(screenBx, screenBy, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`A(${ax},${ay})`, screenAx, screenAy - 20);
+            ctx.fillText(`B(${bx},${by})`, screenBx, screenBy - 20);
+            
+            // Distance labels
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#FF9800';
+            
+            if (pathType !== 'vertical') {
+                // Horizontal distance label
+                const midX = (screenAx + screenBx) / 2;
+                ctx.fillText(`${Math.abs(bx - ax)} blocks`, midX, screenAy - 8);
+            }
+            
+            if (pathType !== 'horizontal') {
+                // Vertical distance label
+                const midY = (screenAy + screenBy) / 2;
+                ctx.save();
+                ctx.translate(screenAx + (pathType === 'both' ? -20 : 20), midY);
+                ctx.rotate(-Math.PI / 2);
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.abs(by - ay)} blocks`, 0, 0);
+                ctx.restore();
+            }
+        }
+        
+        function calculateDistances() {
+            const ax = parseInt(document.getElementById('ax').value);
+            const ay = parseInt(document.getElementById('ay').value);
+            const bx = parseInt(document.getElementById('bx').value);
+            const by = parseInt(document.getElementById('by').value);
+            
+            const dx = Math.abs(bx - ax);
+            const dy = Math.abs(by - ay);
+            const manhattanDistance = dx + dy;
+            const euclideanDistance = Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+            
+            // Update display
+            document.getElementById('distance').textContent = manhattanDistance;
+            document.getElementById('calc-x1').textContent = ax;
+            document.getElementById('calc-y1').textContent = ay;
+            document.getElementById('calc-x2').textContent = bx;
+            document.getElementById('calc-y2').textContent = by;
+            document.getElementById('calc-dx').textContent = dx;
+            document.getElementById('calc-dy').textContent = dy;
+            document.getElementById('calc-result').textContent = manhattanDistance;
+            
+            // Update comparison
+            document.getElementById('manhattan-dist').textContent = manhattanDistance;
+            document.getElementById('euclidean-dist').textContent = euclideanDistance.toFixed(2);
+        }
+        
+        function updateDisplay() {
+            // Update slider value displays
+            document.getElementById('ax-value').textContent = document.getElementById('ax').value;
+            document.getElementById('ay-value').textContent = document.getElementById('ay').value;
+            document.getElementById('bx-value').textContent = document.getElementById('bx').value;
+            document.getElementById('by-value').textContent = document.getElementById('by').value;
+            
+            drawGrid();
+            drawManhattanPath();
+            calculateDistances();
+        }
+        
+        function setPoints(ax, ay, bx, by) {
+            document.getElementById('ax').value = ax;
+            document.getElementById('ay').value = ay;
+            document.getElementById('bx').value = bx;
+            document.getElementById('by').value = by;
+            updateDisplay();
+        }
+        
+        function setPathType(type) {
+            pathType = type;
+            
+            // Update button states
+            document.querySelectorAll('.path-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateDisplay();
+        }
+        
+        // Event listeners
+        document.getElementById('ax').addEventListener('input', updateDisplay);
+        document.getElementById('ay').addEventListener('input', updateDisplay);
+        document.getElementById('bx').addEventListener('input', updateDisplay);
+        document.getElementById('by').addEventListener('input', updateDisplay);
+        
+        // Initial draw
+        updateDisplay();
+    </script>
+</body>
+</html>

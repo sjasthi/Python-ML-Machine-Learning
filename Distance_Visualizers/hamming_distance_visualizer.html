@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamming Distance Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .string-inputs {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .input-group h3 {
+            margin: 0 0 15px 0;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        .visualization {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .string-display {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .char-box {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            margin: 2px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .char-match {
+            background: #4ade80;
+            color: #166534;
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+        }
+        
+        .char-diff {
+            background: #f87171;
+            color: #7f1d1d;
+            border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .distance-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin: 20px 0;
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+        
+        .examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .example {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .example:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #fbbf24;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .mode-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .mode-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .mode-button.active {
+            background: rgba(255, 255, 255, 0.5);
+            color: #333;
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Hamming Distance Explorer</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-button active" onclick="setMode('text')">📝 Text Mode</button>
+            <button class="mode-button" onclick="setMode('binary')">💾 Binary Mode</button>
+            <button class="mode-button" onclick="setMode('dna')">🧬 DNA Mode</button>
+        </div>
+        
+        <div class="input-section">
+            <div class="string-inputs">
+                <div class="input-group">
+                    <h3 id="string1-label">🔤 String 1</h3>
+                    <input type="text" id="string1" placeholder="Enter first string" value="HELLO">
+                </div>
+                
+                <div class="input-group">
+                    <h3 id="string2-label">🔤 String 2</h3>
+                    <input type="text" id="string2" placeholder="Enter second string" value="JELLO">
+                </div>
+            </div>
+            
+            <div class="error-message" id="error-message">
+                ⚠️ Strings must be the same length for Hamming distance calculation!
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <h3>Character-by-Character Comparison</h3>
+            
+            <div class="string-display" id="string1-display"></div>
+            <div class="string-display" id="string2-display"></div>
+            
+            <div class="distance-display">
+                Hamming Distance: <span id="distance">1</span>
+            </div>
+            
+            <div class="formula">
+                <div id="formula-text">
+                    Distance = Number of differing positions<br>
+                    Comparing: "<span id="comp-str1">HELLO</span>" and "<span id="comp-str2">JELLO</span>"<br>
+                    Differences at positions: <span id="diff-positions">1</span><br>
+                    Hamming Distance = <span id="final-distance">1</span>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-chars">5</div>
+                    <div>Total Characters</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="matches">4</div>
+                    <div>Matches</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="differences">1</div>
+                    <div>Differences</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="similarity">80%</div>
+                    <div>Similarity</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 id="examples-title">💡 Try These Examples:</h2>
+        <div class="examples" id="examples-container">
+            <!-- Examples will be populated by JavaScript -->
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <p><strong>🎯 Key Concept:</strong> <span id="concept-text">Hamming distance counts character mismatches in equal-length strings.</span></p>
+            <p><strong>🔬 Applications:</strong> <span id="applications-text">Error detection, spell checking, genetics, data compression.</span></p>
+            <p><strong>💡 Try it:</strong> Change the characters above and watch how the distance updates in real-time!</p>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'text';
+        
+        const modes = {
+            text: {
+                label: '🔤 String',
+                examples: [
+                    { str1: 'HELLO', str2: 'JELLO', desc: 'One Letter Change', dist: 1 },
+                    { str1: 'KITTEN', str2: 'MITTEN', desc: 'First Letter', dist: 1 },
+                    { str1: 'COMPUTER', str2: 'COMPUTED', desc: 'Last Letter', dist: 2 },
+                    { str1: 'PROGRAMMING', str2: 'ALGORITHMIC', desc: 'Many Changes', dist: 11 },
+                    { str1: 'SAME', str2: 'SAME', desc: 'Identical', dist: 0 },
+                    { str1: 'ABCD', str2: 'WXYZ', desc: 'All Different', dist: 4 }
+                ],
+                concept: 'Hamming distance counts character mismatches in equal-length strings.',
+                applications: 'Spell checking, data validation, string comparison algorithms.'
+            },
+            binary: {
+                label: '💾 Binary',
+                examples: [
+                    { str1: '1010', str2: '1011', desc: 'One Bit Flip', dist: 1 },
+                    { str1: '11110000', str2: '11111111', desc: 'Four Bits', dist: 4 },
+                    { str1: '10101010', str2: '01010101', desc: 'All Flipped', dist: 8 },
+                    { str1: '11000011', str2: '11000010', desc: 'Last Bit', dist: 1 },
+                    { str1: '00000000', str2: '00000000', desc: 'Identical', dist: 0 },
+                    { str1: '1111', str2: '0000', desc: 'Complete Flip', dist: 4 }
+                ],
+                concept: 'Hamming distance measures bit differences - crucial for error correction.',
+                applications: 'Error-correcting codes, data transmission, digital communications.'
+            },
+            dna: {
+                label: '🧬 DNA',
+                examples: [
+                    { str1: 'ATCG', str2: 'ATCC', desc: 'Single Mutation', dist: 1 },
+                    { str1: 'AAATTTCCCGGG', str2: 'AAATTCCCCGGG', desc: 'Two Changes', dist: 2 },
+                    { str1: 'GCTAGCTA', str2: 'AGTCAGTC', desc: 'Many Mutations', dist: 6 },
+                    { str1: 'ATGC', str2: 'CGTA', desc: 'All Different', dist: 4 },
+                    { str1: 'TTTTAAAA', str2: 'TTTTAAAA', desc: 'No Mutation', dist: 0 },
+                    { str1: 'ACGT', str2: 'TGCA', desc: 'Complete Change', dist: 4 }
+                ],
+                concept: 'Hamming distance measures genetic differences between DNA sequences.',
+                applications: 'Genetic analysis, evolution studies, mutation detection, phylogenetics.'
+            }
+        };
+        
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Update button states
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update labels
+            document.getElementById('string1-label').textContent = modes[mode].label + ' 1';
+            document.getElementById('string2-label').textContent = modes[mode].label + ' 2';
+            
+            // Update placeholders and examples
+            const placeholders = {
+                text: ['Enter first string', 'Enter second string'],
+                binary: ['Enter binary (0s and 1s)', 'Enter binary (0s and 1s)'],
+                dna: ['Enter DNA (A,T,C,G)', 'Enter DNA (A,T,C,G)']
+            };
+            
+            document.getElementById('string1').placeholder = placeholders[mode][0];
+            document.getElementById('string2').placeholder = placeholders[mode][1];
+            
+            // Set default values
+            const defaults = modes[mode].examples[0];
+            document.getElementById('string1').value = defaults.str1;
+            document.getElementById('string2').value = defaults.str2;
+            
+            // Update examples
+            updateExamples();
+            
+            // Update concept and applications
+            document.getElementById('concept-text').textContent = modes[mode].concept;
+            document.getElementById('applications-text').textContent = modes[mode].applications;
+            
+            // Recalculate
+            calculateHammingDistance();
+        }
+        
+        function updateExamples() {
+            const container = document.getElementById('examples-container');
+            container.innerHTML = '';
+            
+            modes[currentMode].examples.forEach(example => {
+                const div = document.createElement('div');
+                div.className = 'example';
+                div.onclick = () => setStrings(example.str1, example.str2);
+                div.innerHTML = `
+                    <div class="example-title">${example.desc}</div>
+                    <div style="font-family: 'Courier New', monospace; margin: 5px 0;">
+                        "${example.str1}" ↔ "${example.str2}"
+                    </div>
+                    <div>Distance: ${example.dist}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function validateInput(str, mode) {
+            switch(mode) {
+                case 'binary':
+                    return /^[01]*$/.test(str);
+                case 'dna':
+                    return /^[ATCG]*$/i.test(str);
+                case 'text':
+                default:
+                    return true;
+            }
+        }
+        
+        function calculateHammingDistance() {
+            const str1 = document.getElementById('string1').value.toUpperCase();
+            const str2 = document.getElementById('string2').value.toUpperCase();
+            const errorMsg = document.getElementById('error-message');
+            
+            // Validate input based on mode
+            if (!validateInput(str1, currentMode) || !validateInput(str2, currentMode)) {
+                const validChars = {
+                    binary: '0 and 1',
+                    dna: 'A, T, C, G',
+                    text: 'any characters'
+                };
+                errorMsg.textContent = `⚠️ ${modes[currentMode].label} mode only accepts ${validChars[currentMode]}!`;
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            // Check if strings are same length
+            if (str1.length !== str2.length) {
+                errorMsg.style.display = 'block';
+                clearDisplay();
+                return;
+            }
+            
+            errorMsg.style.display = 'none';
+            
+            let distance = 0;
+            let differences = [];
+            let matches = 0;
+            
+            // Calculate Hamming distance
+            for (let i = 0; i < str1.length; i++) {
+                if (str1[i] !== str2[i]) {
+                    distance++;
+                    differences.push(i + 1); // 1-indexed for display
+                } else {
+                    matches++;
+                }
+            }
+            
+            // Update display
+            displayStrings(str1, str2);
+            updateStats(str1.length, matches, distance);
+            updateFormula(str1, str2, differences, distance);
+        }
+        
+        function displayStrings(str1, str2) {
+            const display1 = document.getElementById('string1-display');
+            const display2 = document.getElementById('string2-display');
+            
+            display1.innerHTML = '';
+            display2.innerHTML = '';
+            
+            for (let i = 0; i < str1.length; i++) {
+                const char1 = str1[i];
+                const char2 = str2[i];
+                const isMatch = char1 === char2;
+                
+                // First string
+                const box1 = document.createElement('div');
+                box1.className = `char-box ${isMatch ? 'char-match' : 'char-diff'}`;
+                box1.textContent = char1;
+                display1.appendChild(box1);
+                
+                // Second string
+                const box2 = document.createElement('div');
+                box2.className = `char-box ${isMatch ? 'char-match' : 'char-diff'}`;
+                box2.textContent = char2;
+                display2.appendChild(box2);
+            }
+        }
+        
+        function updateStats(total, matches, differences) {
+            document.getElementById('total-chars').textContent = total;
+            document.getElementById('matches').textContent = matches;
+            document.getElementById('differences').textContent = differences;
+            document.getElementById('distance').textContent = differences;
+            
+            const similarity = total > 0 ? Math.round((matches / total) * 100) : 0;
+            document.getElementById('similarity').textContent = similarity + '%';
+        }
+        
+        function updateFormula(str1, str2, differences, distance) {
+            document.getElementById('comp-str1').textContent = str1;
+            document.getElementById('comp-str2').textContent = str2;
+            document.getElementById('diff-positions').textContent = differences.length > 0 ? differences.join(', ') : 'none';
+            document.getElementById('final-distance').textContent = distance;
+        }
+        
+        function clearDisplay() {
+            document.getElementById('string1-display').innerHTML = '';
+            document.getElementById('string2-display').innerHTML = '';
+            document.getElementById('distance').textContent = '?';
+            document.getElementById('total-chars').textContent = '?';
+            document.getElementById('matches').textContent = '?';
+            document.getElementById('differences').textContent = '?';
+            document.getElementById('similarity').textContent = '?';
+        }
+        
+        function setStrings(str1, str2) {
+            document.getElementById('string1').value = str1;
+            document.getElementById('string2').value = str2;
+            calculateHammingDistance();
+        }
+        
+        // Event listeners
+        document.getElementById('string1').addEventListener('input', calculateHammingDistance);
+        document.getElementById('string2').addEventListener('input', calculateHammingDistance);
+        
+        // Initialize
+        updateExamples();
+        calculateHammingDistance();
+    </script>
+</body>
+</html>
