@@ -115,9 +115,8 @@ Once you're comfortable with the basics, try these projects:
 
 - Check the official documentation first
 - Read error messages carefully - they often tell you what's wrong
-- Try searching for your error message online
+- Try asking claude.ai for clarification
 - Ask your teacher or classmates
-- The scikit-learn community forum: [https://stackoverflow.com/questions/tagged/scikit-learn](https://stackoverflow.com/questions/tagged/scikit-learn)
 
 ## Fun Fact! 🎉
 
