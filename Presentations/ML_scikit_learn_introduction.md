@@ -63,7 +63,8 @@ Here's a super simple example that predicts ice cream sales based on temperature
 ```python
 from sklearn.linear_model import LinearRegression
 
-# Temperature data (in Celsius)
+# Temperature data (in Celsius).
+# Note: scikit-learn expects the features to be multi-dimensional. Even if there is only column, we still need to represent that as a spreadsheet. Hence, it is a list of lists.
 temperatures = [[25], [28], [32], [35], [38]]
 # How much ice cream was sold (in scoops)
 ice_cream_sales = [20, 25, 35, 40, 50]
