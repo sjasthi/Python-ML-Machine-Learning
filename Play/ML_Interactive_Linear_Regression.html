@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Linear Regression Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .canvas-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            display: block;
+            cursor: crosshair;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .control-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .slider-group {
+            margin-bottom: 20px;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        .slider-value {
+            float: right;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn-preset {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-preset:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-action {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-action:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-clear {
+            background: #fc8181;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #f56565;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .metrics {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .metric-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .info-box {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box h4 {
+            color: #0050b3;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p {
+            color: #003a8c;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Interactive Linear Regression Explorer</h1>
+        <p class="subtitle">Adjust the sliders to see how residuals, MSE, and R² change!</p>
+        
+        <div style="background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%); border-radius: 15px; padding: 25px; margin-bottom: 30px; border: 2px solid #3b82f6;">
+            <h2 style="color: #1e40af; margin-bottom: 15px; font-size: 1.5em;">📚 How to Use This Tool</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div>
+                    <h4 style="color: #1e40af; margin-bottom: 8px;">🎮 Interactive Controls</h4>
+                    <ul style="color: #1e3a8a; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Slope (m):</strong> Controls the steepness of the line</li>
+                        <li><strong>Intercept (b):</strong> Controls where the line crosses the y-axis</li>
+                        <li><strong>Click on graph:</strong> Add your own data points!</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: #1e40af; margin-bottom: 8px;">👀 What to Observe</h4>
+                    <ul style="color: #1e3a8a; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Green lines:</strong> Residuals (prediction errors)</li>
+                        <li><strong>Red line:</strong> Your regression line</li>
+                        <li><strong>Orange dashed line:</strong> Mean of all y-values</li>
+                        <li><strong>Metrics:</strong> Watch MSE, RMSE, and R² update!</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: #1e40af; margin-bottom: 8px;">🎯 Your Goals</h4>
+                    <ul style="color: #1e3a8a; line-height: 1.8; font-size: 0.95em;">
+                        <li>Maximize R² score (get close to 1.0)</li>
+                        <li>Minimize MSE and RMSE</li>
+                        <li>Make green residual lines as short as possible</li>
+                        <li>Try to match the "Best Fit" result manually!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="canvas" width="700" height="600"></canvas>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>Data Points</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>Regression Line</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Residuals</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span>Mean Line</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-section" id="linearControls">
+                    <h3>🎛️ Adjust Line Parameters</h3>
+                    <div class="slider-group">
+                        <label>
+                            Slope (m): <span class="slider-value" id="slopeValue">1.0</span>
+                        </label>
+                        <input type="range" id="slope" min="-3" max="3" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>
+                            Intercept (b): <span class="slider-value" id="interceptValue">0</span>
+                        </label>
+                        <input type="range" id="intercept" min="-100" max="100" step="5" value="0">
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>⚡ Quick Presets</h3>
+                    <div class="button-group">
+                        <button class="btn-preset" onclick="applyPreset('underfit')">Underfit Line</button>
+                        <button class="btn-preset" onclick="applyPreset('goodfit')">Best Fit Line</button>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🎯 Learning Goals</h3>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <p style="margin-bottom: 12px; color: #333; font-size: 0.95em;"><strong>Your Mission:</strong></p>
+                        <ol style="margin-left: 20px; color: #555; line-height: 1.8; font-size: 0.9em;">
+                            <li>Try to get the <strong>R² score as close to 1.0</strong> as possible</li>
+                            <li>Minimize the <strong>MSE</strong> (lower is better!)</li>
+                            <li>Observe how residuals (green lines) change</li>
+                            <li>Compare your manual adjustment to the "Best Fit" button</li>
+                        </ol>
+                    </div>
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 8px;">
+                        <p style="color: #856404; font-size: 0.85em; margin: 0;"><strong>💡 Challenge:</strong> Can you manually adjust the line to match the "Best Fit" result?</p>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🎲 Data Controls</h3>
+                    <button class="btn-action" onclick="generateNewData()" style="width: 100%; margin-bottom: 10px;">Generate New Data</button>
+                    <button class="btn-clear" onclick="clearData()" style="width: 100%;">Clear All Points</button>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;">💡 Tip: Click on canvas to add custom points!</p>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🏆 Try These Challenges</h3>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <ol style="margin-left: 20px; color: #555; line-height: 2; font-size: 0.9em;">
+                            <li><strong>Beginner:</strong> Generate data and get R² above 0.90 manually</li>
+                            <li><strong>Intermediate:</strong> Create your own data points (by clicking) that form a clear line</li>
+                            <li><strong>Advanced:</strong> Generate data, then try to match the "Best Fit" result within 0.1 slope/intercept</li>
+                            <li><strong>Expert:</strong> Create a dataset where slope = 2 and intercept = 10, then verify with Best Fit!</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="metrics">
+                    <h3 style="margin-bottom: 15px; color: #333;">📈 Model Metrics</h3>
+                    <div class="metric-item">
+                        <span class="metric-label">MSE:</span>
+                        <span class="metric-value" id="mseValue">0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">RMSE:</span>
+                        <span class="metric-value" id="rmseValue">0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">R² Score:</span>
+                        <span class="metric-value" id="r2Value">0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Data Points:</span>
+                        <span class="metric-value" id="pointCount">0</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h4>📖 Understanding the Metrics:</h4>
+                    <p style="margin-bottom: 10px;"><strong>MSE (Mean Squared Error):</strong> Average of squared residuals. Lower = better fit.</p>
+                    <p style="margin-bottom: 10px;"><strong>RMSE (Root MSE):</strong> Square root of MSE, in original units. Easier to interpret.</p>
+                    <p><strong>R² Score:</strong> Ranges 0-1. Closer to 1.0 = better fit. Shows % of variance explained.</p>
+                </div>
+                
+                <div class="info-box" style="background: #f0fdf4; border-left: 4px solid #10b981;">
+                    <h4 style="color: #065f46;">💡 Dynamic Feedback:</h4>
+                    <p id="infoText" style="color: #047857;">Adjust the slope and intercept to see how the line changes. Watch the residuals (green lines) and metrics update in real-time!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let dataPoints = [];
+        let slope = 1.0;
+        let intercept = 0;
+        
+        const margin = 50;
+        const graphWidth = canvas.width - 2 * margin;
+        const graphHeight = canvas.height - 2 * margin;
+        
+        // Initialize with some data
+        function generateNewData() {
+            dataPoints = [];
+            const numPoints = 15;
+            for (let i = 0; i < numPoints; i++) {
+                const x = Math.random() * 10;
+                const y = 2 * x + 10 + (Math.random() - 0.5) * 20;
+                dataPoints.push({x, y});
+            }
+            calculateBestFit();
+        }
+        
+        function clearData() {
+            dataPoints = [];
+            draw();
+        }
+        
+        // Convert data coordinates to canvas coordinates
+        function toCanvasX(x) {
+            return margin + (x / 10) * graphWidth;
+        }
+        
+        function toCanvasY(y) {
+            const maxY = 50;
+            return canvas.height - margin - (y / maxY) * graphHeight;
+        }
+        
+        function fromCanvasX(canvasX) {
+            return ((canvasX - margin) / graphWidth) * 10;
+        }
+        
+        function fromCanvasY(canvasY) {
+            const maxY = 50;
+            return ((canvas.height - margin - canvasY) / graphHeight) * maxY;
+        }
+        
+        // Predict y value based on linear equation: y = mx + b
+        function predict(x) {
+            return slope * x + intercept;
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, canvas.height - margin);
+            ctx.lineTo(canvas.width - margin, canvas.height - margin);
+            ctx.stroke();
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = margin + (i / 10) * graphWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, canvas.height - margin);
+                ctx.stroke();
+                
+                const y = margin + (i / 10) * graphHeight;
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(canvas.width - margin, y);
+                ctx.stroke();
+            }
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 10; i += 2) {
+                const x = toCanvasX(i);
+                ctx.fillText(i.toString(), x, canvas.height - margin + 25);
+            }
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 50; i += 10) {
+                const y = toCanvasY(i);
+                ctx.fillText(i.toString(), margin - 10, y + 5);
+            }
+            
+            // Draw mean line
+            if (dataPoints.length > 0) {
+                const meanY = dataPoints.reduce((sum, p) => sum + p.y, 0) / dataPoints.length;
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(margin, toCanvasY(meanY));
+                ctx.lineTo(canvas.width - margin, toCanvasY(meanY));
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // Draw regression line
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            const startX = 0;
+            const endX = 10;
+            const steps = 100;
+            
+            for (let i = 0; i <= steps; i++) {
+                const x = startX + (endX - startX) * (i / steps);
+                const y = predict(x);
+                const canvasX = toCanvasX(x);
+                const canvasY = toCanvasY(y);
+                
+                if (i === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw residuals
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            dataPoints.forEach(point => {
+                const predictedY = predict(point.x);
+                const x = toCanvasX(point.x);
+                const y1 = toCanvasY(point.y);
+                const y2 = toCanvasY(predictedY);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+            });
+            
+            // Draw data points
+            dataPoints.forEach(point => {
+                const x = toCanvasX(point.x);
+                const y = toCanvasY(point.y);
+                
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#1e40af';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+            
+            updateMetrics();
+        }
+        
+        function calculateMetrics() {
+            if (dataPoints.length === 0) {
+                return {mse: 0, rmse: 0, r2: 0};
+            }
+            
+            const meanY = dataPoints.reduce((sum, p) => sum + p.y, 0) / dataPoints.length;
+            
+            let ssRes = 0;
+            let ssTot = 0;
+            
+            dataPoints.forEach(point => {
+                const predicted = predict(point.x);
+                const residual = point.y - predicted;
+                ssRes += residual * residual;
+                ssTot += (point.y - meanY) * (point.y - meanY);
+            });
+            
+            const mse = ssRes / dataPoints.length;
+            const rmse = Math.sqrt(mse);
+            const r2 = ssTot === 0 ? 0 : 1 - (ssRes / ssTot);
+            
+            return {mse, rmse, r2};
+        }
+        
+        function updateMetrics() {
+            const metrics = calculateMetrics();
+            document.getElementById('mseValue').textContent = metrics.mse.toFixed(2);
+            document.getElementById('rmseValue').textContent = metrics.rmse.toFixed(2);
+            document.getElementById('r2Value').textContent = metrics.r2.toFixed(3);
+            document.getElementById('pointCount').textContent = dataPoints.length;
+            
+            // Update info text based on R²
+            const r2 = metrics.r2;
+            let infoText = '';
+            if (dataPoints.length === 0) {
+                infoText = '👋 Welcome! Click "Generate New Data" or click on the graph to add points.';
+            } else if (r2 > 0.95) {
+                infoText = '🎉 Outstanding! R² > 0.95 means excellent fit. Your line explains almost all the variance!';
+            } else if (r2 > 0.85) {
+                infoText = '✨ Great job! R² > 0.85 is a very good fit. The line captures the pattern well.';
+            } else if (r2 > 0.70) {
+                infoText = '👍 Good fit! R² > 0.70 means the model captures most of the pattern. Can you improve it?';
+            } else if (r2 > 0.40) {
+                infoText = '⚠️ Moderate fit. R² = ' + r2.toFixed(2) + '. Try adjusting the slope and intercept to improve!';
+            } else if (r2 > 0) {
+                infoText = '❌ Poor fit! R² = ' + r2.toFixed(2) + '. The line doesn\'t capture the pattern. Try the "Best Fit" button!';
+            } else {
+                infoText = '💥 Negative R²! Your line is worse than just predicting the mean (orange dashed line).';
+            }
+            document.getElementById('infoText').textContent = infoText;
+        }
+        
+        function calculateBestFit() {
+            if (dataPoints.length < 2) return;
+            
+            // Calculate best fit using least squares method
+            const n = dataPoints.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            dataPoints.forEach(p => {
+                sumX += p.x;
+                sumY += p.y;
+                sumXY += p.x * p.y;
+                sumX2 += p.x * p.x;
+            });
+            
+            const bestSlope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const bestIntercept = (sumY - bestSlope * sumX) / n;
+            
+            slope = bestSlope;
+            intercept = bestIntercept;
+            
+            document.getElementById('slope').value = slope;
+            document.getElementById('intercept').value = intercept;
+            document.getElementById('slopeValue').textContent = slope.toFixed(2);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(2);
+            
+            draw();
+        }
+        
+        function applyPreset(preset) {
+            if (preset === 'underfit') {
+                // A horizontal line that doesn't follow the data trend
+                slope = 0;
+                intercept = 25;
+            } else if (preset === 'goodfit') {
+                // Calculate the optimal best fit line
+                calculateBestFit();
+                return;
+            }
+            
+            document.getElementById('slope').value = slope;
+            document.getElementById('intercept').value = intercept;
+            document.getElementById('slopeValue').textContent = slope.toFixed(2);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(2);
+            
+            draw();
+        }
+        
+        // Event listeners
+        document.getElementById('slope').addEventListener('input', (e) => {
+            slope = parseFloat(e.target.value);
+            document.getElementById('slopeValue').textContent = slope.toFixed(2);
+            draw();
+        });
+        
+        document.getElementById('intercept').addEventListener('input', (e) => {
+            intercept = parseFloat(e.target.value);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(2);
+            draw();
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const canvasX = e.clientX - rect.left;
+            const canvasY = e.clientY - rect.top;
+            
+            const x = fromCanvasX(canvasX);
+            const y = fromCanvasY(canvasY);
+            
+            if (x >= 0 && x <= 10 && y >= 0 && y <= 50) {
+                dataPoints.push({x, y});
+                draw();
+            }
+        });
+        
+        // Initialize
+        generateNewData();
+    </script>
+</body>
+</html>
