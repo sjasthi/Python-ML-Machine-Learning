@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Linear Regression Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #3b82f6;
+        }
+        
+        .instructions h2 {
+            color: #1e40af;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .instructions-card h4 {
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+        
+        .instructions-card ul {
+            color: #1e3a8a;
+            line-height: 1.8;
+            font-size: 0.95em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .visualizations {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .canvas-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .canvas-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .control-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .equation-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .equation {
+            font-size: 1.1em;
+            color: #333;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        
+        .equation-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .slider-group {
+            margin-bottom: 20px;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        .slider-value {
+            float: right;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn-preset {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-preset:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-action {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-action:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-clear {
+            background: #fc8181;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #f56565;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .metrics {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .metric-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .info-box {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box h4 {
+            color: #0050b3;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p {
+            color: #003a8c;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Multiple Linear Regression Explorer</h1>
+        <p class="subtitle">Predict student grades using Study Hours (+) and TV Hours (-)</p>
+        
+        <div class="instructions">
+            <h2>📚 How to Use This Tool</h2>
+            <div class="instructions-grid">
+                <div class="instructions-card">
+                    <h4>🎯 The Model</h4>
+                    <ul>
+                        <li><strong>Equation:</strong> Grade = β₀ + β₁(Study) + β₂(TV)</li>
+                        <li><strong>Study Hours:</strong> Positive effect on grades</li>
+                        <li><strong>TV Hours:</strong> Negative effect on grades</li>
+                        <li><strong>Goal:</strong> Find the best coefficients!</li>
+                    </ul>
+                </div>
+                <div class="instructions-card">
+                    <h4>👀 Understanding the Charts</h4>
+                    <ul>
+                        <li><strong>Top Chart:</strong> Study Hours vs Grade (TV = 0)</li>
+                        <li><strong>Bottom Chart:</strong> TV Hours vs Grade (Study = 0)</li>
+                        <li><strong>Blue dots:</strong> Actual student data</li>
+                        <li><strong>Red line:</strong> Model prediction (other variable = 0)</li>
+                        <li><strong>Y-intercept:</strong> Both red lines cross y-axis at β₀!</li>
+                    </ul>
+                </div>
+                <div class="instructions-card">
+                    <h4>🎮 Your Mission</h4>
+                    <ul>
+                        <li>Maximize R² score (aim for > 0.90)</li>
+                        <li>Minimize MSE and RMSE</li>
+                        <li>Make both charts' lines fit well</li>
+                        <li>Compare to "Best Fit" result!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="visualizations">
+                <div class="canvas-container">
+                    <div class="canvas-title">📖 Study Hours vs Grade (when TV Hours = 0)</div>
+                    <canvas id="studyCanvas" width="700" height="400"></canvas>
+                </div>
+                
+                <div class="canvas-container">
+                    <div class="canvas-title">📺 TV Hours vs Grade (when Study Hours = 0)</div>
+                    <canvas id="tvCanvas" width="700" height="400"></canvas>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>Student Data Points</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>Model Prediction Line</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Residuals (Errors)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="equation-display">
+                    <h3 style="text-align: center; color: #333; margin-bottom: 10px;">Current Model Equation</h3>
+                    <div class="equation">
+                        Grade = <span class="equation-value" id="eqIntercept">50</span> + 
+                        <span class="equation-value" id="eqStudy">5</span> × Study - 
+                        <span class="equation-value" id="eqTV">3</span> × TV
+                    </div>
+                    <p style="text-align: center; color: #666; font-size: 0.9em; margin-top: 10px;">
+                        Adjust the sliders below to change the coefficients
+                    </p>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🎛️ Adjust Model Parameters</h3>
+                    <div class="slider-group">
+                        <label>
+                            β₀ (Intercept): <span class="slider-value" id="interceptValue">50</span>
+                        </label>
+                        <input type="range" id="intercept" min="0" max="100" step="1" value="50">
+                        <small style="color: #666;">Base grade when Study=0 and TV=0. <strong style="color: #ef4444;">Both red lines cross the y-axis at this value!</strong></small>
+                    </div>
+                    <div class="slider-group">
+                        <label>
+                            β₁ (Study Coefficient): <span class="slider-value" id="studyCoefValue">5</span>
+                        </label>
+                        <input type="range" id="studyCoef" min="0" max="10" step="0.5" value="5">
+                        <small style="color: #666;">Points gained per hour of study</small>
+                    </div>
+                    <div class="slider-group">
+                        <label>
+                            β₂ (TV Coefficient): <span class="slider-value" id="tvCoefValue">-3</span>
+                        </label>
+                        <input type="range" id="tvCoef" min="-10" max="0" step="0.5" value="-3">
+                        <small style="color: #666;">Points lost per hour of TV</small>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>⚡ Quick Actions</h3>
+                    <div class="button-group">
+                        <button class="btn-preset" onclick="applyPreset('poor')">Poor Model</button>
+                        <button class="btn-preset" onclick="calculateBestFit()">Best Fit Model</button>
+                    </div>
+                    <button class="btn-action" onclick="generateNewData()" style="width: 100%; margin-bottom: 10px;">Generate New Data</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🎯 Learning Goals</h3>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <p style="margin-bottom: 12px; color: #333; font-size: 0.95em;"><strong>Understand:</strong></p>
+                        <ul style="margin-left: 20px; color: #555; line-height: 1.8; font-size: 0.9em;">
+                            <li>How multiple features affect the target</li>
+                            <li>Positive vs negative coefficients</li>
+                            <li>Balancing multiple predictors</li>
+                            <li>Interpreting coefficient magnitudes</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🏆 Challenges</h3>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <ol style="margin-left: 20px; color: #555; line-height: 2; font-size: 0.9em;">
+                            <li><strong>Beginner:</strong> Get R² > 0.85 manually</li>
+                            <li><strong>Intermediate:</strong> Guess coefficients within ±1 of Best Fit</li>
+                            <li><strong>Advanced:</strong> Explain why TV coefficient is negative</li>
+                            <li><strong>Expert:</strong> What happens if TV coefficient = 0?</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="metrics">
+                    <h3 style="margin-bottom: 15px; color: #333;">📈 Model Performance</h3>
+                    <div class="metric-item">
+                        <span class="metric-label">MSE:</span>
+                        <span class="metric-value" id="mseValue">0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">RMSE:</span>
+                        <span class="metric-value" id="rmseValue">0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">R² Score:</span>
+                        <span class="metric-value" id="r2Value">0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Data Points:</span>
+                        <span class="metric-value" id="pointCount">0</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h4>📖 Understanding Multiple Regression:</h4>
+                    <p style="margin-bottom: 10px;"><strong>Key Insight:</strong> Both features work together to predict the grade. More study hours increase the grade, while more TV hours decrease it.</p>
+                    <p style="margin-bottom: 10px;"><strong>The Red Lines:</strong> Each chart shows predictions when the OTHER variable equals zero. This is why both red lines cross the y-axis at β₀ (the intercept).</p>
+                    <p><strong>Example:</strong> If β₀=50, β₁=6, β₂=-4, and a student studies 5 hours and watches 2 hours TV: Grade = 50 + 6(5) + (-4)(2) = 50 + 30 - 8 = 72</p>
+                </div>
+                
+                <div class="info-box" style="background: #f0fdf4; border-left: 4px solid #10b981;">
+                    <h4 style="color: #065f46;">💡 Dynamic Feedback:</h4>
+                    <p id="infoText" style="color: #047857;">Adjust the coefficients to see how both relationships change. Watch how the model captures both positive and negative effects!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studyCanvas = document.getElementById('studyCanvas');
+        const tvCanvas = document.getElementById('tvCanvas');
+        const studyCtx = studyCanvas.getContext('2d');
+        const tvCtx = tvCanvas.getContext('2d');
+        
+        let dataPoints = [];
+        let intercept = 50;
+        let studyCoef = 5;
+        let tvCoef = -3;
+        
+        const margin = 50;
+        const graphWidth = studyCanvas.width - 2 * margin;
+        const graphHeight = studyCanvas.height - 2 * margin;
+        
+        // Generate realistic student data
+        function generateNewData() {
+            dataPoints = [];
+            const numStudents = 25;
+            
+            for (let i = 0; i < numStudents; i++) {
+                const studyHours = Math.random() * 8 + 0.5; // 0.5 to 8.5 hours
+                const tvHours = Math.random() * 6 + 0.5; // 0.5 to 6.5 hours
+                
+                // True relationship: Grade = 50 + 6*study - 4*tv + noise
+                const baseGrade = 50;
+                const trueStudyEffect = 6;
+                const trueTVEffect = -4;
+                const noise = (Math.random() - 0.5) * 15; // Random variation
+                
+                let grade = baseGrade + trueStudyEffect * studyHours + trueTVEffect * tvHours + noise;
+                grade = Math.max(0, Math.min(100, grade)); // Clamp between 0-100
+                
+                dataPoints.push({
+                    studyHours: studyHours,
+                    tvHours: tvHours,
+                    grade: grade
+                });
+            }
+            
+            draw();
+        }
+        
+        // Convert data to canvas coordinates
+        function toCanvasX(value, maxValue) {
+            return margin + (value / maxValue) * graphWidth;
+        }
+        
+        function toCanvasY(value) {
+            return studyCanvas.height - margin - (value / 100) * graphHeight;
+        }
+        
+        // Predict grade using multiple regression equation
+        function predictGrade(studyHours, tvHours) {
+            return intercept + studyCoef * studyHours + tvCoef * tvHours;
+        }
+        
+        // Draw a single chart
+        function drawChart(ctx, xData, xLabel, xMax) {
+            ctx.clearRect(0, 0, studyCanvas.width, studyCanvas.height);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, studyCanvas.height - margin);
+            ctx.lineTo(studyCanvas.width - margin, studyCanvas.height - margin);
+            ctx.stroke();
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = margin + (i / 10) * graphWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, studyCanvas.height - margin);
+                ctx.stroke();
+                
+                const y = margin + (i / 10) * graphHeight;
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(studyCanvas.width - margin, y);
+                ctx.stroke();
+            }
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            
+            // X-axis labels
+            for (let i = 0; i <= xMax; i += 2) {
+                const x = toCanvasX(i, xMax);
+                ctx.fillText(i.toString(), x, studyCanvas.height - margin + 25);
+            }
+            
+            // Y-axis labels (grades)
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 100; i += 20) {
+                const y = toCanvasY(i);
+                ctx.fillText(i.toString(), margin - 10, y + 5);
+            }
+            
+            // Axis titles
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(xLabel, studyCanvas.width / 2, studyCanvas.height - 5);
+            
+            ctx.save();
+            ctx.translate(15, studyCanvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Grade (0-100)', 0, 0);
+            ctx.restore();
+        }
+        
+        // Draw study hours chart
+        function drawStudyChart() {
+            const ctx = studyCtx;
+            drawChart(ctx, 'study', 'Study Hours per Day', 10);
+            
+            // Draw regression line (holding TV at 0 so intercept is visible)
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let study = 0; study <= 10; study += 0.1) {
+                const grade = predictGrade(study, 0); // TV = 0
+                const x = toCanvasX(study, 10);
+                const y = toCanvasY(grade);
+                
+                if (study === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw residuals and data points
+            dataPoints.forEach(point => {
+                const predictedGrade = predictGrade(point.studyHours, point.tvHours);
+                const x = toCanvasX(point.studyHours, 10);
+                const y1 = toCanvasY(point.grade);
+                const y2 = toCanvasY(predictedGrade);
+                
+                // Draw residual line
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+                
+                // Draw data point
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(x, y1, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = '#1e40af';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+        
+        // Draw TV hours chart
+        function drawTVChart() {
+            const ctx = tvCtx;
+            drawChart(ctx, 'tv', 'TV Hours per Day', 8);
+            
+            // Draw regression line (holding Study at 0 so intercept is visible)
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let tv = 0; tv <= 8; tv += 0.1) {
+                const grade = predictGrade(0, tv); // Study = 0
+                const x = toCanvasX(tv, 8);
+                const y = toCanvasY(grade);
+                
+                if (tv === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw residuals and data points
+            dataPoints.forEach(point => {
+                const predictedGrade = predictGrade(point.studyHours, point.tvHours);
+                const x = toCanvasX(point.tvHours, 8);
+                const y1 = toCanvasY(point.grade);
+                const y2 = toCanvasY(predictedGrade);
+                
+                // Draw residual line
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+                
+                // Draw data point
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(x, y1, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = '#1e40af';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+        
+        function draw() {
+            if (dataPoints.length === 0) {
+                return;
+            }
+            drawStudyChart();
+            drawTVChart();
+            updateMetrics();
+            updateEquation();
+        }
+        
+        function updateEquation() {
+            document.getElementById('eqIntercept').textContent = intercept.toFixed(1);
+            document.getElementById('eqStudy').textContent = studyCoef.toFixed(1);
+            document.getElementById('eqTV').textContent = Math.abs(tvCoef).toFixed(1);
+        }
+        
+        function calculateMetrics() {
+            if (dataPoints.length === 0) {
+                return {mse: 0, rmse: 0, r2: 0};
+            }
+            
+            const meanGrade = dataPoints.reduce((sum, p) => sum + p.grade, 0) / dataPoints.length;
+            
+            let ssRes = 0;
+            let ssTot = 0;
+            
+            dataPoints.forEach(point => {
+                const predicted = predictGrade(point.studyHours, point.tvHours);
+                const residual = point.grade - predicted;
+                ssRes += residual * residual;
+                ssTot += (point.grade - meanGrade) * (point.grade - meanGrade);
+            });
+            
+            const mse = ssRes / dataPoints.length;
+            const rmse = Math.sqrt(mse);
+            const r2 = ssTot === 0 ? 0 : 1 - (ssRes / ssTot);
+            
+            return {mse, rmse, r2};
+        }
+        
+        function updateMetrics() {
+            const metrics = calculateMetrics();
+            document.getElementById('mseValue').textContent = metrics.mse.toFixed(2);
+            document.getElementById('rmseValue').textContent = metrics.rmse.toFixed(2);
+            document.getElementById('r2Value').textContent = metrics.r2.toFixed(3);
+            document.getElementById('pointCount').textContent = dataPoints.length;
+            
+            // Update feedback
+            const r2 = metrics.r2;
+            let infoText = '';
+            if (dataPoints.length === 0) {
+                infoText = '👋 Welcome! Click "Generate New Data" to start exploring multiple regression.';
+            } else if (r2 > 0.95) {
+                infoText = '🎉 Outstanding! R² > 0.95! Your model captures both relationships excellently!';
+            } else if (r2 > 0.85) {
+                infoText = '✨ Excellent work! R² > 0.85 shows your coefficients balance both features well!';
+            } else if (r2 > 0.70) {
+                infoText = '👍 Good fit! R² > 0.70. Try fine-tuning the coefficients to improve further.';
+            } else if (r2 > 0.40) {
+                infoText = '⚠️ Moderate fit. R² = ' + r2.toFixed(2) + '. Adjust both Study and TV coefficients!';
+            } else if (r2 > 0) {
+                infoText = '❌ Poor fit! The coefficients don\'t capture the relationships. Try "Best Fit"!';
+            } else {
+                infoText = '💥 Negative R²! Your model is worse than predicting the average grade.';
+            }
+            document.getElementById('infoText').textContent = infoText;
+        }
+        
+        function calculateBestFit() {
+            if (dataPoints.length < 3) return;
+            
+            // Multiple linear regression using normal equations
+            const n = dataPoints.length;
+            
+            // Calculate means
+            let meanStudy = 0, meanTV = 0, meanGrade = 0;
+            dataPoints.forEach(p => {
+                meanStudy += p.studyHours;
+                meanTV += p.tvHours;
+                meanGrade += p.grade;
+            });
+            meanStudy /= n;
+            meanTV /= n;
+            meanGrade /= n;
+            
+            // Calculate sums for normal equations
+            let ss_study = 0, ss_tv = 0, ss_study_tv = 0;
+            let s_study_grade = 0, s_tv_grade = 0;
+            
+            dataPoints.forEach(p => {
+                const study_dev = p.studyHours - meanStudy;
+                const tv_dev = p.tvHours - meanTV;
+                const grade_dev = p.grade - meanGrade;
+                
+                ss_study += study_dev * study_dev;
+                ss_tv += tv_dev * tv_dev;
+                ss_study_tv += study_dev * tv_dev;
+                s_study_grade += study_dev * grade_dev;
+                s_tv_grade += tv_dev * grade_dev;
+            });
+            
+            // Solve for coefficients
+            const denominator = ss_study * ss_tv - ss_study_tv * ss_study_tv;
+            
+            if (Math.abs(denominator) < 0.0001) {
+                alert('Cannot calculate best fit - features may be too correlated');
+                return;
+            }
+            
+            const bestStudyCoef = (s_study_grade * ss_tv - s_tv_grade * ss_study_tv) / denominator;
+            const bestTVCoef = (s_tv_grade * ss_study - s_study_grade * ss_study_tv) / denominator;
+            const bestIntercept = meanGrade - bestStudyCoef * meanStudy - bestTVCoef * meanTV;
+            
+            studyCoef = bestStudyCoef;
+            tvCoef = bestTVCoef;
+            intercept = bestIntercept;
+            
+            // Update sliders
+            document.getElementById('studyCoef').value = studyCoef;
+            document.getElementById('tvCoef').value = tvCoef;
+            document.getElementById('intercept').value = intercept;
+            document.getElementById('studyCoefValue').textContent = studyCoef.toFixed(2);
+            document.getElementById('tvCoefValue').textContent = tvCoef.toFixed(2);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(2);
+            
+            draw();
+        }
+        
+        function applyPreset(preset) {
+            if (preset === 'poor') {
+                studyCoef = 2;
+                tvCoef = -1;
+                intercept = 60;
+            }
+            
+            document.getElementById('studyCoef').value = studyCoef;
+            document.getElementById('tvCoef').value = tvCoef;
+            document.getElementById('intercept').value = intercept;
+            document.getElementById('studyCoefValue').textContent = studyCoef.toFixed(2);
+            document.getElementById('tvCoefValue').textContent = tvCoef.toFixed(2);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(2);
+            
+            draw();
+        }
+        
+        // Event listeners
+        document.getElementById('intercept').addEventListener('input', (e) => {
+            intercept = parseFloat(e.target.value);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(2);
+            draw();
+        });
+        
+        document.getElementById('studyCoef').addEventListener('input', (e) => {
+            studyCoef = parseFloat(e.target.value);
+            document.getElementById('studyCoefValue').textContent = studyCoef.toFixed(2);
+            draw();
+        });
+        
+        document.getElementById('tvCoef').addEventListener('input', (e) => {
+            tvCoef = parseFloat(e.target.value);
+            document.getElementById('tvCoefValue').textContent = tvCoef.toFixed(2);
+            draw();
+        });
+        
+        // Initialize
+        generateNewData();
+    </script>
+</body>
+</html>
