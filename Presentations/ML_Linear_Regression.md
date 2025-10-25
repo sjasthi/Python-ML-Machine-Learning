@@ -199,6 +199,33 @@ R² ranges from 0 to 1 (can be negative for terrible models)
   - R² = 0.5 means your model explains 50% of the variation (okay)
   - R² = 0.1 means your model explains 10% of the variation (poor)
 
+**How is R² Calculated?**
+
+R² is determined by comparing your model's predictions to a baseline "naive" model that just predicts the average value every time:
+
+```
+R² = 1 - (Sum of Squared Residuals / Total Sum of Squares)
+
+Or more formally:
+R² = 1 - (SSres / SStot)
+
+Where:
+SSres = Σ(actual - predicted)²     [Your model's errors]
+SStot = Σ(actual - mean)²          [Baseline model's errors]
+```
+
+**What does this mean?**
+- **SSres** (Residual Sum of Squares): How much error your model makes
+- **SStot** (Total Sum of Squares): How much error a naive model (predicting the mean) makes
+- **R²**: The proportion of variance your model explains compared to the baseline
+
+**Examples:**
+- If SSres = 0 (perfect predictions), then R² = 1 - 0/SStot = 1 (perfect!)
+- If SSres = SStot (your model is as bad as predicting the mean), then R² = 1 - 1 = 0
+- If SSres > SStot (your model is worse than predicting the mean!), then R² becomes negative
+
+Think of it this way: R² = 0.85 means your model reduced the prediction error by 85% compared to just always guessing the average.
+
 ![R² Score Interpretation](images_lrm/r_squared_interpretation.png)
 
 The graphs above show what different R² scores look like visually. With a high R² (0.95), the points cluster tightly around the line. With a low R² (0.40), the points are scattered far from the line, indicating the model doesn't capture the relationship well.
