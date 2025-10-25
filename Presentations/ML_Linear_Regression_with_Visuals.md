@@ -73,7 +73,7 @@ This tells us:
 - For each additional hour of study, your score increases by 8 points
 - If you study 5 hours: Score = 50 + 8(5) = 90
 
-![Simple Linear Regression](images/simple_linear_regression.png)
+![Simple Linear Regression](images_lrm/simple_linear_regression.png)
 
 In the graph above, you can see the actual test scores (blue dots) and the best-fit line (red) that the model found. Notice how the line goes through the middle of the points, minimizing the overall distance to all data points.
 
@@ -91,7 +91,7 @@ Residual = Actual Value - Predicted Value
 
 Imagine plotting study hours vs test scores for 20 students. Some points will be above our line, some below. The residuals measure how far off each prediction is.
 
-![Residuals Visualization](images/residuals.png)
+![Residuals Visualization](images_lrm/residuals.png)
 
 The green dashed lines show the residuals - the vertical distance from each actual data point (blue) to the predicted line (red). Our goal is to make these distances as small as possible overall.
 
@@ -149,7 +149,7 @@ Price = 50,000 + 150,000 + 45,000 - 20,000
 Price = $225,000
 ```
 
-![Multiple Regression Coefficients](images/multiple_regression_coefficients.png)
+![Multiple Regression Coefficients](images_lrm/multiple_regression_coefficients.png)
 
 The bar chart shows how each feature contributes to the house price. Green bars (positive coefficients) increase the price, while red bars (negative coefficients) decrease it. Square footage has the smallest per-unit impact, but can add up quickly. Age has a negative impact - older houses are worth less.
 
@@ -165,7 +165,7 @@ Before evaluating, we split our data:
 
 This split is crucial! If we only test on the data we trained on, we might have **overfitting** - where the model memorizes the training data but fails on new data.
 
-![Train-Test Split](images/train_test_split.png)
+![Train-Test Split](images_lrm/train_test_split.png)
 
 Think of it like studying for a test: if you only memorize the practice problems (training data), you might struggle with new questions on the actual test (testing data). We want a model that understands the concepts, not just memorizes examples.
 
@@ -199,7 +199,7 @@ R² ranges from 0 to 1 (can be negative for terrible models)
   - R² = 0.5 means your model explains 50% of the variation (okay)
   - R² = 0.1 means your model explains 10% of the variation (poor)
 
-![R² Score Interpretation](images/r_squared_interpretation.png)
+![R² Score Interpretation](images_lrm/r_squared_interpretation.png)
 
 The graphs above show what different R² scores look like visually. With a high R² (0.95), the points cluster tightly around the line. With a low R² (0.40), the points are scattered far from the line, indicating the model doesn't capture the relationship well.
 
@@ -207,7 +207,7 @@ The graphs above show what different R² scores look like visually. With a high 
 
 Here's what good and poor model fits look like side by side:
 
-![Good vs Poor Fit](images/good_vs_poor_fit.png)
+![Good vs Poor Fit](images_lrm/good_vs_poor_fit.png)
 
 The left graph shows a good fit where the model captures the underlying pattern. The right graph shows a poor fit where there's too much scatter - the linear model may not be appropriate, or we may need more/better features.
 
@@ -237,7 +237,7 @@ Test Score = 50 + 8(Study Hours) - 3(Hours of Video Games)
 
 **Overfitting** happens when your model learns the training data too well, including the noise and random variations. It's like memorizing specific practice problems instead of understanding the underlying concepts.
 
-![Overfitting Example](images/overfitting.png)
+![Overfitting Example](images_lrm/overfitting.png)
 
 The left graph shows a simple linear model that generalizes well - it captures the overall trend without getting distracted by individual variations. The right graph shows an overfit model that twists and turns to pass through every training point. While it's "perfect" on the training data, it will perform poorly on new data because it learned the noise, not the true pattern.
 
