@@ -27,6 +27,7 @@ This course introduces middle and high school students to Machine Learning conce
 
 ### **Thanksgiving Break**
 | - | 11/22/2025 | 11/28/2025 | **No Class - Thanksgiving Break** |
+
 | - | 11/29/2025 | 12/5/2025 | **No Class - Thanksgiving Break** |
 
 | Class # | Week Start | Week End (Due Date) | Topic |
