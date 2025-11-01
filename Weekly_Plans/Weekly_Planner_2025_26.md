@@ -37,7 +37,9 @@ This course introduces middle and high school students to Machine Learning conce
 
 ### **Winter Break**
 | - | 12/20/2025 | 12/26/2025 | **No Class - Christmas Break** |
+
 | - | 12/27/2025 | 1/2/2026 | **No Class - Christmas Break** |
+
 | - | 1/3/2026 | 1/9/2026 | **No Class - New Year Break** |
 
 | Class # | Week Start | Week End (Due Date) | Topic |
@@ -53,6 +55,7 @@ This course introduces middle and high school students to Machine Learning conce
 
 ### **Spring Break**
 | - | 3/7/2026 | 3/13/2026 | **No Class - Spring Break** |
+
 | - | 3/14/2026 | 3/20/2026 | **No Class - Spring Break** |
 
 | Class # | Week Start | Week End (Due Date) | Topic |
@@ -68,6 +71,7 @@ This course introduces middle and high school students to Machine Learning conce
 
 ### **Final Demonstrations**
 | - | 5/16/2026 | 5/22/2026 | **Demonstrations to External Judges** |
+
 | 30 | 5/23/2026 | - | **Demonstrations to External Judges** |
 
 ---
