@@ -35,14 +35,7 @@ Imagine predicting house prices with linear regression:
 
 ## The Three Pillars of Feature Engineering
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│   1. FEATURE SELECTION  →  2. TRANSFORMATION  →  3. CREATION  │
-│   (Choose the best)        (Improve existing)    (Build new)  │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+![Three Pillars of Feature Engineering](images_feature_engineering/three_pillars.png)
 
 ---
 
@@ -71,16 +64,9 @@ Suppose you have these features:
 
 ### Visual: Correlation with Price
 
-```
-Feature                 Correlation with Price
-────────────────────────────────────────────────
-Square feet             ████████████ (0.85)
-Bedrooms                ████████ (0.65)
-Bathrooms               █████████ (0.70)
-Age                     ███ (-0.45)
-Square meters           ████████████ (0.85)  ← Redundant!
-House color             █ (0.05)              ← Not useful!
-```
+![Correlation Analysis](images_feature_engineering/correlation_analysis.png)
+
+**Key Insight:** Square meters is redundant (same as square feet), and house color doesn't predict price!
 
 ### Simple Python Example
 
@@ -144,25 +130,7 @@ X_scaled = scaler.fit_transform(X)
 
 **Problem:** Your data has a curved relationship, but linear regression draws straight lines!
 
-```
-Without Polynomial Features:
-    Price
-      │     ╱
-      │   ╱  ·  ·
-      │ ╱   ·
-      │╱·  ·
-      └──────── Square Feet
-      (straight line doesn't fit curved data well)
-
-With Polynomial Features (add Square_Feet²):
-    Price
-      │       ╱─╲
-      │     ╱   ╲ · ·
-      │   ╱  ·   ╲
-      │ ╱  ·      ╲
-      └──────────── Square Feet
-      (curve fits data better!)
-```
+![Polynomial Features Comparison](images_feature_engineering/polynomial_features_comparison.png)
 
 **Simple Example:**
 
@@ -295,14 +263,9 @@ model.fit(X_scaled, y_train)
 
 ### Visual Comparison
 
-```
-Model Performance
-──────────────────────────────────────────────
-                  Baseline    With Feature Engineering
-R² Score:         0.82        0.91 ⭐
-Avg Error:        $45,000     $28,000 ⭐
-Training Time:    100ms       95ms ⭐
-```
+![Performance Comparison](images_feature_engineering/performance_comparison.png)
+
+**Amazing improvement!** Feature engineering made the model more accurate AND faster!
 
 ---
 
