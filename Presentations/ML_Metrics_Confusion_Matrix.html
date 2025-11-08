@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Confusion Matrix Playbook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .confusion-matrix {
+            display: grid;
+            grid-template-columns: 100px 150px 150px;
+            grid-template-rows: 50px 150px 150px;
+            gap: 2px;
+            margin: 30px auto;
+            width: fit-content;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .cm-cell {
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .cm-header {
+            background: #667eea;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .cm-label {
+            background: #764ba2;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .cm-tn {
+            background: #d4edda;
+            color: #155724;
+            font-size: 1.5em;
+            flex-direction: column;
+        }
+
+        .cm-fp {
+            background: #f8d7da;
+            color: #721c24;
+            font-size: 1.5em;
+            flex-direction: column;
+        }
+
+        .cm-fn {
+            background: #fff3cd;
+            color: #856404;
+            font-size: 1.5em;
+            flex-direction: column;
+        }
+
+        .cm-tp {
+            background: #cce5ff;
+            color: #004085;
+            font-size: 1.5em;
+            flex-direction: column;
+        }
+
+        .cm-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .cm-desc {
+            font-size: 0.7em;
+            margin-top: 5px;
+        }
+
+        .interactive-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .metric-name {
+            font-size: 1.1em;
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .metric-formula {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .warning-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .example-box {
+            background: #f0f9ff;
+            border: 2px dashed #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .formula {
+            background: #2d3748;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .interpretation {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .visual-demo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .sample-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+
+        .sample-box:hover {
+            transform: scale(1.2);
+        }
+
+        .tp-sample { background: #cce5ff; border: 2px solid #004085; }
+        .tn-sample { background: #d4edda; border: 2px solid #155724; }
+        .fp-sample { background: #f8d7da; border: 2px solid #721c24; }
+        .fn-sample { background: #fff3cd; border: 2px solid #856404; }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Interactive Confusion Matrix Playbook</h1>
+        <p class="subtitle">Master Classification Metrics for Machine Learning</p>
+
+        <!-- Introduction Section -->
+        <div class="section">
+            <h2>📚 What is a Confusion Matrix?</h2>
+            <p>A <strong>confusion matrix</strong> is a fundamental tool in machine learning for evaluating the performance of classification models. It's a table that visualizes the performance of an algorithm by comparing actual values with predicted values.</p>
+            
+            <div class="info-box">
+                <strong>💡 Key Insight:</strong> The confusion matrix helps us understand not just <em>how many</em> predictions were wrong, but <em>what type</em> of mistakes our model is making.
+            </div>
+
+            <h3>The Four Quadrants</h3>
+            <div class="confusion-matrix">
+                <div class="cm-cell"></div>
+                <div class="cm-cell cm-header">Predicted Negative</div>
+                <div class="cm-cell cm-header">Predicted Positive</div>
+                
+                <div class="cm-cell cm-label">Actual Negative</div>
+                <div class="cm-cell cm-tn">
+                    <span class="cm-value">TN</span>
+                    <span class="cm-desc">True Negative</span>
+                </div>
+                <div class="cm-cell cm-fp">
+                    <span class="cm-value">FP</span>
+                    <span class="cm-desc">False Positive</span>
+                </div>
+                
+                <div class="cm-cell cm-label">Actual Positive</div>
+                <div class="cm-cell cm-fn">
+                    <span class="cm-value">FN</span>
+                    <span class="cm-desc">False Negative</span>
+                </div>
+                <div class="cm-cell cm-tp">
+                    <span class="cm-value">TP</span>
+                    <span class="cm-desc">True Positive</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #cce5ff; border: 2px solid #004085;"></div>
+                    <div><strong>True Positive (TP):</strong> Correctly predicted positive</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #d4edda; border: 2px solid #155724;"></div>
+                    <div><strong>True Negative (TN):</strong> Correctly predicted negative</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f8d7da; border: 2px solid #721c24;"></div>
+                    <div><strong>False Positive (FP):</strong> Incorrectly predicted positive (Type I Error)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fff3cd; border: 2px solid #856404;"></div>
+                    <div><strong>False Negative (FN):</strong> Incorrectly predicted negative (Type II Error)</div>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h3>🏥 Real-World Example: Medical Diagnosis</h3>
+                <p>Imagine a model predicting whether a patient has a disease:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>TP:</strong> Patient has disease, model predicts disease ✅</li>
+                    <li><strong>TN:</strong> Patient is healthy, model predicts healthy ✅</li>
+                    <li><strong>FP:</strong> Patient is healthy, model predicts disease ❌ (False alarm)</li>
+                    <li><strong>FN:</strong> Patient has disease, model predicts healthy ❌ (Missed diagnosis)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Interactive Calculator -->
+        <div class="section">
+            <h2>🎮 Interactive Calculator</h2>
+            <p>Enter values for each quadrant of the confusion matrix and see the metrics calculate in real-time!</p>
+            
+            <div class="interactive-section">
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="tp">True Positives (TP)</label>
+                        <input type="number" id="tp" value="85" min="0" oninput="calculateMetrics()">
+                    </div>
+                    <div class="input-group">
+                        <label for="tn">True Negatives (TN)</label>
+                        <input type="number" id="tn" value="90" min="0" oninput="calculateMetrics()">
+                    </div>
+                    <div class="input-group">
+                        <label for="fp">False Positives (FP)</label>
+                        <input type="number" id="fp" value="10" min="0" oninput="calculateMetrics()">
+                    </div>
+                    <div class="input-group">
+                        <label for="fn">False Negatives (FN)</label>
+                        <input type="number" id="fn" value="15" min="0" oninput="calculateMetrics()">
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <button onclick="loadExample('balanced')">📊 Balanced Model</button>
+                    <button onclick="loadExample('high_precision')">🎯 High Precision</button>
+                    <button onclick="loadExample('high_recall')">🔍 High Recall</button>
+                    <button onclick="loadExample('poor')">⚠️ Poor Model</button>
+                </div>
+
+                <div class="results" id="results">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+
+                <div id="interpretation" style="margin-top: 30px;">
+                    <!-- Interpretation will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics Section -->
+        <div class="section">
+            <h2>📊 Performance Metrics Explained</h2>
+
+            <h3>1. Accuracy</h3>
+            <p>The proportion of correct predictions (both positive and negative) among all predictions.</p>
+            <div class="formula">
+Accuracy = (TP + TN) / (TP + TN + FP + FN)
+            </div>
+            <div class="interpretation">
+                <strong>Interpretation:</strong> Accuracy is useful when classes are balanced, but can be misleading with imbalanced datasets. A model predicting "no disease" for everyone could have 95% accuracy if only 5% of patients have the disease!
+            </div>
+
+            <h3>2. Precision (Positive Predictive Value)</h3>
+            <p>Of all the instances predicted as positive, how many were actually positive?</p>
+            <div class="formula">
+Precision = TP / (TP + FP)
+            </div>
+            <div class="interpretation">
+                <strong>Interpretation:</strong> Precision answers: "When my model says it's positive, how often is it right?" High precision means few false alarms.
+                <br><br>
+                <strong>Use Case:</strong> Spam detection - you don't want legitimate emails marked as spam (low FP).
+            </div>
+
+            <h3>3. Recall (Sensitivity, True Positive Rate)</h3>
+            <p>Of all the actual positive instances, how many did we correctly identify?</p>
+            <div class="formula">
+Recall = TP / (TP + FN)
+            </div>
+            <div class="interpretation">
+                <strong>Interpretation:</strong> Recall answers: "Of all the actual positive cases, how many did I catch?" High recall means we're not missing many positive cases.
+                <br><br>
+                <strong>Use Case:</strong> Cancer detection - you want to catch all cases (low FN), even if it means some false alarms.
+            </div>
+
+            <h3>4. F1 Score</h3>
+            <p>The harmonic mean of Precision and Recall, providing a single score that balances both metrics.</p>
+            <div class="formula">
+F1 Score = 2 × (Precision × Recall) / (Precision + Recall)
+            </div>
+            <div class="interpretation">
+                <strong>Interpretation:</strong> F1 Score is useful when you need a balance between Precision and Recall. It's especially valuable with imbalanced datasets.
+                <br><br>
+                <strong>Note:</strong> F1 Score is the harmonic mean (not arithmetic), so it gives more weight to lower values. This means if either Precision or Recall is low, the F1 Score will be low.
+            </div>
+
+            <h3>5. Specificity (True Negative Rate)</h3>
+            <p>Of all the actual negative instances, how many did we correctly identify?</p>
+            <div class="formula">
+Specificity = TN / (TN + FP)
+            </div>
+            <div class="interpretation">
+                <strong>Interpretation:</strong> Specificity measures how well the model identifies negative cases. High specificity means few false alarms.
+            </div>
+        </div>
+
+        <!-- Trade-offs Section -->
+        <div class="section">
+            <h2>⚖️ Understanding Trade-offs</h2>
+            
+            <div class="warning-box">
+                <strong>⚠️ The Precision-Recall Trade-off</strong>
+                <p>In most cases, improving precision leads to decreased recall, and vice versa. This is called the <strong>precision-recall trade-off</strong>.</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Scenario</th>
+                        <th>Prioritize</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>🏥 Disease Detection</td>
+                        <td><strong>Recall</strong></td>
+                        <td>Missing a sick patient (FN) is more costly than a false alarm (FP)</td>
+                    </tr>
+                    <tr>
+                        <td>📧 Spam Filtering</td>
+                        <td><strong>Precision</strong></td>
+                        <td>Marking important email as spam (FP) is more costly than letting spam through (FN)</td>
+                    </tr>
+                    <tr>
+                        <td>🔒 Fraud Detection</td>
+                        <td><strong>Recall</strong></td>
+                        <td>Missing fraud (FN) can be very costly, false alarms can be manually reviewed</td>
+                    </tr>
+                    <tr>
+                        <td>🎯 Targeted Advertising</td>
+                        <td><strong>Precision</strong></td>
+                        <td>Want high conversion rate, okay to miss some potential customers (FN)</td>
+                    </tr>
+                    <tr>
+                        <td>⚖️ Legal System</td>
+                        <td><strong>Precision</strong></td>
+                        <td>"Better to let guilty go free than convict innocent" - minimize FP</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Python Code Section -->
+        <div class="section">
+            <h2>🐍 Python Implementation</h2>
+            <p>Here's how to calculate these metrics in Python using scikit-learn:</p>
+            
+            <div class="formula">
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+
+# Actual and predicted values
+y_true = [0, 1, 1, 0, 1, 1, 0, 0, 1, 0]
+y_pred = [0, 1, 1, 0, 0, 1, 0, 1, 1, 0]
+
+# Generate confusion matrix
+cm = confusion_matrix(y_true, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# Calculate individual metrics
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred)
+recall = recall_score(y_true, y_pred)
+f1 = f1_score(y_true, y_pred)
+
+print(f"\nAccuracy: {accuracy:.3f}")
+print(f"Precision: {precision:.3f}")
+print(f"Recall: {recall:.3f}")
+print(f"F1 Score: {f1:.3f}")
+
+# Comprehensive report
+print("\nClassification Report:")
+print(classification_report(y_true, y_pred))
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Pro Tip:</strong> Use <code>classification_report()</code> for a comprehensive view of all metrics at once!
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="section">
+            <h2>🎓 Test Your Understanding</h2>
+            
+            <div class="example-box">
+                <h3>Question 1: Medical Test Scenario</h3>
+                <p>A COVID-19 test has been administered to 1000 people. The results are:</p>
+                <ul style="margin-left: 20px;">
+                    <li>50 people have COVID and test positive (TP)</li>
+                    <li>10 people have COVID but test negative (FN)</li>
+                    <li>900 people don't have COVID and test negative (TN)</li>
+                    <li>40 people don't have COVID but test positive (FP)</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Calculate: What is more concerning in this scenario - the false positive rate or false negative rate? Why?</strong></p>
+                
+                <button onclick="showAnswer1()">Show Answer</button>
+                <div id="answer1" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                    <p><strong>Calculations:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Precision = 50/(50+40) = 0.556 (55.6%)</li>
+                        <li>Recall = 50/(50+10) = 0.833 (83.3%)</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Analysis:</strong> The false negatives (FN = 10) are more concerning because people with COVID who test negative will continue spreading the disease. The recall of 83.3% means we're missing about 17% of actual cases. While false positives cause unnecessary stress and quarantine, false negatives pose a public health risk.</p>
+                </div>
+            </div>
+
+            <div class="example-box" style="margin-top: 20px;">
+                <h3>Question 2: Imbalanced Dataset</h3>
+                <p>You're building a rare disease detector. Out of 10,000 patients:</p>
+                <ul style="margin-left: 20px;">
+                    <li>100 actually have the disease</li>
+                    <li>9,900 are healthy</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>A naive model predicts "healthy" for everyone. What's the accuracy? Why is this misleading?</strong></p>
+                
+                <button onclick="showAnswer2()">Show Answer</button>
+                <div id="answer2" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                    <p><strong>Accuracy = 9,900/10,000 = 99%</strong></p>
+                    <p style="margin-top: 10px;">This is misleading because the model has 0% recall - it doesn't catch ANY of the disease cases! This demonstrates why accuracy alone is insufficient for imbalanced datasets. In this scenario, Precision, Recall, and F1 Score would all be 0 or undefined, giving a much more accurate picture of the model's uselessness.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="section">
+            <h2>📝 Quick Reference Guide</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                        <th>Key Question</th>
+                        <th>Range</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Accuracy</strong></td>
+                        <td>(TP+TN)/(TP+TN+FP+FN)</td>
+                        <td>Overall, how often is the model correct?</td>
+                        <td>0 to 1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Precision</strong></td>
+                        <td>TP/(TP+FP)</td>
+                        <td>When it predicts positive, how often is it right?</td>
+                        <td>0 to 1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recall</strong></td>
+                        <td>TP/(TP+FN)</td>
+                        <td>Of all actual positives, how many did we catch?</td>
+                        <td>0 to 1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>F1 Score</strong></td>
+                        <td>2×(P×R)/(P+R)</td>
+                        <td>What's the balance between precision and recall?</td>
+                        <td>0 to 1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Specificity</strong></td>
+                        <td>TN/(TN+FP)</td>
+                        <td>Of all actual negatives, how many did we catch?</td>
+                        <td>0 to 1</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box" style="margin-top: 20px;">
+                <strong>🎯 Remember:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Higher values (closer to 1) are better for all metrics</li>
+                    <li>The "best" metric depends on your specific problem and costs</li>
+                    <li>Always consider the context and consequences of different error types</li>
+                    <li>For imbalanced datasets, prefer Precision, Recall, and F1 over Accuracy</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateMetrics() {
+            const tp = parseFloat(document.getElementById('tp').value) || 0;
+            const tn = parseFloat(document.getElementById('tn').value) || 0;
+            const fp = parseFloat(document.getElementById('fp').value) || 0;
+            const fn = parseFloat(document.getElementById('fn').value) || 0;
+
+            const total = tp + tn + fp + fn;
+            
+            if (total === 0) {
+                document.getElementById('results').innerHTML = '<p style="color: red; text-align: center;">Please enter at least one value greater than 0</p>';
+                return;
+            }
+
+            const accuracy = ((tp + tn) / total) * 100;
+            const precision = tp + fp > 0 ? (tp / (tp + fp)) * 100 : 0;
+            const recall = tp + fn > 0 ? (tp / (tp + fn)) * 100 : 0;
+            const specificity = tn + fp > 0 ? (tn / (tn + fp)) * 100 : 0;
+            const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+
+            document.getElementById('results').innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-name">Accuracy</div>
+                    <div class="metric-value">${accuracy.toFixed(2)}%</div>
+                    <div class="metric-formula">(TP+TN)/Total</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-name">Precision</div>
+                    <div class="metric-value">${precision.toFixed(2)}%</div>
+                    <div class="metric-formula">TP/(TP+FP)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-name">Recall</div>
+                    <div class="metric-value">${recall.toFixed(2)}%</div>
+                    <div class="metric-formula">TP/(TP+FN)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-name">Specificity</div>
+                    <div class="metric-value">${specificity.toFixed(2)}%</div>
+                    <div class="metric-formula">TN/(TN+FP)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-name">F1 Score</div>
+                    <div class="metric-value">${f1.toFixed(2)}%</div>
+                    <div class="metric-formula">2×(P×R)/(P+R)</div>
+                </div>
+            `;
+
+            // Generate interpretation
+            let interpretation = '<h3 style="color: #667eea;">📊 Model Interpretation</h3>';
+            
+            if (accuracy > 90) {
+                interpretation += '<div class="interpretation" style="border-left-color: #28a745;">✅ <strong>Excellent overall accuracy</strong> - The model correctly classifies most instances.</div>';
+            } else if (accuracy > 70) {
+                interpretation += '<div class="interpretation" style="border-left-color: #ffc107;">⚠️ <strong>Good accuracy</strong> - The model performs reasonably well but has room for improvement.</div>';
+            } else {
+                interpretation += '<div class="interpretation" style="border-left-color: #dc3545;">❌ <strong>Low accuracy</strong> - The model needs significant improvement.</div>';
+            }
+
+            if (precision > 80 && recall < 60) {
+                interpretation += '<div class="interpretation" style="border-left-color: #764ba2;">🎯 <strong>High Precision, Low Recall</strong> - The model is conservative. When it predicts positive, it\'s usually right, but it misses many actual positive cases. Consider lowering the classification threshold.</div>';
+            } else if (precision < 60 && recall > 80) {
+                interpretation += '<div class="interpretation" style="border-left-color: #764ba2;">🔍 <strong>Low Precision, High Recall</strong> - The model is aggressive. It catches most positive cases but has many false alarms. Consider raising the classification threshold.</div>';
+            } else if (precision > 75 && recall > 75) {
+                interpretation += '<div class="interpretation" style="border-left-color: #28a745;">⚖️ <strong>Well-balanced model</strong> - Good balance between precision and recall. The F1 score reflects this balance.</div>';
+            }
+
+            if (f1 < 50) {
+                interpretation += '<div class="interpretation" style="border-left-color: #dc3545;">📉 <strong>Low F1 Score</strong> - The model struggles with positive class prediction. Consider gathering more data, feature engineering, or trying different algorithms.</div>';
+            }
+
+            const fpRate = fp / (tn + fp) * 100;
+            const fnRate = fn / (tp + fn) * 100;
+
+            if (fpRate > 20) {
+                interpretation += `<div class="interpretation" style="border-left-color: #ffc107;">⚠️ <strong>High False Positive Rate (${fpRate.toFixed(1)}%)</strong> - Many negative cases are incorrectly classified as positive. This could lead to unnecessary actions or alerts.</div>`;
+            }
+
+            if (fnRate > 20) {
+                interpretation += `<div class="interpretation" style="border-left-color: #ffc107;">⚠️ <strong>High False Negative Rate (${fnRate.toFixed(1)}%)</strong> - Many positive cases are being missed. This could be critical in applications like medical diagnosis or fraud detection.</div>`;
+            }
+
+            document.getElementById('interpretation').innerHTML = interpretation;
+        }
+
+        function loadExample(type) {
+            let tp, tn, fp, fn;
+            
+            switch(type) {
+                case 'balanced':
+                    tp = 85; tn = 90; fp = 10; fn = 15;
+                    break;
+                case 'high_precision':
+                    tp = 60; tn = 120; fp = 5; fn = 35;
+                    break;
+                case 'high_recall':
+                    tp = 90; tn = 80; fp = 25; fn = 5;
+                    break;
+                case 'poor':
+                    tp = 30; tn = 40; fp = 60; fn = 70;
+                    break;
+            }
+            
+            document.getElementById('tp').value = tp;
+            document.getElementById('tn').value = tn;
+            document.getElementById('fp').value = fp;
+            document.getElementById('fn').value = fn;
+            
+            calculateMetrics();
+        }
+
+        function showAnswer1() {
+            const answer = document.getElementById('answer1');
+            answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showAnswer2() {
+            const answer = document.getElementById('answer2');
+            answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Calculate metrics on page load
+        window.onload = calculateMetrics;
+    </script>
+</body>
+</html>
