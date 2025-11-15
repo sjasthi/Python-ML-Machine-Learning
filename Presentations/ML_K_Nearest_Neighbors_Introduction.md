@@ -24,7 +24,7 @@ You're a new student, and we want to predict which sport you'll like based on:
 - How much you like running around
 - How much you like team sports
 
-![KNN Sports Analogy](knn_intro_analogy.png)
+![KNN Sports Analogy](images_knn/knn_intro_analogy.png)
 
 In this picture:
 - **Blue circles** = Students who like Soccer
@@ -40,7 +40,7 @@ In this picture:
 
 Great question! We use **distance** to find who's nearest. Remember the Pythagorean theorem from math class? We use it here!
 
-![Distance Calculation](knn_distance.png)
+![Distance Calculation](images_knn/knn_distance.png)
 
 **The Formula:**
 ```
@@ -59,7 +59,7 @@ The **K** is just a number that tells us **how many neighbors to look at**.
 - K = 3 means we look at the **3 closest** neighbors  
 - K = 5 means we look at the **5 closest** neighbors
 
-![Different K Values](knn_k_values.png)
+![Different K Values](images_knn/knn_k_values.png)
 
 **Which K should we choose?**
 - **Small K (like 1):** Quick decisions, but might be wrong if that one neighbor is unusual
@@ -72,7 +72,7 @@ The **K** is just a number that tells us **how many neighbors to look at**.
 
 Let's break down how KNN works into simple steps:
 
-![KNN Process Steps](knn_steps.png)
+![KNN Process Steps](images_knn/knn_steps.png)
 
 **Step 1: Collect Training Data**
 - Gather information about students we already know
