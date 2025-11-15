@@ -1,0 +1,1 @@
+Parameters (data given to the model) and Hyper-Parameters (eg: K and Distance measure in the case of KNN)
