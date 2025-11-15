@@ -3,3 +3,5 @@ Parameters (data given to the model) and Hyper-Parameters (eg: K and Distance me
 Distance Measures - what are the others?
 
 Cross-Validation
+
+PCA
