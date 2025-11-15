@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNN Quiz - Test Your Knowledge! 🎯</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .quiz-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            background: #f7f7f7;
+            border: 3px solid transparent;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background: #e8f0fe;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #e8f0fe;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .option-letter {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .feedback {
+            display: none;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            animation: slideDown 0.4s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .results-container.show {
+            display: block;
+        }
+
+        .results-score {
+            font-size: 4em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        .results-message {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .performance-meter {
+            background: #f0f0f0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+
+        .performance-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .emoji {
+            font-size: 5em;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>🎯 KNN Quiz Challenge!</h1>
+            <p>Test your knowledge of K-Nearest Neighbors</p>
+        </div>
+
+        <div class="score-display">
+            <span id="current-question">Question 1</span> of 10 | Score: <span id="score">0</span>/10
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 10%"></div>
+        </div>
+
+        <!-- Question Containers -->
+        <div class="question-container active" data-question="1">
+            <div class="question-number">Question 1</div>
+            <div class="question-text">What does "KNN" stand for?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>K-Number Networks</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>K-Nearest Neighbors</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>K-Neural Network</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>K-Node Navigator</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="2">
+            <div class="question-number">Question 2</div>
+            <div class="question-text">What does the "K" represent in KNN?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>The number of features in the dataset</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>The number of training examples</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>The number of neighbors to consider</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>The number of classes</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="3">
+            <div class="question-number">Question 3</div>
+            <div class="question-text">How does KNN make a prediction for a new data point?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>It uses a complex mathematical formula</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>It looks at the K nearest neighbors and uses majority voting</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>It randomly guesses the answer</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>It only looks at the closest neighbor</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="4">
+            <div class="question-number">Question 4</div>
+            <div class="question-text">Which formula is commonly used to calculate distance in KNN?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Quadratic formula</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Euclidean distance (Pythagorean theorem)</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Fibonacci sequence</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>Slope formula</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="5">
+            <div class="question-number">Question 5</div>
+            <div class="question-text">If K=3 and you have 2 Soccer neighbors and 1 Basketball neighbor, what does KNN predict?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Basketball</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Soccer</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Both equally</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>Cannot determine</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="6">
+            <div class="question-number">Question 6</div>
+            <div class="question-text">What is a disadvantage of using a very small K value (like K=1)?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>It takes too long to compute</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>It can be sensitive to noise and outliers</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>It uses too much memory</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>It requires training time</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="7">
+            <div class="question-number">Question 7</div>
+            <div class="question-text">KNN is called a "lazy learner" because:</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>It doesn't work very hard</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>It doesn't build a model during training - it just memorizes the data</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>It's slow to make predictions</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>It requires a lot of training</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="8">
+            <div class="question-number">Question 8</div>
+            <div class="question-text">Which of these is a real-world application of KNN?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Recommendation systems (like Netflix suggestions)</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Handwriting recognition</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Medical diagnosis</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>All of the above</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="9">
+            <div class="question-number">Question 9</div>
+            <div class="question-text">To calculate the distance between points (2,3) and (5,7), what's the first step?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Add the coordinates together</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Find the differences: (5-2) and (7-3)</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Multiply the coordinates</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>Take the square root</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-container" data-question="10">
+            <div class="question-number">Question 10</div>
+            <div class="question-text">What is generally a good choice for K in KNN?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Always K=1</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>A small odd number like 3 or 5</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>As large as possible</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>An even number</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container">
+            <h2 style="color: #667eea; font-size: 2em;">Quiz Complete! 🎉</h2>
+            <div class="emoji" id="results-emoji">🎯</div>
+            <div class="results-score" id="final-score">0/10</div>
+            <div class="results-message" id="results-message"></div>
+            <div class="performance-meter">
+                <div class="performance-fill" id="performance-fill">0%</div>
+            </div>
+            <button onclick="restartQuiz()">🔄 Try Again</button>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="buttons" id="nav-buttons">
+            <button id="submit-btn" onclick="checkAnswer()">Submit Answer</button>
+            <button id="next-btn" onclick="nextQuestion()" style="display: none;">Next Question →</button>
+        </div>
+    </div>
+
+    <script>
+        // Correct answers for each question
+        const correctAnswers = {
+            1: 'b',  // K-Nearest Neighbors
+            2: 'c',  // Number of neighbors to consider
+            3: 'b',  // Majority voting
+            4: 'b',  // Euclidean distance
+            5: 'b',  // Soccer (2 > 1)
+            6: 'b',  // Sensitive to noise
+            7: 'b',  // Doesn't build model
+            8: 'd',  // All of the above
+            9: 'b',  // Find differences
+            10: 'b'  // Small odd number
+        };
+
+        // Explanations for each answer
+        const explanations = {
+            1: {
+                correct: "Perfect! 🎉 KNN stands for K-Nearest Neighbors!",
+                incorrect: "Not quite! KNN stands for K-Nearest Neighbors. It finds the K closest neighbors to make predictions."
+            },
+            2: {
+                correct: "Excellent! 🌟 K is the number of neighbors we look at when making a prediction.",
+                incorrect: "Not quite! K represents the number of neighbors to consider. For example, K=3 means we look at the 3 closest neighbors."
+            },
+            3: {
+                correct: "Great job! 👏 KNN uses majority voting among the K nearest neighbors to make predictions.",
+                incorrect: "Not quite! KNN looks at the K nearest neighbors and uses majority voting. The class with the most votes wins!"
+            },
+            4: {
+                correct: "Spot on! 📐 We use Euclidean distance, which is based on the Pythagorean theorem: √((x₂-x₁)² + (y₂-y₁)²)",
+                incorrect: "Not quite! We use Euclidean distance (Pythagorean theorem) to calculate how far apart points are."
+            },
+            5: {
+                correct: "Correct! ⚽ With 2 Soccer votes and 1 Basketball vote, Soccer wins by majority!",
+                incorrect: "Not quite! KNN uses majority voting. 2 Soccer > 1 Basketball, so the prediction would be Soccer!"
+            },
+            6: {
+                correct: "Exactly right! 🎯 K=1 can be fooled by noisy data or outliers because it only looks at one neighbor.",
+                incorrect: "Not quite! With K=1, if that one neighbor happens to be unusual or noisy data, the prediction will be wrong. Small K values are sensitive to outliers!"
+            },
+            7: {
+                correct: "Perfect! 💤 KNN doesn't train a model - it just stores the data and does all the work when making predictions.",
+                incorrect: "Not quite! KNN is 'lazy' because it doesn't build a model during training. It just memorizes the data and calculates distances when needed."
+            },
+            8: {
+                correct: "Amazing! 🌟 KNN is used in all of these applications and many more!",
+                incorrect: "Actually, KNN is used in ALL of these! It's great for recommendations, handwriting recognition, medical diagnosis, and much more."
+            },
+            9: {
+                correct: "Right! 📊 First, we find the differences in x-coordinates (5-2=3) and y-coordinates (7-3=4).",
+                incorrect: "Not quite! The first step is to find the differences: Δx = (5-2) = 3 and Δy = (7-3) = 4. Then we'd square them and use the Pythagorean theorem."
+            },
+            10: {
+                correct: "Perfect! 👍 Small odd numbers like 3 or 5 work well - they avoid ties and aren't too sensitive to noise.",
+                incorrect: "Not quite! Small odd numbers (like 3 or 5) are usually best. They prevent ties and balance between being too sensitive (K=1) or too general (large K)."
+            }
+        };
+
+        let currentQuestion = 1;
+        let score = 0;
+        let answered = false;
+
+        // Add click handlers to all options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                if (!answered) {
+                    // Remove selected class from all options in this question
+                    this.parentElement.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        function checkAnswer() {
+            if (answered) return;
+
+            const currentContainer = document.querySelector(`.question-container[data-question="${currentQuestion}"]`);
+            const selectedOption = currentContainer.querySelector('.option.selected');
+            
+            if (!selectedOption) {
+                alert('Please select an answer!');
+                return;
+            }
+
+            answered = true;
+            const selectedAnswer = selectedOption.dataset.answer;
+            const correct = correctAnswers[currentQuestion];
+            const feedback = currentContainer.querySelector('.feedback');
+
+            if (selectedAnswer === correct) {
+                selectedOption.classList.add('correct');
+                feedback.className = 'feedback correct show';
+                feedback.textContent = explanations[currentQuestion].correct;
+                score++;
+                document.getElementById('score').textContent = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                // Also show the correct answer
+                currentContainer.querySelectorAll('.option').forEach(opt => {
+                    if (opt.dataset.answer === correct) {
+                        opt.classList.add('correct');
+                    }
+                });
+                feedback.className = 'feedback incorrect show';
+                feedback.textContent = explanations[currentQuestion].incorrect;
+            }
+
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            answered = false;
+
+            if (currentQuestion > 10) {
+                showResults();
+                return;
+            }
+
+            // Hide all questions
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+
+            // Show next question
+            document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.add('active');
+
+            // Update UI
+            document.getElementById('current-question').textContent = `Question ${currentQuestion}`;
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+
+            // Update progress bar
+            const progress = (currentQuestion / 10) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.style.display = 'none';
+            });
+            document.getElementById('nav-buttons').style.display = 'none';
+            document.querySelector('.score-display').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+
+            const resultsContainer = document.querySelector('.results-container');
+            resultsContainer.classList.add('show');
+
+            document.getElementById('final-score').textContent = `${score}/10`;
+            
+            const percentage = (score / 10) * 100;
+            document.getElementById('performance-fill').style.width = percentage + '%';
+            document.getElementById('performance-fill').textContent = percentage + '%';
+
+            let message, emoji;
+            if (score === 10) {
+                message = "Perfect Score! You're a KNN Master! 🏆";
+                emoji = "🏆";
+            } else if (score >= 8) {
+                message = "Excellent work! You really understand KNN! 🌟";
+                emoji = "🌟";
+            } else if (score >= 6) {
+                message = "Good job! You've got the basics down! 👍";
+                emoji = "👍";
+            } else if (score >= 4) {
+                message = "Not bad! Review the material and try again! 📚";
+                emoji = "📚";
+            } else {
+                message = "Keep learning! Practice makes perfect! 💪";
+                emoji = "💪";
+            }
+
+            document.getElementById('results-message').textContent = message;
+            document.getElementById('results-emoji').textContent = emoji;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            score = 0;
+            answered = false;
+
+            document.getElementById('score').textContent = '0';
+            document.getElementById('current-question').textContent = 'Question 1';
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.className = 'feedback';
+            });
+
+            document.querySelector('.results-container').classList.remove('show');
+            document.querySelector('.score-display').style.display = 'block';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.getElementById('progress-fill').style.width = '10%';
+            document.getElementById('nav-buttons').style.display = 'flex';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.style.display = 'none';
+                q.classList.remove('active');
+            });
+
+            document.querySelector('.question-container[data-question="1"]').classList.add('active');
+            document.querySelector('.question-container[data-question="1"]').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
