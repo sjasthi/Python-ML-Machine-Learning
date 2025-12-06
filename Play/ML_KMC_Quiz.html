@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Means Clustering Quiz - Test Your Knowledge! 🎨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h1 {
+            color: #f5576c;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .quiz-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            height: 100%;
+            width: 10%;
+            transition: width 0.5s ease;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-number {
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            background: #f7f7f7;
+            border: 3px solid transparent;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background: #ffe8f0;
+            border-color: #f5576c;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #ffe8f0;
+            border-color: #f5576c;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .option-letter {
+            background: #f5576c;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .feedback {
+            display: none;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            animation: slideDown 0.4s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .results-container.show {
+            display: block;
+        }
+
+        .results-score {
+            font-size: 4em;
+            color: #f5576c;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        .results-message {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .performance-meter {
+            background: #e0e0e0;
+            height: 50px;
+            border-radius: 25px;
+            overflow: hidden;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .performance-fill {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3em;
+            transition: width 1s ease;
+        }
+
+        .results-emoji {
+            font-size: 5em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <!-- Header -->
+        <div class="quiz-header">
+            <h1>🎨 K-Means Clustering Quiz</h1>
+            <p>Test your understanding of K-Means clustering algorithm!</p>
+        </div>
+
+        <!-- Score Display -->
+        <div class="score-display">
+            <span id="current-question">Question 1</span> | Score: <span id="score">0</span>/10
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <!-- Question 1 -->
+        <div class="question-container active" data-question="1">
+            <div class="question-number">Question 1 of 10</div>
+            <div class="question-text">What type of machine learning algorithm is K-Means Clustering?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Supervised Learning</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Unsupervised Learning</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Reinforcement Learning</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>Semi-supervised Learning</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container" data-question="2">
+            <div class="question-number">Question 2 of 10</div>
+            <div class="question-text">In K-Means Clustering, what does the 'K' represent?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>The number of features in the dataset</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>The number of clusters to create</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>The number of iterations to run</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>The number of data points</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container" data-question="3">
+            <div class="question-number">Question 3 of 10</div>
+            <div class="question-text">What is a "centroid" in K-Means Clustering?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>The farthest point from the cluster</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>The center point (mean) of a cluster</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>A data point that doesn't fit any cluster</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>The first data point in the dataset</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-container" data-question="4">
+            <div class="question-number">Question 4 of 10</div>
+            <div class="question-text">What is the main difference between K-Means and KNN (K-Nearest Neighbors)?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>They are the same algorithm with different names</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>K-Means is unsupervised (no labels), KNN is supervised (needs labels)</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>K-Means is faster but less accurate than KNN</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>K-Means only works with 2D data</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-container" data-question="5">
+            <div class="question-number">Question 5 of 10</div>
+            <div class="question-text">How does the K-Means algorithm start?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>By analyzing all data points carefully</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>By randomly selecting K initial centroids</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>By asking the user where centroids should be</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>By sorting all data points first</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-container" data-question="6">
+            <div class="question-number">Question 6 of 10</div>
+            <div class="question-text">You have data about students' study hours (2-9) and test scores (60-95). Before running K-Means, what should you do?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Nothing - run K-Means directly</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Standardize (scale) the features so they're on similar scales</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Remove all data points with test scores below 70</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>Multiply study hours by 10 to match the score range</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-container" data-question="7">
+            <div class="question-number">Question 7 of 10</div>
+            <div class="question-text">What is the "Elbow Method" used for in K-Means?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>To measure how fast the algorithm runs</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>To help choose the optimal number of clusters (K)</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>To remove outliers from the dataset</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>To calculate the distance between points</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-container" data-question="8">
+            <div class="question-number">Question 8 of 10</div>
+            <div class="question-text">When does the K-Means algorithm stop (converge)?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>After exactly 10 iterations</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>When all data points are perfectly separated</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>When centroids stop moving (or move very little)</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>When the user manually stops it</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-container" data-question="9">
+            <div class="question-number">Question 9 of 10</div>
+            <div class="question-text">Which of these is a DISADVANTAGE of K-Means Clustering?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>It's very slow even with small datasets</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>You must choose K in advance (don't know the "right" number of clusters)</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>It can only work with 2D data</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>It requires labeled training data</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-container" data-question="10">
+            <div class="question-number">Question 10 of 10</div>
+            <div class="question-text">Which real-world application would be BEST suited for K-Means Clustering?</div>
+            <div class="options">
+                <div class="option" data-answer="a">
+                    <span class="option-letter">A</span>
+                    <span>Predicting tomorrow's stock price</span>
+                </div>
+                <div class="option" data-answer="b">
+                    <span class="option-letter">B</span>
+                    <span>Grouping customers into segments based on shopping behavior</span>
+                </div>
+                <div class="option" data-answer="c">
+                    <span class="option-letter">C</span>
+                    <span>Recognizing handwritten digits (0-9)</span>
+                </div>
+                <div class="option" data-answer="d">
+                    <span class="option-letter">D</span>
+                    <span>Translating English to Spanish</span>
+                </div>
+            </div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container">
+            <h2>Quiz Complete! 🎉</h2>
+            <div class="results-emoji" id="results-emoji">🎨</div>
+            <div class="results-score" id="final-score">0/10</div>
+            <div class="results-message" id="results-message"></div>
+            <div class="performance-meter">
+                <div class="performance-fill" id="performance-fill">0%</div>
+            </div>
+            <button onclick="restartQuiz()">Try Again 🔄</button>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="buttons" id="nav-buttons">
+            <button id="submit-btn" onclick="checkAnswer()">Submit Answer</button>
+            <button id="next-btn" onclick="nextQuestion()" style="display: none;">Next Question →</button>
+        </div>
+    </div>
+
+    <script>
+        // Correct answers for each question
+        const correctAnswers = {
+            1: 'b',  // Unsupervised Learning
+            2: 'b',  // Number of clusters to create
+            3: 'b',  // Center point of a cluster
+            4: 'b',  // K-Means unsupervised, KNN supervised
+            5: 'b',  // Randomly selecting K initial centroids
+            6: 'b',  // Standardize features
+            7: 'b',  // Choose optimal K
+            8: 'c',  // Centroids stop moving
+            9: 'b',  // Must choose K in advance
+            10: 'b'  // Customer segmentation
+        };
+
+        // Explanations for each answer
+        const explanations = {
+            1: {
+                correct: "Perfect! 🎉 K-Means is unsupervised learning because it finds patterns in data WITHOUT needing labels!",
+                incorrect: "Not quite! K-Means is UNSUPERVISED learning - it discovers groups in data without being told what the groups should be. No labels needed!"
+            },
+            2: {
+                correct: "Excellent! 🌟 K represents how many clusters (groups) we want the algorithm to create!",
+                incorrect: "Not quite! K is the number of clusters we want to find. For example, K=3 means we want to group data into 3 clusters."
+            },
+            3: {
+                correct: "Great job! 👏 A centroid is the center point of a cluster, calculated as the mean (average) of all points in that cluster!",
+                incorrect: "Not quite! A centroid is the CENTER of a cluster - like the average position of all points in that group. It's the 'leader' that points gather around!"
+            },
+            4: {
+                correct: "Spot on! 📊 K-Means discovers groups WITHOUT labels (unsupervised), while KNN classifies WITH labels (supervised)!",
+                incorrect: "Not quite! The key difference: K-Means is UNSUPERVISED (finds groups without labels), KNN is SUPERVISED (needs labeled training data). They're very different!"
+            },
+            5: {
+                correct: "Correct! 🎲 K-Means starts by randomly picking K points as initial centroids. That's why it can give different results each time!",
+                incorrect: "Not quite! K-Means starts with RANDOM initial centroids. It picks K random starting points, then iteratively improves them. This randomness is why we sometimes get different results!"
+            },
+            6: {
+                correct: "Exactly right! 📏 Study hours (2-9 range) and test scores (60-95 range) have very different scales. Standardizing ensures both features contribute equally!",
+                incorrect: "Not quite! Different scales is a big problem! Test scores (60-95) would dominate study hours (2-9) in distance calculations. Always STANDARDIZE features to similar scales first!"
+            },
+            7: {
+                correct: "Perfect! 📈 The Elbow Method plots K vs. inertia and helps us find the 'sweet spot' where adding more clusters doesn't help much!",
+                incorrect: "Not quite! The Elbow Method helps us CHOOSE K by plotting different K values and finding where the 'elbow' appears - the point where benefits diminish."
+            },
+            8: {
+                correct: "Right! ✓ When centroids stop moving (or move very little), we've reached convergence - the clusters are stable!",
+                incorrect: "Not quite! K-Means stops when centroids no longer move (or move very little). This means clusters have stabilized and no points want to switch groups."
+            },
+            9: {
+                correct: "Great thinking! 🤔 One of K-Means' biggest challenges is that WE must decide K beforehand - we don't always know the 'right' number of clusters!",
+                incorrect: "Not quite! K-Means is actually FAST and works in many dimensions. The main disadvantage is having to choose K in advance - we might not know how many clusters exist!"
+            },
+            10: {
+                correct: "Excellent! 🛍️ Customer segmentation is PERFECT for K-Means - group similar customers together to find natural market segments!",
+                incorrect: "Not quite! K-Means excels at GROUPING similar things. Customer segmentation is ideal - group customers by behavior to find patterns. Stock prediction, digit recognition, and translation need supervised learning!"
+            }
+        };
+
+        let currentQuestion = 1;
+        let score = 0;
+        let answered = false;
+
+        // Add click handlers to all options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                if (!answered) {
+                    // Remove selected class from all options in this question
+                    this.parentElement.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        function checkAnswer() {
+            if (answered) return;
+
+            const currentContainer = document.querySelector(`.question-container[data-question="${currentQuestion}"]`);
+            const selectedOption = currentContainer.querySelector('.option.selected');
+            
+            if (!selectedOption) {
+                alert('Please select an answer!');
+                return;
+            }
+
+            answered = true;
+            const selectedAnswer = selectedOption.dataset.answer;
+            const correct = correctAnswers[currentQuestion];
+            const feedback = currentContainer.querySelector('.feedback');
+
+            if (selectedAnswer === correct) {
+                selectedOption.classList.add('correct');
+                feedback.className = 'feedback correct show';
+                feedback.textContent = explanations[currentQuestion].correct;
+                score++;
+                document.getElementById('score').textContent = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                // Also show the correct answer
+                currentContainer.querySelectorAll('.option').forEach(opt => {
+                    if (opt.dataset.answer === correct) {
+                        opt.classList.add('correct');
+                    }
+                });
+                feedback.className = 'feedback incorrect show';
+                feedback.textContent = explanations[currentQuestion].incorrect;
+            }
+
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            answered = false;
+
+            if (currentQuestion > 10) {
+                showResults();
+                return;
+            }
+
+            // Hide all questions
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+
+            // Show next question
+            document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.add('active');
+
+            // Update UI
+            document.getElementById('current-question').textContent = `Question ${currentQuestion}`;
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+
+            // Update progress bar
+            const progress = (currentQuestion / 10) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.style.display = 'none';
+            });
+            document.getElementById('nav-buttons').style.display = 'none';
+            document.querySelector('.score-display').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+
+            const resultsContainer = document.querySelector('.results-container');
+            resultsContainer.classList.add('show');
+
+            document.getElementById('final-score').textContent = `${score}/10`;
+            
+            const percentage = (score / 10) * 100;
+            document.getElementById('performance-fill').style.width = percentage + '%';
+            document.getElementById('performance-fill').textContent = percentage + '%';
+
+            let message, emoji;
+            if (score === 10) {
+                message = "Perfect Score! You're a K-Means Master! 🏆";
+                emoji = "🏆";
+            } else if (score >= 8) {
+                message = "Excellent work! You really understand K-Means! 🌟";
+                emoji = "🌟";
+            } else if (score >= 6) {
+                message = "Good job! You've got the basics down! 👍";
+                emoji = "👍";
+            } else if (score >= 4) {
+                message = "Not bad! Review the material and try again! 📚";
+                emoji = "📚";
+            } else {
+                message = "Keep learning! Practice makes perfect! 💪";
+                emoji = "💪";
+            }
+
+            document.getElementById('results-message').textContent = message;
+            document.getElementById('results-emoji').textContent = emoji;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            score = 0;
+            answered = false;
+
+            document.getElementById('score').textContent = '0';
+            document.getElementById('current-question').textContent = 'Question 1';
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.className = 'feedback';
+            });
+
+            document.querySelector('.results-container').classList.remove('show');
+            document.querySelector('.score-display').style.display = 'block';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.getElementById('progress-fill').style.width = '10%';
+            document.getElementById('nav-buttons').style.display = 'flex';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.style.display = 'none';
+                q.classList.remove('active');
+            });
+
+            document.querySelector('.question-container[data-question="1"]').classList.add('active');
+            document.querySelector('.question-container[data-question="1"]').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
