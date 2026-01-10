@@ -1,8 +1,7 @@
 # Assignment: Decision Tree Classifier (Breast Cancer)
 
-**Course:** Python for Machine Learning  
+**Course:** Python for Machine Learning (Python ML)
 **Instructor:** Siva Jasthi (Siva.Jasthi@metrostate.edu)  
-**Week:** 14  
 **Points:** 25
 
 ---
