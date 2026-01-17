@@ -673,27 +673,10 @@ df['room_density'] = df['total_rooms'] / df['sqft']
 ## 🗓️ What's Due This Week?
 
 ### **✅ Assignment: Feature Selection**
-- **Due**: End of Week 5
-- **Format**: Markdown document or Jupyter Notebook
+- **Due**: End of Week 15
+- **Format**: Jupyter Notebook or Interactive Playbook or Markup Document
 - **Points**: 25 points
 - **Link**: [Python_ML_Assignment_Feature_Selection.md](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Assignments/Python_ML_Assignment_Feature_Selection.md)
-
-**Assignment Overview:**
-Students will practice feature selection techniques on a real dataset:
-1. Load and explore a dataset
-2. Apply filter methods (statistical tests)
-3. Apply wrapper methods (RFE)
-4. Apply embedded methods (feature importance)
-5. Compare results from all three approaches
-6. Train models with selected features
-7. Write analysis of which method worked best
-
-**Key Skills Tested:**
-- Using SelectKBest with different scoring functions
-- Implementing Recursive Feature Elimination (RFE)
-- Extracting feature importances from tree-based models
-- Comparing model performance with different feature sets
-- Critical thinking about feature selection trade-offs
 
 ---
 
@@ -792,29 +775,6 @@ Students should leave this week able to answer:
 3. Scale features
 4. Create new features
 5. Select features
-
----
-
-## 🔜 Looking Ahead: Week 6
-
-**Next Week's Topic**: Model Evaluation & Validation
-
-**Preview:**
-- Train/test split strategies
-- Cross-validation techniques
-- Evaluation metrics (accuracy, precision, recall, F1)
-- Confusion matrices
-- ROC curves and AUC
-- Avoiding overfitting
-
-**Connection:**
-Great features are useless if you can't evaluate your model properly! Next week we learn how to measure success.
-
-**Preparation:**
-Make sure you understand:
-- How to create and transform features
-- Why proper scaling matters
-- The importance of feature selection
 
 ---
 
