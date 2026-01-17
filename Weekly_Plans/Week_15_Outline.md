@@ -1,4 +1,4 @@
-# Week 5: Feature Engineering - Making Data ML-Ready
+# Week 15: Feature Engineering - Making Data ML-Ready
 
 **Course:** Python for Machine Learning  
 **Instructor:** Siva Jasthi (Siva.Jasthi@metrostate.edu)  
