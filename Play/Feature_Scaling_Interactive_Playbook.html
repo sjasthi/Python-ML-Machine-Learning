@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Scaling - Interactive Playbook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            margin: 20px 0 15px 0;
+            font-size: 1.5em;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .analogy-box h4 {
+            color: #c92a2a;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .formula-box {
+            background: #e3f2fd;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+            font-family: 'Courier New', monospace;
+        }
+
+        .formula {
+            font-size: 1.3em;
+            text-align: center;
+            margin: 15px 0;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .interactive-demo {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .calculator {
+            display: grid;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 1.1em;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .data-input-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .data-input-row input {
+            width: 100%;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .result-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #155724;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .visual-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .scale-box {
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .scale-box:hover {
+            transform: scale(1.05);
+        }
+
+        .standardization-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .minmax-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .robust-box {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .key-point {
+            background: #e7f3ff;
+            padding: 15px;
+            border-left: 4px solid #2196f3;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .key-point strong {
+            color: #1565c0;
+        }
+
+        .quiz-section {
+            background: #fff3cd;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+
+        .quiz-question {
+            margin-bottom: 20px;
+        }
+
+        .quiz-question h4 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .quiz-option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .quiz-option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 30px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 300px;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea 0%, #764ba2 100%);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            min-width: 40px;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .bar-label {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #495057;
+            text-align: center;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .visual-demo {
+                grid-template-columns: 1fr;
+            }
+
+            .data-input-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📏 Feature Scaling 📏</h1>
+            <p>Making Your Features Play Nice Together!</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Interactive Playbook for Middle & High School Students</p>
+        </div>
+
+        <div class="content">
+            <!-- Introduction Section -->
+            <div class="section">
+                <h2><span class="emoji">🎯</span> What is Feature Scaling?</h2>
+                <p style="font-size: 1.1em;">Feature scaling is the process of transforming your data so that all features are on a <strong>similar scale</strong>. It's like making sure everyone speaks the same "language" so they can work together!</p>
+                
+                <div class="analogy-box">
+                    <h4>🏃‍♂️ The Race Analogy</h4>
+                    <p>Imagine you're organizing a race, but you measure different runners in different units:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>Runner A:</strong> Speed in meters per second (5 m/s)</li>
+                        <li><strong>Runner B:</strong> Speed in miles per hour (11 mph ≈ 4.9 m/s)</li>
+                        <li><strong>Runner C:</strong> Speed in kilometers per hour (18 km/h ≈ 5 m/s)</li>
+                    </ul>
+                    <p style="margin-top: 15px;">They're all running at nearly the same speed, but the numbers look very different! To compare them fairly, you need to convert them all to the <strong>same scale</strong>.</p>
+                    <p style="margin-top: 10px;"><strong>That's exactly what feature scaling does for machine learning!</strong></p>
+                </div>
+
+                <h3>Why Do We Need Feature Scaling?</h3>
+                
+                <div class="visual-demo">
+                    <div class="scale-box" style="background: #f8d7da;">
+                        <span style="font-size: 2em;">😵</span>
+                        <div><strong>Without Scaling</strong></div>
+                        <div style="font-size: 0.9em;">Age: 25</div>
+                        <div style="font-size: 0.9em;">Income: $75,000</div>
+                        <div style="font-size: 0.8em; margin-top: 10px;">Income dominates!</div>
+                    </div>
+                    <div class="scale-box" style="background: #d4edda; color: #155724;">
+                        <span style="font-size: 2em;">😊</span>
+                        <div><strong>With Scaling</strong></div>
+                        <div style="font-size: 0.9em;">Age: 0.25</div>
+                        <div style="font-size: 0.9em;">Income: 0.75</div>
+                        <div style="font-size: 0.8em; margin-top: 10px;">Balanced!</div>
+                    </div>
+                </div>
+
+                <div class="key-point">
+                    <strong>Key Problems Without Scaling:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Features with larger values dominate the learning process</li>
+                        <li>Distance-based algorithms (KNN, K-Means) give wrong results</li>
+                        <li>Gradient descent takes forever to converge</li>
+                        <li>Some models might not converge at all!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Standardization Section -->
+            <div class="section">
+                <h2><span class="emoji">📊</span> Method 1: Standardization (Z-Score Normalization)</h2>
+                
+                <h3>What Is It?</h3>
+                <p style="font-size: 1.1em;">Standardization transforms your data to have a <strong>mean of 0</strong> and a <strong>standard deviation of 1</strong>. It's like centering all your data around zero!</p>
+
+                <div class="analogy-box">
+                    <h4>🎯 The Test Score Analogy</h4>
+                    <p>Imagine you're comparing test scores across different subjects:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>Math Test:</strong> You scored 85 (class average: 75, std: 10)</li>
+                        <li><strong>English Test:</strong> You scored 90 (class average: 80, std: 15)</li>
+                    </ul>
+                    <p style="margin-top: 15px;">Which score is actually better <em>relative to the class</em>?</p>
+                    <p style="margin-top: 10px;">
+                        <strong>Math Z-score:</strong> (85 - 75) / 10 = 1.0 (1 std above average!)<br>
+                        <strong>English Z-score:</strong> (90 - 80) / 15 = 0.67 (only 0.67 std above average)
+                    </p>
+                    <p style="margin-top: 10px;"><strong>You actually did better in Math relatively speaking!</strong></p>
+                </div>
+
+                <div class="formula-box">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">The Formula:</h4>
+                    <div class="formula">z = (x - μ) / σ</div>
+                    <p style="margin-top: 15px; font-family: 'Segoe UI', sans-serif;">Where:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; font-family: 'Segoe UI', sans-serif;">
+                        <li><strong>x</strong> = original value</li>
+                        <li><strong>μ</strong> = mean of the feature</li>
+                        <li><strong>σ</strong> = standard deviation of the feature</li>
+                        <li><strong>z</strong> = standardized value (z-score)</li>
+                    </ul>
+                    <div class="key-point" style="margin-top: 15px;">
+                        <strong>Result:</strong> Data is centered at 0, most values fall between -3 and +3
+                    </div>
+                </div>
+
+                <h3>Try It Yourself! 🧮</h3>
+                <div class="interactive-demo">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">Standardization Calculator</h4>
+                    <p>Enter your data values (separated by spaces):</p>
+                    
+                    <div class="calculator">
+                        <div class="input-group">
+                            <label for="std-data">📝 Data Values:</label>
+                            <input type="text" id="std-data" placeholder="e.g., 10 20 30 40 50" value="10 20 30 40 50">
+                        </div>
+                        <button class="btn" onclick="calculateStandardization()">Standardize Data</button>
+                    </div>
+
+                    <div id="std-result" class="result-box">
+                        <h4>Results:</h4>
+                        <div id="std-calculation"></div>
+                    </div>
+                </div>
+
+                <div class="key-point">
+                    <strong>When to Use Standardization:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ When features follow a normal (bell curve) distribution</li>
+                        <li>✅ For algorithms that assume normally distributed data (Logistic Regression, Linear Regression, SVM)</li>
+                        <li>✅ When you want to preserve the shape of the original distribution</li>
+                        <li>✅ When outliers are meaningful and you don't want to squash them</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Min-Max Scaling Section -->
+            <div class="section">
+                <h2><span class="emoji">📐</span> Method 2: Min-Max Scaling (Normalization)</h2>
+                
+                <h3>What Is It?</h3>
+                <p style="font-size: 1.1em;">Min-Max scaling transforms your data to fit within a specific range, usually <strong>[0, 1]</strong> or <strong>[-1, 1]</strong>. It's like squeezing everything into a fixed box!</p>
+
+                <div class="analogy-box">
+                    <h4>🎨 The Paint Mixing Analogy</h4>
+                    <p>Imagine you're mixing paint colors, but each color comes in different container sizes:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>Red:</strong> Comes in 1-10 ml bottles</li>
+                        <li><strong>Blue:</strong> Comes in 100-1000 ml bottles</li>
+                        <li><strong>Yellow:</strong> Comes in 5-50 ml bottles</li>
+                    </ul>
+                    <p style="margin-top: 15px;">To create a recipe that works, you need to convert all measurements to the same scale - say, percentages from 0% to 100%.</p>
+                    <p style="margin-top: 10px;"><strong>Min-Max scaling does exactly this!</strong></p>
+                </div>
+
+                <div class="formula-box">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">The Formula:</h4>
+                    <div class="formula">X_scaled = (X - X_min) / (X_max - X_min)</div>
+                    <p style="margin-top: 15px; font-family: 'Segoe UI', sans-serif;">Where:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; font-family: 'Segoe UI', sans-serif;">
+                        <li><strong>X</strong> = original value</li>
+                        <li><strong>X_min</strong> = minimum value in the feature</li>
+                        <li><strong>X_max</strong> = maximum value in the feature</li>
+                        <li><strong>X_scaled</strong> = scaled value (between 0 and 1)</li>
+                    </ul>
+                    <div class="key-point" style="margin-top: 15px;">
+                        <strong>Result:</strong> All values squeezed into the range [0, 1]
+                    </div>
+                </div>
+
+                <h3>Try It Yourself! 🧮</h3>
+                <div class="interactive-demo">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">Min-Max Scaling Calculator</h4>
+                    <p>Enter your data values (separated by spaces):</p>
+                    
+                    <div class="calculator">
+                        <div class="input-group">
+                            <label for="minmax-data">📝 Data Values:</label>
+                            <input type="text" id="minmax-data" placeholder="e.g., 10 20 30 40 50" value="10 20 30 40 50">
+                        </div>
+                        <button class="btn" onclick="calculateMinMax()">Apply Min-Max Scaling</button>
+                    </div>
+
+                    <div id="minmax-result" class="result-box">
+                        <h4>Results:</h4>
+                        <div id="minmax-calculation"></div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h4>⚠️ Warning: Sensitive to Outliers!</h4>
+                    <p>Min-Max scaling is very sensitive to outliers. If you have one extreme value, it will compress all other values!</p>
+                    <p style="margin-top: 10px;"><strong>Example:</strong> Values [1, 2, 3, 4, 1000] → After scaling: [0.000, 0.001, 0.002, 0.003, 1.000]</p>
+                    <p style="margin-top: 10px;">The first 4 values are all squashed near 0!</p>
+                </div>
+
+                <div class="key-point">
+                    <strong>When to Use Min-Max Scaling:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ When you need data in a specific range (e.g., [0, 1] for neural networks)</li>
+                        <li>✅ For image processing (pixel values 0-255 → 0-1)</li>
+                        <li>✅ When your data doesn't have significant outliers</li>
+                        <li>✅ For algorithms that need bounded features (Neural Networks, KNN)</li>
+                        <li>❌ Avoid when you have outliers!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Robust Scaling Section -->
+            <div class="section">
+                <h2><span class="emoji">💪</span> Method 3: Robust Scaling</h2>
+                
+                <h3>What Is It?</h3>
+                <p style="font-size: 1.1em;">Robust scaling uses the <strong>median</strong> and <strong>interquartile range (IQR)</strong> instead of mean and standard deviation. It's <strong>resistant to outliers</strong>!</p>
+
+                <div class="analogy-box">
+                    <h4>🏠 The Housing Price Analogy</h4>
+                    <p>You're analyzing house prices in a neighborhood:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>Most houses:</strong> $200,000 - $400,000</li>
+                        <li><strong>One mansion:</strong> $10,000,000 (outlier!)</li>
+                    </ul>
+                    <p style="margin-top: 15px;">
+                        <strong>Standard Scaling:</strong> Mean gets pulled way up by the mansion!<br>
+                        <strong>Robust Scaling:</strong> Uses median (middle value), unaffected by the mansion!
+                    </p>
+                    <p style="margin-top: 10px;"><strong>Robust scaling gives you the true "middle" of your data!</strong></p>
+                </div>
+
+                <div class="formula-box">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">The Formula:</h4>
+                    <div class="formula">X_scaled = (X - median) / IQR</div>
+                    <p style="margin-top: 15px; font-family: 'Segoe UI', sans-serif;">Where:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; font-family: 'Segoe UI', sans-serif;">
+                        <li><strong>X</strong> = original value</li>
+                        <li><strong>median</strong> = middle value of the feature</li>
+                        <li><strong>IQR</strong> = Q3 - Q1 (75th percentile - 25th percentile)</li>
+                        <li><strong>X_scaled</strong> = robustly scaled value</li>
+                    </ul>
+                    <div class="key-point" style="margin-top: 15px;">
+                        <strong>Result:</strong> Data centered at 0, but outliers don't distort the scaling!
+                    </div>
+                </div>
+
+                <h3>Try It Yourself! 🧮</h3>
+                <div class="interactive-demo">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">Robust Scaling Calculator</h4>
+                    <p>Enter your data values (separated by spaces):</p>
+                    
+                    <div class="calculator">
+                        <div class="input-group">
+                            <label for="robust-data">📝 Data Values:</label>
+                            <input type="text" id="robust-data" placeholder="e.g., 10 20 30 40 1000" value="10 20 30 40 1000">
+                        </div>
+                        <button class="btn" onclick="calculateRobust()">Apply Robust Scaling</button>
+                    </div>
+
+                    <div id="robust-result" class="result-box">
+                        <h4>Results:</h4>
+                        <div id="robust-calculation"></div>
+                    </div>
+                </div>
+
+                <div class="key-point">
+                    <strong>When to Use Robust Scaling:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ When your data has outliers</li>
+                        <li>✅ When you want to preserve the influence of outliers without them dominating</li>
+                        <li>✅ For real-world datasets that often have extreme values</li>
+                        <li>✅ When median is more representative than mean</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Comparison Section -->
+            <div class="section">
+                <h2><span class="emoji">⚖️</span> Scaling Methods: Side-by-Side</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Formula</th>
+                            <th>Range</th>
+                            <th>Outlier Sensitive?</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Standardization</strong></td>
+                            <td>(x - μ) / σ</td>
+                            <td>Unbounded (typically -3 to +3)</td>
+                            <td>Yes ✓</td>
+                            <td>Normal distributions, preserving shape</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Min-Max</strong></td>
+                            <td>(x - min) / (max - min)</td>
+                            <td>[0, 1]</td>
+                            <td>Very sensitive! ⚠️</td>
+                            <td>Bounded range, no outliers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Robust</strong></td>
+                            <td>(x - median) / IQR</td>
+                            <td>Unbounded</td>
+                            <td>No ✓</td>
+                            <td>Data with outliers</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Visual Comparison</h3>
+                <div class="interactive-demo">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">Compare All Methods</h4>
+                    <p>Enter data with an outlier to see how each method handles it:</p>
+                    
+                    <div class="calculator">
+                        <div class="input-group">
+                            <label for="compare-data">📝 Data Values:</label>
+                            <input type="text" id="compare-data" placeholder="e.g., 10 20 30 40 200" value="10 20 30 40 200">
+                        </div>
+                        <button class="btn" onclick="compareAllMethods()">Compare All Methods</button>
+                    </div>
+
+                    <div id="compare-result" class="result-box">
+                        <h4>Comparison Results:</h4>
+                        <div id="compare-calculation"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- When to Use What -->
+            <div class="section">
+                <h2><span class="emoji">🤔</span> Decision Tree: Which Scaling Method?</h2>
+                
+                <div class="chart-container">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #667eea; margin-bottom: 20px;">Follow This Decision Tree:</h4>
+                        
+                        <div style="padding: 15px; background: white; border-left: 4px solid #667eea; margin-bottom: 15px; border-radius: 5px;">
+                            <strong>Q1: Does your data have outliers?</strong>
+                            <div style="margin-left: 20px; margin-top: 10px;">
+                                <div style="padding: 10px; background: #d4edda; border-radius: 5px; margin-bottom: 10px;">
+                                    <strong>YES</strong> → Use <strong>Robust Scaling</strong> 💪
+                                </div>
+                                <div style="padding: 10px; background: #fff3cd; border-radius: 5px;">
+                                    <strong>NO</strong> → Go to Q2
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 15px; background: white; border-left: 4px solid #764ba2; margin-bottom: 15px; border-radius: 5px;">
+                            <strong>Q2: Do you need data in a specific range (like 0-1)?</strong>
+                            <div style="margin-left: 20px; margin-top: 10px;">
+                                <div style="padding: 10px; background: #d4edda; border-radius: 5px; margin-bottom: 10px;">
+                                    <strong>YES</strong> → Use <strong>Min-Max Scaling</strong> 📐
+                                </div>
+                                <div style="padding: 10px; background: #fff3cd; border-radius: 5px;">
+                                    <strong>NO</strong> → Go to Q3
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 15px; background: white; border-left: 4px solid #f5576c; border-radius: 5px;">
+                            <strong>Q3: Are you using algorithms that assume normal distribution?</strong>
+                            <div style="margin-left: 20px; margin-top: 10px;">
+                                <div style="padding: 10px; background: #d4edda; border-radius: 5px; margin-bottom: 10px;">
+                                    <strong>YES</strong> → Use <strong>Standardization</strong> 📊
+                                </div>
+                                <div style="padding: 10px; background: #e7f3ff; border-radius: 5px;">
+                                    <strong>NO</strong> → <strong>Standardization</strong> is still a safe default! 📊
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="key-point" style="margin-top: 20px;">
+                    <strong>Algorithm-Specific Recommendations:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Linear/Logistic Regression, SVM:</strong> Standardization ✓</li>
+                        <li><strong>Neural Networks:</strong> Min-Max (0-1 range) or Standardization ✓</li>
+                        <li><strong>K-Nearest Neighbors (KNN):</strong> Any scaling method (distance-based) ✓</li>
+                        <li><strong>Decision Trees, Random Forests:</strong> NO scaling needed! They're scale-invariant ✓</li>
+                        <li><strong>K-Means Clustering:</strong> Standardization or Min-Max ✓</li>
+                        <li><strong>PCA:</strong> Standardization (required!) ✓</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Interactive Quiz -->
+            <div class="section">
+                <h2><span class="emoji">🧠</span> Test Your Understanding!</h2>
+                
+                <div class="quiz-section">
+                    <div class="quiz-question" id="q1">
+                        <h4>Question 1: What does standardization center the data at?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q1', this, true)">
+                                A) Mean of 0, Standard deviation of 1
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q1', this, false)">
+                                B) Range of [0, 1]
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q1', this, false)">
+                                C) Median of 0
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q1', this, false)">
+                                D) Mean of 1, Standard deviation of 0
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q2">
+                        <h4>Question 2: Which scaling method is MOST sensitive to outliers?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q2', this, false)">
+                                A) Standardization
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q2', this, true)">
+                                B) Min-Max Scaling
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q2', this, false)">
+                                C) Robust Scaling
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q2', this, false)">
+                                D) All are equally sensitive
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q3">
+                        <h4>Question 3: Which scaling method uses median and IQR?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q3', this, false)">
+                                A) Standardization
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q3', this, false)">
+                                B) Min-Max Scaling
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q3', this, true)">
+                                C) Robust Scaling
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q3', this, false)">
+                                D) MaxAbs Scaling
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q4">
+                        <h4>Question 4: You have ages (0-100) and income ($10,000-$1,000,000). What happens without scaling?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q4', this, false)">
+                                A) Age will dominate the model
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q4', this, true)">
+                                B) Income will dominate the model
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q4', this, false)">
+                                C) They will be balanced automatically
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q4', this, false)">
+                                D) Neither will affect the model
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q5">
+                        <h4>Question 5: Which algorithms DON'T need feature scaling?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q5', this, false)">
+                                A) K-Nearest Neighbors (KNN)
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q5', this, false)">
+                                B) Support Vector Machines (SVM)
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q5', this, true)">
+                                C) Decision Trees and Random Forests
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q5', this, false)">
+                                D) Neural Networks
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q6">
+                        <h4>Question 6: What range does Min-Max scaling typically produce?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q6', this, false)">
+                                A) [-1, 1]
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q6', this, true)">
+                                B) [0, 1]
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q6', this, false)">
+                                C) [-3, 3]
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q6', this, false)">
+                                D) Unbounded
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q7">
+                        <h4>Question 7: You're working with image pixels (0-255). Which scaling is best?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q7', this, false)">
+                                A) No scaling needed
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q7', this, true)">
+                                B) Min-Max scaling to [0, 1]
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q7', this, false)">
+                                C) Robust Scaling
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q7', this, false)">
+                                D) Standardization
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="q8">
+                        <h4>Question 8: Which is true about standardization?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer('q8', this, false)">
+                                A) It bounds data to [0, 1]
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q8', this, true)">
+                                B) It preserves the shape of the original distribution
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q8', this, false)">
+                                C) It removes all outliers
+                            </div>
+                            <div class="quiz-option" onclick="checkAnswer('q8', this, false)">
+                                D) It's not affected by outliers
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="score-display" id="score-display">
+                    Score: <span id="score">0</span> / 8
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">0%</div>
+                </div>
+            </div>
+
+            <!-- Python Code Examples -->
+            <div class="section">
+                <h2><span class="emoji">💻</span> Python Code Examples</h2>
+                
+                <div class="formula-box">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">Standardization with sklearn:</h4>
+                    <pre style="background: white; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.95em;"><code>from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+# Your data
+data = np.array([[1, 2000], 
+                 [2, 3000], 
+                 [3, 4000], 
+                 [4, 5000]])
+
+# Create scaler
+scaler = StandardScaler()
+
+# Fit and transform
+scaled_data = scaler.fit_transform(data)
+
+print("Original data:")
+print(data)
+print("\nStandardized data:")
+print(scaled_data)
+
+# To inverse transform (get original values back)
+original = scaler.inverse_transform(scaled_data)
+print("\nInverse transformed:")
+print(original)</code></pre>
+                </div>
+
+                <div class="formula-box">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">Min-Max Scaling with sklearn:</h4>
+                    <pre style="background: white; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.95em;"><code>from sklearn.preprocessing import MinMaxScaler
+
+# Your data
+data = np.array([[1, 2000], 
+                 [2, 3000], 
+                 [3, 4000], 
+                 [4, 5000]])
+
+# Create scaler (default range is [0, 1])
+scaler = MinMaxScaler()
+
+# For custom range like [-1, 1]:
+# scaler = MinMaxScaler(feature_range=(-1, 1))
+
+# Fit and transform
+scaled_data = scaler.fit_transform(data)
+
+print("Original data:")
+print(data)
+print("\nMin-Max scaled data:")
+print(scaled_data)</code></pre>
+                </div>
+
+                <div class="formula-box">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">Robust Scaling with sklearn:</h4>
+                    <pre style="background: white; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.95em;"><code>from sklearn.preprocessing import RobustScaler
+
+# Your data with outliers
+data = np.array([[1, 2000], 
+                 [2, 3000], 
+                 [3, 4000], 
+                 [4, 100000]])  # Outlier!
+
+# Create scaler
+scaler = RobustScaler()
+
+# Fit and transform
+scaled_data = scaler.fit_transform(data)
+
+print("Original data:")
+print(data)
+print("\nRobust scaled data:")
+print(scaled_data)</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <h4>🚨 CRITICAL: Fit on Training Data Only!</h4>
+                    <pre style="background: white; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.95em; margin-top: 10px;"><code># ✅ CORRECT WAY
+scaler = StandardScaler()
+scaler.fit(X_train)  # Fit only on training data
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)  # Use same scaler!
+
+# ❌ WRONG WAY - Data Leakage!
+X_train_scaled = StandardScaler().fit_transform(X_train)
+X_test_scaled = StandardScaler().fit_transform(X_test)  # Different scaler!
+</code></pre>
+                    <p style="margin-top: 10px;"><strong>Why?</strong> If you fit on test data, you're "peeking" at information the model shouldn't have during training!</p>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="section">
+                <h2><span class="emoji">🎓</span> Key Takeaways</h2>
+                
+                <div class="key-point">
+                    <strong>1. Why Scale?</strong> Features with larger values dominate the learning process. Scaling puts all features on equal footing!
+                </div>
+
+                <div class="key-point">
+                    <strong>2. Three Main Methods:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Standardization:</strong> Mean=0, Std=1 → Best for normal distributions</li>
+                        <li><strong>Min-Max:</strong> Range [0,1] → Best when you need bounded values</li>
+                        <li><strong>Robust:</strong> Uses median/IQR → Best with outliers</li>
+                    </ul>
+                </div>
+
+                <div class="key-point">
+                    <strong>3. Not All Algorithms Need Scaling:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Need Scaling:</strong> KNN, SVM, Neural Networks, K-Means, PCA</li>
+                        <li><strong>Don't Need:</strong> Decision Trees, Random Forests, Gradient Boosting</li>
+                    </ul>
+                </div>
+
+                <div class="key-point">
+                    <strong>4. Always Fit on Training Data Only!</strong> Fitting on test data causes data leakage and overly optimistic results.
+                </div>
+
+                <div class="key-point">
+                    <strong>5. When in Doubt:</strong> Standardization is a safe default choice for most situations!
+                </div>
+
+                <div class="analogy-box" style="margin-top: 30px;">
+                    <h4>🎯 Final Analogy: The Orchestra</h4>
+                    <p>Think of your features as instruments in an orchestra:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>Without Scaling:</strong> The drums (loud) drown out the flute (quiet) 🥁🎺</li>
+                        <li><strong>With Scaling:</strong> All instruments play at balanced volumes - beautiful harmony! 🎻🎺🎹</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Feature scaling is like a good sound engineer - making sure every instrument can be heard!</strong></p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="section" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h2 style="color: white;">🎉 Congratulations!</h2>
+                <p style="font-size: 1.2em; margin-top: 10px;">You now understand feature scaling and when to use each method!</p>
+                <p style="margin-top: 20px; font-size: 1.1em;">Remember: Scale your features, train better models! 📏✨</p>
+                <p style="margin-top: 20px; opacity: 0.9;">Created by Siva Jasthi for Python ML Students</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let totalQuestions = 8;
+        let answeredQuestions = new Set();
+
+        function calculateStandardization() {
+            const input = document.getElementById('std-data').value;
+            const data = input.split(/\s+/).map(Number).filter(n => !isNaN(n));
+
+            if (data.length === 0) {
+                alert('Please enter valid numbers!');
+                return;
+            }
+
+            // Calculate mean
+            const mean = data.reduce((a, b) => a + b, 0) / data.length;
+
+            // Calculate standard deviation
+            const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / data.length;
+            const std = Math.sqrt(variance);
+
+            // Standardize
+            const standardized = data.map(val => (val - mean) / std);
+
+            const resultDiv = document.getElementById('std-result');
+            const calculationDiv = document.getElementById('std-calculation');
+
+            let html = `
+                <p><strong>Original Data:</strong> [${data.join(', ')}]</p>
+                <p><strong>Mean (μ):</strong> ${mean.toFixed(2)}</p>
+                <p><strong>Standard Deviation (σ):</strong> ${std.toFixed(2)}</p>
+                <p><strong>Formula:</strong> z = (x - μ) / σ</p>
+                <div class="result-value">Standardized Data: [${standardized.map(v => v.toFixed(3)).join(', ')}]</div>
+                <p style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                    <strong>Interpretation:</strong> Values are now centered at 0 with standard deviation of 1. 
+                    Most values fall between -3 and +3.
+                </p>
+            `;
+
+            calculationDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        function calculateMinMax() {
+            const input = document.getElementById('minmax-data').value;
+            const data = input.split(/\s+/).map(Number).filter(n => !isNaN(n));
+
+            if (data.length === 0) {
+                alert('Please enter valid numbers!');
+                return;
+            }
+
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const range = max - min;
+
+            const scaled = data.map(val => (val - min) / range);
+
+            const resultDiv = document.getElementById('minmax-result');
+            const calculationDiv = document.getElementById('minmax-calculation');
+
+            let html = `
+                <p><strong>Original Data:</strong> [${data.join(', ')}]</p>
+                <p><strong>Min:</strong> ${min}</p>
+                <p><strong>Max:</strong> ${max}</p>
+                <p><strong>Range:</strong> ${range}</p>
+                <p><strong>Formula:</strong> X_scaled = (X - min) / (max - min)</p>
+                <div class="result-value">Scaled Data: [${scaled.map(v => v.toFixed(3)).join(', ')}]</div>
+                <p style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                    <strong>Interpretation:</strong> All values are now between 0 and 1. 
+                    The minimum value → 0, maximum value → 1.
+                </p>
+            `;
+
+            calculationDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        function calculateRobust() {
+            const input = document.getElementById('robust-data').value;
+            const data = input.split(/\s+/).map(Number).filter(n => !isNaN(n));
+
+            if (data.length === 0) {
+                alert('Please enter valid numbers!');
+                return;
+            }
+
+            // Sort for percentile calculations
+            const sorted = [...data].sort((a, b) => a - b);
+            
+            // Calculate median
+            const median = sorted.length % 2 === 0
+                ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                : sorted[Math.floor(sorted.length / 2)];
+
+            // Calculate Q1 and Q3
+            const q1Index = Math.floor(sorted.length * 0.25);
+            const q3Index = Math.floor(sorted.length * 0.75);
+            const q1 = sorted[q1Index];
+            const q3 = sorted[q3Index];
+            const iqr = q3 - q1;
+
+            // Robust scale
+            const scaled = data.map(val => (val - median) / iqr);
+
+            const resultDiv = document.getElementById('robust-result');
+            const calculationDiv = document.getElementById('robust-calculation');
+
+            let html = `
+                <p><strong>Original Data:</strong> [${data.join(', ')}]</p>
+                <p><strong>Median:</strong> ${median.toFixed(2)}</p>
+                <p><strong>Q1 (25th percentile):</strong> ${q1.toFixed(2)}</p>
+                <p><strong>Q3 (75th percentile):</strong> ${q3.toFixed(2)}</p>
+                <p><strong>IQR (Q3 - Q1):</strong> ${iqr.toFixed(2)}</p>
+                <p><strong>Formula:</strong> X_scaled = (X - median) / IQR</p>
+                <div class="result-value">Robust Scaled Data: [${scaled.map(v => v.toFixed(3)).join(', ')}]</div>
+                <p style="margin-top: 15px; padding: 15px; background: #d4edda; border-radius: 8px;">
+                    <strong>Interpretation:</strong> Data is centered at 0 using median (not mean). 
+                    Outliers have less impact because we use IQR instead of standard deviation!
+                </p>
+            `;
+
+            calculationDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        function compareAllMethods() {
+            const input = document.getElementById('compare-data').value;
+            const data = input.split(/\s+/).map(Number).filter(n => !isNaN(n));
+
+            if (data.length === 0) {
+                alert('Please enter valid numbers!');
+                return;
+            }
+
+            // Standardization
+            const mean = data.reduce((a, b) => a + b, 0) / data.length;
+            const std = Math.sqrt(data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / data.length);
+            const standardized = data.map(val => (val - mean) / std);
+
+            // Min-Max
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const minmax = data.map(val => (val - min) / (max - min));
+
+            // Robust
+            const sorted = [...data].sort((a, b) => a - b);
+            const median = sorted.length % 2 === 0
+                ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                : sorted[Math.floor(sorted.length / 2)];
+            const q1 = sorted[Math.floor(sorted.length * 0.25)];
+            const q3 = sorted[Math.floor(sorted.length * 0.75)];
+            const iqr = q3 - q1;
+            const robust = data.map(val => (val - median) / iqr);
+
+            const resultDiv = document.getElementById('compare-result');
+            const calculationDiv = document.getElementById('compare-calculation');
+
+            let html = `
+                <p><strong>Original Data:</strong> [${data.join(', ')}]</p>
+                <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #667eea; color: white;">
+                            <th style="padding: 10px; text-align: left;">Method</th>
+                            <th style="padding: 10px; text-align: left;">Scaled Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px;"><strong>Standardization</strong></td>
+                            <td style="padding: 10px; font-family: monospace;">[${standardized.map(v => v.toFixed(2)).join(', ')}]</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;"><strong>Min-Max</strong></td>
+                            <td style="padding: 10px; font-family: monospace;">[${minmax.map(v => v.toFixed(2)).join(', ')}]</td>
+                        </tr>
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px;"><strong>Robust</strong></td>
+                            <td style="padding: 10px; font-family: monospace;">[${robust.map(v => v.toFixed(2)).join(', ')}]</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 15px; padding: 15px; background: #e7f3ff; border-radius: 8px;">
+                    <strong>Notice:</strong> If you have an outlier (like 200 in the default data), 
+                    Min-Max squashes most values near 0, while Robust Scaling handles it better!
+                </p>
+            `;
+
+            calculationDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        function checkAnswer(questionId, element, isCorrect) {
+            if (answeredQuestions.has(questionId)) {
+                return;
+            }
+
+            const options = element.parentElement.children;
+            for (let option of options) {
+                option.style.pointerEvents = 'none';
+            }
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                element.innerHTML += ' ✅';
+                score++;
+                answeredQuestions.add(questionId);
+            } else {
+                element.classList.add('incorrect');
+                element.innerHTML += ' ❌';
+                for (let option of options) {
+                    if (option.onclick.toString().includes('true')) {
+                        option.classList.add('correct');
+                        option.innerHTML += ' ✅ (Correct Answer)';
+                    }
+                }
+                answeredQuestions.add(questionId);
+            }
+
+            updateScore();
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            const percentage = (score / totalQuestions) * 100;
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = Math.round(percentage) + '%';
+
+            if (score === totalQuestions) {
+                setTimeout(() => {
+                    alert('🎉 Perfect score! You\'ve mastered Feature Scaling!');
+                }, 500);
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            updateScore();
+        };
+    </script>
+</body>
+</html>
