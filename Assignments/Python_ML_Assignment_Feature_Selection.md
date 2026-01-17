@@ -24,25 +24,13 @@
 
 ### **Choose ONE Resource Type:**
 
-You must create ONE of the following:
+You must create an Interactive HTML Playbook. It can possibly contain a Quiz as well:
 
 1. **Interactive Jupyter Notebook (.ipynb)**
    - Code examples with explanations
    - Practice exercises with solutions
    - Visualizations and demonstrations
    - **Target Length:** 30-50 cells
-
-2. **Markdown Tutorial (.md)**
-   - Written explanation with examples
-   - Step-by-step guide
-   - Tables, diagrams, and code snippets
-   - **Target Length:** 1500-2500 words
-
-3. **Interactive HTML Playbook (.html)**
-   - Interactive calculators or demonstrations
-   - Quizzes with instant feedback
-   - Visual examples and animations
-   - **Target Length:** Similar to the Feature Scaling playbook we used
 
 ---
 
