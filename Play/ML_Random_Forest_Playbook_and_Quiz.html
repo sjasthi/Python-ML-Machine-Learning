@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌲 Random Forests & Bagging - Interactive Playbook 🌳</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2E7D32;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #2E7D32;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2E7D32;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: #1976D2;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        .info-box {
+            background: #E3F2FD;
+            border-left: 5px solid #1976D2;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .success-box {
+            background: #E8F5E9;
+            border-left: 5px solid #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #FFF3E0;
+            border-left: 5px solid #FF9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: #2E7D32;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1em;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .comparison-table tr:hover {
+            background: #E8F5E9;
+        }
+
+        .tree-col {
+            background: #E3F2FD;
+            font-weight: bold;
+        }
+
+        .forest-col {
+            background: #E8F5E9;
+            font-weight: bold;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            color: white;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .demo-btn {
+            padding: 12px 25px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .demo-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .visualization-area {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 300px;
+            color: #333;
+        }
+
+        .tree-visual {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .tree-icon {
+            font-size: 3em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .prediction-box {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            margin-top: 30px;
+        }
+
+        .question-card {
+            background: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .question-card:hover {
+            border-color: #2E7D32;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .question-number {
+            background: #2E7D32;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .options {
+            margin: 15px 0;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1.05em;
+        }
+
+        .submit-quiz-btn {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: all 0.3s;
+        }
+
+        .submit-quiz-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .quiz-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.3em;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .score-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #C8E6C9;
+            color: #1B5E20;
+            border: 2px solid #4CAF50;
+        }
+
+        .feedback.incorrect {
+            background: #FFCDD2;
+            color: #B71C1C;
+            border: 2px solid #F44336;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            background: #FFEB3B;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .emoji-large {
+            font-size: 3em;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        strong {
+            color: #2E7D32;
+        }
+
+        .reset-btn {
+            background: #FF5722;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #D84315;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .comparison-table {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌲 Random Forests & Bagging 🌳</h1>
+        <p class="subtitle">Interactive Learning Playbook for Python Machine Learning</p>
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showSection('intro')">📚 Introduction</button>
+            <button class="nav-btn" onclick="showSection('bagging')">🎒 Bagging Explained</button>
+            <button class="nav-btn" onclick="showSection('comparison')">🆚 Tree vs Forest</button>
+            <button class="nav-btn" onclick="showSection('demo')">🎮 Interactive Demo</button>
+            <button class="nav-btn" onclick="showSection('code')">💻 Code Examples</button>
+            <button class="nav-btn" onclick="showSection('quiz')">📝 Quiz Time!</button>
+        </div>
+
+        <!-- INTRODUCTION SECTION -->
+        <div id="intro" class="section active">
+            <h2>🌟 What is a Random Forest?</h2>
+            
+            <div class="info-box">
+                <strong>🎯 Simple Definition:</strong> A Random Forest is a team of decision trees working together to make better predictions than any single tree could make alone!
+            </div>
+
+            <div class="emoji-large">🌳 + 🌳 + 🌳 + 🌳 + 🌳 = 🌲 RANDOM FOREST! 🌲</div>
+
+            <h3>The Big Idea 💡</h3>
+            <p>Imagine you're trying to decide which movie to watch. You could:</p>
+            <ul>
+                <li><strong>Option 1:</strong> Ask ONE friend for their recommendation (like using a single decision tree)</li>
+                <li><strong>Option 2:</strong> Ask 100 different friends and pick the movie most of them recommend (like using a Random Forest!)</li>
+            </ul>
+
+            <p>Which option would probably give you a better movie choice? Option 2, right? That's exactly how Random Forests work!</p>
+
+            <div class="success-box">
+                <h3>🎉 Why Random Forests Are Awesome:</h3>
+                <ol>
+                    <li><strong>More Accurate:</strong> Many trees together are smarter than one tree</li>
+                    <li><strong>Less Overfitting:</strong> Doesn't memorize the training data</li>
+                    <li><strong>Handles Complexity:</strong> Works well with messy, real-world data</li>
+                    <li><strong>Feature Importance:</strong> Tells you which features matter most</li>
+                    <li><strong>Robust:</strong> Works well even with default settings</li>
+                </ol>
+            </div>
+
+            <h3>📊 How It Works (Quick Version)</h3>
+            <div class="info-box">
+                <ol>
+                    <li><strong>Step 1:</strong> Create many random samples from your training data (with replacement)</li>
+                    <li><strong>Step 2:</strong> Train a decision tree on each random sample</li>
+                    <li><strong>Step 3:</strong> Each tree considers only a random subset of features at each split</li>
+                    <li><strong>Step 4:</strong> When making predictions, all trees vote and the majority wins!</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- BAGGING SECTION -->
+        <div id="bagging" class="section">
+            <h2>🎒 Bootstrap Aggregating (Bagging)</h2>
+
+            <div class="info-box">
+                <strong>What is Bagging?</strong><br>
+                <strong>B</strong>ootstrap <strong>AGG</strong>regat<strong>ING</strong> is a technique where we create multiple datasets by randomly sampling from the original data (with replacement), train a model on each dataset, then combine their predictions.
+            </div>
+
+            <h3>🎲 Bootstrap Sampling Explained</h3>
+            
+            <p><strong>Bootstrap Sampling = Random Sampling WITH Replacement</strong></p>
+
+            <div class="warning-box">
+                <h3>🔑 Key Concept: "With Replacement"</h3>
+                <p>Imagine a bag of marbles:</p>
+                <ul>
+                    <li><strong>Without Replacement:</strong> Pick a marble, keep it out → each marble picked once</li>
+                    <li><strong>WITH Replacement:</strong> Pick a marble, put it back → same marble can be picked multiple times!</li>
+                </ul>
+                <p>This is what creates diversity in Random Forests! Each tree sees a slightly different dataset.</p>
+            </div>
+
+            <h3>📝 Example: Bootstrap Sampling</h3>
+            <div class="info-box">
+                <p><strong>Original Dataset (6 samples):</strong></p>
+                <p>Sample 1, Sample 2, Sample 3, Sample 4, Sample 5, Sample 6</p>
+
+                <p style="margin-top: 15px;"><strong>Bootstrap Sample for Tree 1:</strong></p>
+                <p>Sample 1, Sample 3, Sample 1, Sample 5, Sample 2, Sample 6</p>
+                <p style="color: #D32F2F;"><em>Notice: Sample 1 appears twice! Sample 4 is missing!</em></p>
+
+                <p style="margin-top: 15px;"><strong>Bootstrap Sample for Tree 2:</strong></p>
+                <p>Sample 2, Sample 4, Sample 6, Sample 3, Sample 4, Sample 1</p>
+                <p style="color: #D32F2F;"><em>Notice: Sample 4 appears twice! Sample 5 is missing!</em></p>
+
+                <p style="margin-top: 15px;"><strong>Bootstrap Sample for Tree 3:</strong></p>
+                <p>Sample 6, Sample 1, Sample 3, Sample 3, Sample 5, Sample 2</p>
+                <p style="color: #D32F2F;"><em>Notice: Sample 3 appears twice! Sample 4 is missing!</em></p>
+            </div>
+
+            <h3>🌳 How Bagging Creates Diversity</h3>
+            <ol>
+                <li><strong>Different Training Data:</strong> Each tree trains on a different bootstrap sample</li>
+                <li><strong>Different Perspectives:</strong> Each tree "sees" the data slightly differently</li>
+                <li><strong>Reduced Variance:</strong> Averaging predictions smooths out individual errors</li>
+                <li><strong>Better Generalization:</strong> The forest doesn't overfit like a single tree might</li>
+            </ol>
+
+            <div class="success-box">
+                <h3>✨ The Magic Formula</h3>
+                <p><strong>Bagging = Bootstrap Samples + Aggregation</strong></p>
+                <ul>
+                    <li><strong>Bootstrap:</strong> Create random training sets</li>
+                    <li><strong>Train:</strong> Build a tree on each bootstrap sample</li>
+                    <li><strong>Aggregate:</strong> Combine predictions (vote for classification, average for regression)</li>
+                </ul>
+            </div>
+
+            <h3>📈 Out-of-Bag (OOB) Error</h3>
+            <div class="info-box">
+                <p><strong>Cool Fact:</strong> Because of bootstrap sampling, each tree doesn't see about 37% of the original data. This leftover data is called <strong>"Out-of-Bag" (OOB)</strong> data.</p>
+                
+                <p><strong>Why It's Useful:</strong> We can use OOB data to validate each tree without needing a separate validation set! It's like getting free validation!</p>
+
+                <p><strong>OOB Score:</strong> An estimate of how well the Random Forest will perform on unseen data.</p>
+            </div>
+        </div>
+
+        <!-- COMPARISON SECTION -->
+        <div id="comparison" class="section">
+            <h2>🆚 Single Decision Tree vs Random Forest</h2>
+
+            <div class="emoji-large">🌳 VS 🌲🌳🌲</div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th class="tree-col">🌳 Single Decision Tree</th>
+                        <th class="forest-col">🌲 Random Forest</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Training Data</strong></td>
+                        <td class="tree-col">Uses ALL data once</td>
+                        <td class="forest-col">Each tree uses a random bootstrap sample</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Features per Split</strong></td>
+                        <td class="tree-col">Considers ALL features</td>
+                        <td class="forest-col">Considers random subset of features (√n or n/3)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Number of Models</strong></td>
+                        <td class="tree-col">1 tree</td>
+                        <td class="forest-col">Many trees (100-500 typically)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Overfitting Risk</strong></td>
+                        <td class="tree-col">⚠️ HIGH - can memorize training data</td>
+                        <td class="forest-col">✅ LOW - averaging reduces overfitting</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Variance</strong></td>
+                        <td class="tree-col">High variance (sensitive to data changes)</td>
+                        <td class="forest-col">Low variance (stable predictions)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bias</strong></td>
+                        <td class="tree-col">Low bias (can be very complex)</td>
+                        <td class="forest-col">Similar low bias</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Accuracy</strong></td>
+                        <td class="tree-col">Good</td>
+                        <td class="forest-col">✅ Usually BETTER!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interpretability</strong></td>
+                        <td class="tree-col">✅ EASY - can visualize tree</td>
+                        <td class="forest-col">❌ HARD - "black box"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Training Speed</strong></td>
+                        <td class="tree-col">⚡ Fast</td>
+                        <td class="forest-col">🐌 Slower (but can parallelize)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prediction Speed</strong></td>
+                        <td class="tree-col">⚡ Fast</td>
+                        <td class="forest-col">🐌 Slower (all trees must vote)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Usage</strong></td>
+                        <td class="tree-col">Low</td>
+                        <td class="forest-col">High (stores many trees)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prediction Method</strong></td>
+                        <td class="tree-col">Direct prediction from one tree</td>
+                        <td class="forest-col">Majority vote (classification) or average (regression)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best Use Case</strong></td>
+                        <td class="tree-col">When interpretability is critical</td>
+                        <td class="forest-col">When accuracy is critical</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h3>⚖️ The Trade-off</h3>
+                <ul>
+                    <li><strong>Decision Tree:</strong> Fast, interpretable, but can overfit</li>
+                    <li><strong>Random Forest:</strong> Accurate, robust, but slower and less interpretable</li>
+                </ul>
+                <p><strong>Choose wisely based on your needs!</strong></p>
+            </div>
+
+            <h3>🎯 When to Use What?</h3>
+            <div class="success-box">
+                <p><strong>Use a Single Decision Tree when:</strong></p>
+                <ul>
+                    <li>You need to explain the model to stakeholders</li>
+                    <li>You have limited computational resources</li>
+                    <li>Speed is critical</li>
+                    <li>Your dataset is small and simple</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <p><strong>Use a Random Forest when:</strong></p>
+                <ul>
+                    <li>Accuracy is your top priority</li>
+                    <li>Your dataset is large and complex</li>
+                    <li>You want to reduce overfitting</li>
+                    <li>You need feature importance rankings</li>
+                    <li>You can afford the computational cost</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE DEMO SECTION -->
+        <div id="demo" class="section">
+            <h2>🎮 Interactive Random Forest Demo</h2>
+
+            <div class="interactive-demo">
+                <h3 style="text-align: center; margin-bottom: 20px;">🌲 Build Your Own Random Forest! 🌲</h3>
+                
+                <div class="demo-controls">
+                    <button class="demo-btn" onclick="createBootstrapSample()">🎲 Create Bootstrap Sample</button>
+                    <button class="demo-btn" onclick="trainTree()">🌳 Train a Tree</button>
+                    <button class="demo-btn" onclick="makePredictions()">🔮 Make Predictions</button>
+                    <button class="demo-btn" onclick="resetDemo()">🔄 Reset</button>
+                </div>
+
+                <div class="visualization-area" id="demoArea">
+                    <h3 style="text-align: center; color: #666;">Click the buttons above to see Random Forest in action! 🚀</h3>
+                    <p style="text-align: center; margin-top: 20px;">
+                        <strong>Scenario:</strong> Predicting if a student will pass (✅) or fail (❌) based on study hours.
+                    </p>
+                    <p style="text-align: center;">
+                        <strong>Original Data:</strong> 10 students with different study hours
+                    </p>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 30px;">
+                <h3>🎓 What's Happening?</h3>
+                <ol>
+                    <li><strong>Bootstrap Sample:</strong> Randomly picks students from the original dataset (with replacement)</li>
+                    <li><strong>Train Tree:</strong> Creates a decision tree based on the bootstrap sample</li>
+                    <li><strong>Predictions:</strong> Each tree votes, and the majority vote wins!</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- CODE SECTION -->
+        <div id="code" class="section">
+            <h2>💻 Python Code Examples</h2>
+
+            <h3>📦 Import Libraries</h3>
+            <div class="code-block">
+<span style="color: #66d9ef;">from</span> sklearn.ensemble <span style="color: #66d9ef;">import</span> RandomForestClassifier, RandomForestRegressor
+<span style="color: #66d9ef;">from</span> sklearn.tree <span style="color: #66d9ef;">import</span> DecisionTreeClassifier
+<span style="color: #66d9ef;">from</span> sklearn.model_selection <span style="color: #66d9ef;">import</span> train_test_split
+<span style="color: #66d9ef;">from</span> sklearn.metrics <span style="color: #66d9ef;">import</span> accuracy_score
+<span style="color: #66d9ef;">import</span> pandas <span style="color: #66d9ef;">as</span> pd
+<span style="color: #66d9ef;">import</span> numpy <span style="color: #66d9ef;">as</span> np
+            </div>
+
+            <h3>🌳 Single Decision Tree (for comparison)</h3>
+            <div class="code-block">
+<span style="color: #75715e;"># Create and train a single decision tree</span>
+tree = DecisionTreeClassifier(max_depth=<span style="color: #ae81ff;">5</span>, random_state=<span style="color: #ae81ff;">42</span>)
+tree.fit(X_train, y_train)
+
+<span style="color: #75715e;"># Make predictions</span>
+tree_predictions = tree.predict(X_test)
+tree_accuracy = accuracy_score(y_test, tree_predictions)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Decision Tree Accuracy: {tree_accuracy:.2f}"</span>)
+            </div>
+
+            <h3>🌲 Random Forest Classifier</h3>
+            <div class="code-block">
+<span style="color: #75715e;"># Create Random Forest with 100 trees</span>
+rf_classifier = RandomForestClassifier(
+    n_estimators=<span style="color: #ae81ff;">100</span>,        <span style="color: #75715e;"># Number of trees</span>
+    max_depth=<span style="color: #ae81ff;">10</span>,            <span style="color: #75715e;"># Maximum depth of each tree</span>
+    min_samples_split=<span style="color: #ae81ff;">5</span>,     <span style="color: #75715e;"># Minimum samples to split a node</span>
+    max_features=<span style="color: #e6db74;">'sqrt'</span>,     <span style="color: #75715e;"># Number of features to consider (√n)</span>
+    bootstrap=<span style="color: #ae81ff;">True</span>,          <span style="color: #75715e;"># Use bootstrap sampling</span>
+    oob_score=<span style="color: #ae81ff;">True</span>,          <span style="color: #75715e;"># Calculate out-of-bag score</span>
+    random_state=<span style="color: #ae81ff;">42</span>,
+    n_jobs=-<span style="color: #ae81ff;">1</span>                <span style="color: #75715e;"># Use all CPU cores</span>
+)
+
+<span style="color: #75715e;"># Train the forest</span>
+rf_classifier.fit(X_train, y_train)
+
+<span style="color: #75715e;"># Make predictions</span>
+rf_predictions = rf_classifier.predict(X_test)
+rf_accuracy = accuracy_score(y_test, rf_predictions)
+
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Random Forest Accuracy: {rf_accuracy:.2f}"</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"OOB Score: {rf_classifier.oob_score_:.2f}"</span>)
+            </div>
+
+            <h3>📊 Feature Importance</h3>
+            <div class="code-block">
+<span style="color: #75715e;"># Get feature importance</span>
+importances = rf_classifier.feature_importances_
+feature_names = X_train.columns
+
+<span style="color: #75715e;"># Create a DataFrame for easy viewing</span>
+importance_df = pd.DataFrame({
+    <span style="color: #e6db74;">'Feature'</span>: feature_names,
+    <span style="color: #e6db74;">'Importance'</span>: importances
+}).sort_values(<span style="color: #e6db74;">'Importance'</span>, ascending=<span style="color: #ae81ff;">False</span>)
+
+<span style="color: #66d9ef;">print</span>(importance_df)
+
+<span style="color: #75715e;"># Plot feature importance</span>
+<span style="color: #66d9ef;">import</span> matplotlib.pyplot <span style="color: #66d9ef;">as</span> plt
+plt.figure(figsize=(<span style="color: #ae81ff;">10</span>, <span style="color: #ae81ff;">6</span>))
+plt.barh(importance_df[<span style="color: #e6db74;">'Feature'</span>], importance_df[<span style="color: #e6db74;">'Importance'</span>])
+plt.xlabel(<span style="color: #e6db74;">'Importance'</span>)
+plt.title(<span style="color: #e6db74;">'Feature Importance in Random Forest'</span>)
+plt.show()
+            </div>
+
+            <h3>📈 Random Forest Regressor</h3>
+            <div class="code-block">
+<span style="color: #75715e;"># For regression tasks (predicting continuous values)</span>
+rf_regressor = RandomForestRegressor(
+    n_estimators=<span style="color: #ae81ff;">200</span>,
+    max_depth=<span style="color: #ae81ff;">15</span>,
+    min_samples_split=<span style="color: #ae81ff;">10</span>,
+    max_features=<span style="color: #e6db74;">'sqrt'</span>,
+    bootstrap=<span style="color: #ae81ff;">True</span>,
+    random_state=<span style="color: #ae81ff;">42</span>,
+    n_jobs=-<span style="color: #ae81ff;">1</span>
+)
+
+rf_regressor.fit(X_train, y_train)
+predictions = rf_regressor.predict(X_test)
+
+<span style="color: #75715e;"># Evaluate</span>
+<span style="color: #66d9ef;">from</span> sklearn.metrics <span style="color: #66d9ef;">import</span> mean_squared_error, r2_score
+mse = mean_squared_error(y_test, predictions)
+r2 = r2_score(y_test, predictions)
+
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"MSE: {mse:.2f}"</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"R² Score: {r2:.2f}"</span>)
+            </div>
+
+            <h3>🎯 Complete Example: Comparing Tree vs Forest</h3>
+            <div class="code-block">
+<span style="color: #66d9ef;">from</span> sklearn.datasets <span style="color: #66d9ef;">import</span> make_classification
+<span style="color: #66d9ef;">from</span> sklearn.model_selection <span style="color: #66d9ef;">import</span> cross_val_score
+
+<span style="color: #75715e;"># Create sample dataset</span>
+X, y = make_classification(n_samples=<span style="color: #ae81ff;">1000</span>, n_features=<span style="color: #ae81ff;">20</span>, 
+                           n_informative=<span style="color: #ae81ff;">15</span>, random_state=<span style="color: #ae81ff;">42</span>)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<span style="color: #ae81ff;">0.2</span>, 
+                                                    random_state=<span style="color: #ae81ff;">42</span>)
+
+<span style="color: #75715e;"># Single Decision Tree</span>
+tree = DecisionTreeClassifier(random_state=<span style="color: #ae81ff;">42</span>)
+tree_scores = cross_val_score(tree, X_train, y_train, cv=<span style="color: #ae81ff;">5</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Decision Tree CV Score: {tree_scores.mean():.3f} (+/- {tree_scores.std():.3f})"</span>)
+
+<span style="color: #75715e;"># Random Forest</span>
+rf = RandomForestClassifier(n_estimators=<span style="color: #ae81ff;">100</span>, random_state=<span style="color: #ae81ff;">42</span>, n_jobs=-<span style="color: #ae81ff;">1</span>)
+rf_scores = cross_val_score(rf, X_train, y_train, cv=<span style="color: #ae81ff;">5</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Random Forest CV Score: {rf_scores.mean():.3f} (+/- {rf_scores.std():.3f})"</span>)
+
+<span style="color: #75715e;"># Train both and compare test accuracy</span>
+tree.fit(X_train, y_train)
+rf.fit(X_train, y_train)
+
+tree_test_acc = accuracy_score(y_test, tree.predict(X_test))
+rf_test_acc = accuracy_score(y_test, rf.predict(X_test))
+
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"\nTest Set Results:"</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Decision Tree: {tree_test_acc:.3f}"</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Random Forest: {rf_test_acc:.3f}"</span>)
+<span style="color: #66d9ef;">print</span>(<span style="color: #e6db74;">f"Improvement: {(rf_test_acc - tree_test_acc) * 100:.1f}%"</span>)
+            </div>
+
+            <div class="success-box">
+                <h3>💡 Key Parameters Explained</h3>
+                <ul>
+                    <li><strong>n_estimators:</strong> Number of trees (more = better, but slower)</li>
+                    <li><strong>max_depth:</strong> How deep each tree can grow (None = no limit)</li>
+                    <li><strong>max_features:</strong> Features per split ('sqrt' for classification, 'auto' = all for regression)</li>
+                    <li><strong>bootstrap:</strong> Whether to use bootstrap sampling (True for Random Forest)</li>
+                    <li><strong>oob_score:</strong> Use out-of-bag samples for validation</li>
+                    <li><strong>n_jobs:</strong> Number of CPU cores to use (-1 = all)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- QUIZ SECTION -->
+        <div id="quiz" class="section">
+            <h2>📝 Random Forests Quiz</h2>
+            <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px;">
+                Test your knowledge! Select the best answer for each question.
+            </p>
+
+            <div class="quiz-container">
+                <!-- Question 1 -->
+                <div class="question-card">
+                    <span class="question-number">Question 1</span>
+                    <div class="question-text">What does "bagging" stand for in the context of Random Forests?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1" id="q1a" value="a">
+                            <label for="q1a">Batch Aggregating</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1" id="q1b" value="b">
+                            <label for="q1b">Bootstrap Aggregating</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1" id="q1c" value="c">
+                            <label for="q1c">Binary Aggregating</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1" id="q1d" value="d">
+                            <label for="q1d">Balanced Aggregating</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="question-card">
+                    <span class="question-number">Question 2</span>
+                    <div class="question-text">What does "with replacement" mean in bootstrap sampling?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2" id="q2a" value="a">
+                            <label for="q2a">We replace bad data with good data</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2" id="q2b" value="b">
+                            <label for="q2b">After picking a sample, we put it back so it can be picked again</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2" id="q2c" value="c">
+                            <label for="q2c">We replace missing values with averages</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2" id="q2d" value="d">
+                            <label for="q2d">We replace outliers with median values</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="question-card">
+                    <span class="question-number">Question 3</span>
+                    <div class="question-text">How does a Random Forest make a final prediction for classification?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q3" id="q3a" value="a">
+                            <label for="q3a">Uses the prediction from the first tree</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3" id="q3b" value="b">
+                            <label for="q3b">Averages all the predictions</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3" id="q3c" value="c">
+                            <label for="q3c">Uses majority voting from all trees</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3" id="q3d" value="d">
+                            <label for="q3d">Uses the prediction from the deepest tree</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="question-card">
+                    <span class="question-number">Question 4</span>
+                    <div class="question-text">Compared to a single decision tree, a Random Forest typically has:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q4" id="q4a" value="a">
+                            <label for="q4a">Higher overfitting and lower accuracy</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4" id="q4b" value="b">
+                            <label for="q4b">Lower overfitting and higher accuracy</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4" id="q4c" value="c">
+                            <label for="q4c">Higher overfitting and higher accuracy</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4" id="q4d" value="d">
+                            <label for="q4d">Lower overfitting and lower accuracy</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="question-card">
+                    <span class="question-number">Question 5</span>
+                    <div class="question-text">What is "feature randomness" in Random Forests?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5" id="q5a" value="a">
+                            <label for="q5a">Randomly selecting which features to include in the dataset</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5" id="q5b" value="b">
+                            <label for="q5b">At each split, only considering a random subset of features</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5" id="q5c" value="c">
+                            <label for="q5c">Randomly shuffling feature values</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5" id="q5d" value="d">
+                            <label for="q5d">Creating random feature names</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+
+                <!-- Question 6 -->
+                <div class="question-card">
+                    <span class="question-number">Question 6</span>
+                    <div class="question-text">What is the typical value for max_features in classification Random Forests?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q6" id="q6a" value="a">
+                            <label for="q6a">All features (n)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6" id="q6b" value="b">
+                            <label for="q6b">Square root of total features (√n)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6" id="q6c" value="c">
+                            <label for="q6c">Half of the features (n/2)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q6" id="q6d" value="d">
+                            <label for="q6d">Just one feature</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback6"></div>
+                </div>
+
+                <!-- Question 7 -->
+                <div class="question-card">
+                    <span class="question-number">Question 7</span>
+                    <div class="question-text">What is Out-of-Bag (OOB) error used for?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q7" id="q7a" value="a">
+                            <label for="q7a">To identify outliers in the dataset</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q7" id="q7b" value="b">
+                            <label for="q7b">To validate the model without a separate validation set</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q7" id="q7c" value="c">
+                            <label for="q7c">To measure training speed</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q7" id="q7d" value="d">
+                            <label for="q7d">To remove bad trees from the forest</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback7"></div>
+                </div>
+
+                <!-- Question 8 -->
+                <div class="question-card">
+                    <span class="question-number">Question 8</span>
+                    <div class="question-text">Which statement is TRUE about Random Forests?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q8" id="q8a" value="a">
+                            <label for="q8a">They are easier to interpret than a single decision tree</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q8" id="q8b" value="b">
+                            <label for="q8b">They train faster than a single decision tree</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q8" id="q8c" value="c">
+                            <label for="q8c">They can provide feature importance scores</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q8" id="q8d" value="d">
+                            <label for="q8d">They require feature scaling to work properly</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback8"></div>
+                </div>
+
+                <!-- Question 9 -->
+                <div class="question-card">
+                    <span class="question-number">Question 9</span>
+                    <div class="question-text">If you have 100 trees in a Random Forest and 60 predict "Yes" while 40 predict "No", what is the final prediction?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q9" id="q9a" value="a">
+                            <label for="q9a">"No" because we trust minority predictions</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q9" id="q9b" value="b">
+                            <label for="q9b">"Yes" because the majority (60%) voted for it</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q9" id="q9c" value="c">
+                            <label for="q9c">The average: 50% "Yes" and 50% "No"</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q9" id="q9d" value="d">
+                            <label for="q9d">Cannot determine from this information</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback9"></div>
+                </div>
+
+                <!-- Question 10 -->
+                <div class="question-card">
+                    <span class="question-number">Question 10</span>
+                    <div class="question-text">Why don't all trees in a Random Forest make the same predictions?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q10" id="q10a" value="a">
+                            <label for="q10a">Because of random errors in the algorithm</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q10" id="q10b" value="b">
+                            <label for="q10b">Because each tree is trained on different bootstrap samples and considers different feature subsets</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q10" id="q10c" value="c">
+                            <label for="q10c">Because trees use different algorithms</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q10" id="q10d" value="d">
+                            <label for="q10d">Because we intentionally introduce noise</label>
+                        </div>
+                    </div>
+                    <div class="feedback" id="feedback10"></div>
+                </div>
+
+                <button class="submit-quiz-btn" onclick="submitQuiz()">🎯 Submit Quiz</button>
+                <button class="reset-btn" onclick="resetQuiz()" style="display: block; margin: 20px auto;">🔄 Reset Quiz</button>
+
+                <div class="quiz-result" id="quizResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Interactive Demo Variables
+        let demoState = {
+            originalData: [
+                {student: 'A', hours: 2, result: '❌'},
+                {student: 'B', hours: 5, result: '✅'},
+                {student: 'C', hours: 3, result: '❌'},
+                {student: 'D', hours: 7, result: '✅'},
+                {student: 'E', hours: 4, result: '❌'},
+                {student: 'F', hours: 8, result: '✅'},
+                {student: 'G', hours: 6, result: '✅'},
+                {student: 'H', hours: 1, result: '❌'},
+                {student: 'I', hours: 9, result: '✅'},
+                {student: 'J', hours: 3, result: '❌'}
+            ],
+            bootstrapSamples: [],
+            trees: [],
+            predictions: []
+        };
+
+        function createBootstrapSample() {
+            const sample = [];
+            const sampleSize = demoState.originalData.length;
+            
+            // Create bootstrap sample (with replacement)
+            for (let i = 0; i < sampleSize; i++) {
+                const randomIndex = Math.floor(Math.random() * sampleSize);
+                sample.push(demoState.originalData[randomIndex]);
+            }
+            
+            demoState.bootstrapSamples.push(sample);
+            
+            // Display
+            const demoArea = document.getElementById('demoArea');
+            let html = `
+                <h3 style="color: #2E7D32;">🎲 Bootstrap Sample ${demoState.bootstrapSamples.length} Created!</h3>
+                <div style="background: #E8F5E9; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <strong>Sampled Students (with replacement):</strong><br>
+            `;
+            
+            // Count occurrences
+            const counts = {};
+            sample.forEach(s => {
+                counts[s.student] = (counts[s.student] || 0) + 1;
+            });
+            
+            html += '<div style="margin-top: 10px;">';
+            for (let student in counts) {
+                const count = counts[student];
+                const duplicate = count > 1 ? ` (× ${count})` : '';
+                const color = count > 1 ? '#D32F2F' : '#1976D2';
+                html += `<span style="color: ${color}; font-weight: bold; margin-right: 15px;">Student ${student}${duplicate}</span>`;
+            }
+            html += '</div>';
+            
+            // Show which students are missing
+            const missing = demoState.originalData.filter(d => !counts[d.student]).map(d => d.student);
+            if (missing.length > 0) {
+                html += `<div style="margin-top: 10px; color: #F57C00;">
+                    <strong>Missing students:</strong> ${missing.join(', ')}
+                </div>`;
+            }
+            
+            html += '</div>';
+            html += `<p style="text-align: center; margin-top: 15px;">
+                💡 <em>Notice how some students appear multiple times while others are missing!</em>
+            </p>`;
+            
+            demoArea.innerHTML = html;
+        }
+
+        function trainTree() {
+            if (demoState.bootstrapSamples.length === 0) {
+                alert('Create a bootstrap sample first!');
+                return;
+            }
+            
+            // Simulate training a tree (just for visualization)
+            const treeNum = demoState.trees.length + 1;
+            const sample = demoState.bootstrapSamples[demoState.bootstrapSamples.length - 1];
+            
+            // Simple rule: if average hours > 5, predict pass
+            const avgHours = sample.reduce((sum, s) => sum + s.hours, 0) / sample.length;
+            const prediction = avgHours > 5 ? '✅ Pass' : '❌ Fail';
+            
+            demoState.trees.push({
+                id: treeNum,
+                sample: sample,
+                prediction: prediction
+            });
+            
+            // Display
+            const demoArea = document.getElementById('demoArea');
+            let html = `
+                <h3 style="color: #2E7D32;">🌳 Tree ${treeNum} Trained!</h3>
+                <div style="background: #E3F2FD; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <strong>Training Sample Average Study Hours:</strong> ${avgHours.toFixed(1)} hours<br>
+                    <strong>Tree's Decision Rule:</strong> If hours > 5 → Pass ✅, else Fail ❌<br>
+                    <strong>Tree ${treeNum} Prediction for New Student (6 hours):</strong> ${prediction}
+                </div>
+                <div style="text-align: center; margin: 20px 0;">
+            `;
+            
+            // Show all trees
+            demoState.trees.forEach((tree, idx) => {
+                html += `
+                    <div class="tree-visual">
+                        <div class="tree-icon">🌳</div>
+                        <div style="font-weight: bold;">Tree ${tree.id}</div>
+                        <div style="font-size: 0.9em; color: #666;">→ ${tree.prediction}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            demoArea.innerHTML = html;
+        }
+
+        function makePredictions() {
+            if (demoState.trees.length === 0) {
+                alert('Train some trees first!');
+                return;
+            }
+            
+            // Count votes
+            let passVotes = 0;
+            let failVotes = 0;
+            
+            demoState.trees.forEach(tree => {
+                if (tree.prediction.includes('✅')) {
+                    passVotes++;
+                } else {
+                    failVotes++;
+                }
+            });
+            
+            const finalPrediction = passVotes > failVotes ? '✅ PASS' : '❌ FAIL';
+            
+            // Display
+            const demoArea = document.getElementById('demoArea');
+            let html = `
+                <h3 style="color: #2E7D32;">🔮 Random Forest Prediction!</h3>
+                <div style="background: #FFF3E0; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <h4 style="text-align: center; margin-bottom: 15px;">Voting Results</h4>
+                    <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2em;">✅</div>
+                            <div style="font-size: 1.5em; font-weight: bold;">${passVotes}</div>
+                            <div>Pass votes</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2em;">❌</div>
+                            <div style="font-size: 1.5em; font-weight: bold;">${failVotes}</div>
+                            <div>Fail votes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prediction-box">
+                    🏆 FINAL PREDICTION: ${finalPrediction}
+                </div>
+                <p style="text-align: center; margin-top: 15px;">
+                    <em>For a new student studying 6 hours, the Random Forest predicts: <strong>${finalPrediction}</strong></em><br>
+                    (Based on majority vote from ${demoState.trees.length} trees)
+                </p>
+            `;
+            
+            demoArea.innerHTML = html;
+        }
+
+        function resetDemo() {
+            demoState = {
+                originalData: demoState.originalData,
+                bootstrapSamples: [],
+                trees: [],
+                predictions: []
+            };
+            
+            document.getElementById('demoArea').innerHTML = `
+                <h3 style="text-align: center; color: #666;">Click the buttons above to see Random Forest in action! 🚀</h3>
+                <p style="text-align: center; margin-top: 20px;">
+                    <strong>Scenario:</strong> Predicting if a student will pass (✅) or fail (❌) based on study hours.
+                </p>
+                <p style="text-align: center;">
+                    <strong>Original Data:</strong> 10 students with different study hours
+                </p>
+            `;
+        }
+
+        // Quiz Functions
+        const answers = {
+            q1: 'b',  // Bootstrap Aggregating
+            q2: 'b',  // Put it back so it can be picked again
+            q3: 'c',  // Majority voting
+            q4: 'b',  // Lower overfitting and higher accuracy
+            q5: 'b',  // At each split, only considering random subset
+            q6: 'b',  // Square root of features
+            q7: 'b',  // Validate without separate validation set
+            q8: 'c',  // Can provide feature importance
+            q9: 'b',  // "Yes" because majority voted
+            q10: 'b'  // Different bootstrap samples and feature subsets
+        };
+
+        const explanations = {
+            q1: 'Bagging stands for <strong>Bootstrap Aggregating</strong>. It combines bootstrap sampling with aggregation of predictions.',
+            q2: '<strong>"With replacement"</strong> means after picking a sample, we put it back in the dataset, so the same sample can be selected multiple times in a bootstrap sample.',
+            q3: 'For classification, Random Forest uses <strong>majority voting</strong> - each tree votes, and the class with the most votes wins!',
+            q4: 'Random Forests have <strong>lower overfitting</strong> (because averaging reduces variance) and typically <strong>higher accuracy</strong> than single trees.',
+            q5: '<strong>Feature randomness</strong> means at each split in each tree, we only consider a random subset of features (typically √n for classification) instead of all features.',
+            q6: 'For classification, the default max_features is <strong>√n (square root of total features)</strong>. For regression, it\'s typically n/3.',
+            q7: '<strong>Out-of-Bag (OOB) error</strong> uses the ~37% of data not included in each tree\'s bootstrap sample for validation, giving us a free validation estimate!',
+            q8: 'Random Forests <strong>can provide feature importance scores</strong> that rank which features contribute most to predictions. They don\'t need feature scaling and are harder to interpret than single trees.',
+            q9: 'With 60 votes for "Yes" and 40 for "No", <strong>"Yes" wins by majority vote</strong> (60% > 50%).',
+            q10: 'Trees make different predictions because <strong>each sees different data (bootstrap samples) and considers different feature subsets</strong> at each split, creating diversity in the forest!'
+        };
+
+        function submitQuiz() {
+            let score = 0;
+            let totalQuestions = 10;
+            let allAnswered = true;
+
+            // Check each question
+            for (let i = 1; i <= totalQuestions; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const feedback = document.getElementById(`feedback${i}`);
+                
+                if (!selected) {
+                    allAnswered = false;
+                    feedback.className = 'feedback show incorrect';
+                    feedback.innerHTML = '⚠️ Please select an answer!';
+                } else {
+                    const isCorrect = selected.value === answers[`q${i}`];
+                    if (isCorrect) {
+                        score++;
+                        feedback.className = 'feedback show correct';
+                        feedback.innerHTML = `✅ Correct! ${explanations[`q${i}`]}`;
+                    } else {
+                        feedback.className = 'feedback show incorrect';
+                        feedback.innerHTML = `❌ Incorrect. ${explanations[`q${i}`]}`;
+                    }
+                }
+            }
+
+            if (!allAnswered) {
+                alert('Please answer all questions before submitting!');
+                return;
+            }
+
+            // Show results
+            const percentage = (score / totalQuestions) * 100;
+            const resultDiv = document.getElementById('quizResult');
+            
+            let emoji = '🎉';
+            let message = 'Excellent work!';
+            let color = 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)';
+            
+            if (percentage < 50) {
+                emoji = '📚';
+                message = 'Keep studying! Review the material and try again.';
+                color = 'linear-gradient(135deg, #D32F2F 0%, #B71C1C 100%)';
+            } else if (percentage < 70) {
+                emoji = '👍';
+                message = 'Good effort! Review the concepts you missed.';
+                color = 'linear-gradient(135deg, #F57C00 0%, #E65100 100%)';
+            } else if (percentage < 90) {
+                emoji = '🌟';
+                message = 'Great job! You understand Random Forests well!';
+                color = 'linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)';
+            }
+            
+            resultDiv.style.background = color;
+            resultDiv.innerHTML = `
+                <div style="font-size: 4em;">${emoji}</div>
+                <div class="score-display">${score} / ${totalQuestions}</div>
+                <div style="font-size: 1.5em; margin-bottom: 10px;">${percentage}%</div>
+                <div style="font-size: 1.2em;">${message}</div>
+            `;
+            resultDiv.classList.add('show');
+
+            // Scroll to results
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetQuiz() {
+            // Clear all selections
+            for (let i = 1; i <= 10; i++) {
+                const radios = document.querySelectorAll(`input[name="q${i}"]`);
+                radios.forEach(radio => radio.checked = false);
+                
+                const feedback = document.getElementById(`feedback${i}`);
+                feedback.className = 'feedback';
+                feedback.innerHTML = '';
+            }
+
+            // Hide results
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.classList.remove('show');
+
+            // Scroll to top of quiz
+            document.getElementById('quiz').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
