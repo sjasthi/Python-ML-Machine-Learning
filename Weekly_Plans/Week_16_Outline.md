@@ -48,9 +48,9 @@ https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Random_F
 
 ---
 
-## 📋 Week Schedule
+## 📋 Concepts
 
-### Day 1: Introduction to Random Forests
+### 1: Introduction to Random Forests
 - **Concept:** What are Random Forests?
 - **Activity:** Read the presentation (Introduction & How it Works sections)
 - **Interactive:** Try the Interactive Playbook - Introduction section
@@ -58,7 +58,7 @@ https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Random_F
   - How is a Random Forest different from a single tree?
   - What is "ensemble learning"?
 
-### Day 2: Understanding Bagging
+### 2: Understanding Bagging
 - **Concept:** Bootstrap Aggregating (Bagging)
 - **Activity:** Study the Bagging section in the presentation
 - **Interactive:** Explore Bootstrap Sampling demo in the playbook
@@ -66,7 +66,7 @@ https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Random_F
   - What does "with replacement" mean?
   - How does bagging reduce overfitting?
 
-### Day 3: Coding Session - Random Forest Classifier
+### 3: Coding Session - Random Forest Classifier
 - **Activity:** Work through the Colab Notebook
 - **Focus Areas:**
   - Loading and exploring the Heart Disease dataset
@@ -75,7 +75,7 @@ https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Random_F
   - Evaluating model performance
 - **Key Skills:** `RandomForestClassifier`, `fit()`, `predict()`, `accuracy_score()`
 
-### Day 4: Feature Importance & Hyperparameter Tuning
+### 4: Feature Importance & Hyperparameter Tuning
 - **Activity:** Continue with Colab Notebook
 - **Focus Areas:**
   - Analyzing feature importance
@@ -83,7 +83,7 @@ https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Random_F
   - Comparing with Decision Tree performance
 - **Key Skills:** Feature selection, model optimization
 
-### Day 5: Review & Assessment
+### 5: Review & Assessment
 - **Activity:** Complete the Interactive Quiz
 - **Review:** Tree vs Forest comparison
 - **Discussion:** Real-world applications of Random Forests
