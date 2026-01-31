@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ensemble Methods Interactive Playbook 🎭</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 4px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .concept-box h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .example-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .example-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .interactive-demo {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px 5px;
+        }
+
+        .demo-button:hover {
+            transform: scale(1.05);
+        }
+
+        .demo-output {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            min-height: 60px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .question-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .option {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.3em;
+            border-radius: 10px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: transform 0.2s;
+        }
+
+        .submit-button:hover {
+            transform: scale(1.05);
+        }
+
+        .submit-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            display: none;
+        }
+
+        .score-display.show {
+            display: block;
+            animation: bounceIn 0.6s;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .score-display h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .score-number {
+            font-size: 5em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .explanation {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .key-points {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .key-points ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .key-points li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .emoji {
+            font-size: 1.5em;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tab {
+                padding: 15px 10px;
+                font-size: 0.9em;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .score-number {
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Ensemble Methods Interactive Playbook</h1>
+            <p>Learn Boosting, Stacking, and Voting! 🚀</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Python ML Course | Metro State University | Instructor: Siva</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="openTab('boosting')">🎯 Boosting</button>
+            <button class="tab" onclick="openTab('stacking')">🏗️ Stacking</button>
+            <button class="tab" onclick="openTab('voting')">🗳️ Voting</button>
+            <button class="tab" onclick="openTab('quiz')">📝 Quiz</button>
+        </div>
+
+        <!-- Boosting Tab -->
+        <div id="boosting" class="tab-content active">
+            <div class="concept-box">
+                <h2>🎯 Boosting: Learning from Mistakes!</h2>
+                <p style="font-size: 1.2em;">Imagine studying for a test where you focus extra hard on questions you got wrong. That's Boosting!</p>
+            </div>
+
+            <div class="info-card">
+                <h3>💡 What is Boosting?</h3>
+                <p><strong>Boosting</strong> is like having a team where each member learns from the previous member's mistakes!</p>
+                <p style="margin-top: 10px;">Models are trained <span class="highlight">sequentially</span> (one after another), and each new model focuses on fixing the errors made by previous models.</p>
+            </div>
+
+            <div class="example-box">
+                <h3>🎮 Real-Life Analogy: Video Game Levels!</h3>
+                <p><strong>Level 1:</strong> You fight easy enemies, but some beat you 😵</p>
+                <p><strong>Level 2:</strong> The game spawns MORE of the enemies that beat you!</p>
+                <p><strong>Level 3:</strong> Even MORE of your weak spots appear!</p>
+                <p><strong>Result:</strong> You become an expert at handling ALL enemy types! 🏆</p>
+            </div>
+
+            <div class="key-points">
+                <h3>🔑 Key Characteristics:</h3>
+                <ul>
+                    <li><strong>Training Order:</strong> Sequential (one after another) ⏩</li>
+                    <li><strong>Focus:</strong> Correcting previous mistakes ❌➡️✅</li>
+                    <li><strong>Data Weighting:</strong> Mistakes get higher weight 📊</li>
+                    <li><strong>Examples:</strong> AdaBoost, Gradient Boosting, XGBoost</li>
+                    <li><strong>Superpower:</strong> Very accurate! Often wins competitions! 🥇</li>
+                </ul>
+            </div>
+
+            <div class="interactive-demo">
+                <h3>🎲 Try It: Boosting Simulation</h3>
+                <p>Watch how each model focuses on the previous model's mistakes!</p>
+                <button class="demo-button" onclick="runBoostingDemo()">Run Boosting Demo</button>
+                <div class="demo-output" id="boostingOutput">Click the button to see boosting in action!</div>
+            </div>
+
+            <div class="info-card">
+                <h3>⭐ Popular Boosting Algorithms</h3>
+                <p><strong>1. AdaBoost:</strong> The original! Adjusts weights after each round 🎯</p>
+                <p><strong>2. Gradient Boosting:</strong> Builds trees to predict errors 🌲</p>
+                <p><strong>3. XGBoost:</strong> The SUPERSTAR! Wins most competitions! 🏆⚡</p>
+            </div>
+
+            <div class="key-points" style="background: #f8d7da; border-left-color: #dc3545;">
+                <h3>⚡ Strengths vs ⚠️ Challenges</h3>
+                <p><strong>Strengths:</strong></p>
+                <ul>
+                    <li>✅ Very powerful and accurate</li>
+                    <li>✅ Great at finding complex patterns</li>
+                    <li>✅ Works well with weak learners</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Challenges:</strong></p>
+                <ul>
+                    <li>❌ Can overfit if not careful</li>
+                    <li>❌ Sequential (can't parallelize)</li>
+                    <li>❌ Sensitive to outliers</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Stacking Tab -->
+        <div id="stacking" class="tab-content">
+            <div class="concept-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h2>🏗️ Stacking: The Meta-Learning Approach!</h2>
+                <p style="font-size: 1.2em;">Like having a team of experts and a supervisor who learns the best way to combine their opinions!</p>
+            </div>
+
+            <div class="info-card">
+                <h3>💡 What is Stacking?</h3>
+                <p><strong>Stacking</strong> uses a <span class="highlight">two-level architecture</span>:</p>
+                <p style="margin-top: 10px;"><strong>Level 0:</strong> Multiple diverse models make predictions</p>
+                <p><strong>Level 1:</strong> A meta-model learns how to best combine those predictions!</p>
+            </div>
+
+            <div class="example-box">
+                <h3>🏥 Real-Life Analogy: Hospital Diagnosis!</h3>
+                <p><strong>Specialist 1 (Cardiologist):</strong> Checks heart → "60% chance" 💓</p>
+                <p><strong>Specialist 2 (Neurologist):</strong> Checks brain → "80% chance" 🧠</p>
+                <p><strong>Specialist 3 (Radiologist):</strong> Checks X-rays → "70% chance" 📸</p>
+                <p><strong>General Doctor (Meta):</strong> Has seen 1000s of cases and knows how to weight each specialist's opinion → "75% final diagnosis" 🩺</p>
+            </div>
+
+            <div class="key-points">
+                <h3>🔑 How Stacking Works:</h3>
+                <ul>
+                    <li><strong>Step 1:</strong> Train several DIFFERENT types of models (Decision Tree, Random Forest, SVM, etc.) 🌳📊</li>
+                    <li><strong>Step 2:</strong> Each model makes predictions</li>
+                    <li><strong>Step 3:</strong> These predictions become NEW FEATURES! 🔄</li>
+                    <li><strong>Step 4:</strong> Train a meta-model to learn the best combination</li>
+                    <li><strong>Result:</strong> The meta-model knows: "When Tree says 0.7 and Forest says 0.8, answer is usually..."</li>
+                </ul>
+            </div>
+
+            <div class="interactive-demo">
+                <h3>🎲 Try It: Stacking Simulation</h3>
+                <p>See how base models feed into a meta-learner!</p>
+                <button class="demo-button" onclick="runStackingDemo()">Run Stacking Demo</button>
+                <div class="demo-output" id="stackingOutput">Click the button to see stacking in action!</div>
+            </div>
+
+            <div class="info-card">
+                <h3>🎯 Why Use Cross-Validation?</h3>
+                <p>When creating meta-features, we use cross-validation to avoid overfitting:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Split training data into 5 folds</li>
+                    <li>For each fold: train on 4, predict on 1</li>
+                    <li>Collect all predictions as meta-features</li>
+                    <li>Train meta-model on these</li>
+                </ul>
+            </div>
+
+            <div class="key-points" style="background: #f8d7da; border-left-color: #dc3545;">
+                <h3>⚡ Strengths vs ⚠️ Challenges</h3>
+                <p><strong>Strengths:</strong></p>
+                <ul>
+                    <li>✅ Learns optimal combination automatically</li>
+                    <li>✅ Leverages diversity of different models</li>
+                    <li>✅ Often very accurate</li>
+                    <li>✅ Flexible - use any models!</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Challenges:</strong></p>
+                <ul>
+                    <li>❌ Complex to set up and tune</li>
+                    <li>❌ Computationally expensive</li>
+                    <li>❌ Risk of overfitting</li>
+                    <li>❌ Hard to interpret (black box)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Voting Tab -->
+        <div id="voting" class="tab-content">
+            <div class="concept-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <h2>🗳️ Voting: Democracy in Machine Learning!</h2>
+                <p style="font-size: 1.2em;">Just like a real election - each model gets a vote!</p>
+            </div>
+
+            <div class="info-card">
+                <h3>💡 What is Voting?</h3>
+                <p><strong>Voting</strong> is the simplest ensemble method - models vote on the prediction!</p>
+                <p style="margin-top: 10px;">Think of it like a group project decision where everyone votes! 🙋‍♀️🙋‍♂️</p>
+            </div>
+
+            <div class="example-box">
+                <h3>🎪 Real-Life Analogy: Talent Show Judges!</h3>
+                <p><strong>Judge 1:</strong> "This act deserves 9/10!" ⭐</p>
+                <p><strong>Judge 2:</strong> "I give it 8/10!" ⭐</p>
+                <p><strong>Judge 3:</strong> "Perfect 10/10!" ⭐</p>
+                <p><strong>Judge 4:</strong> "Solid 9/10!" ⭐</p>
+                <p><strong>Final Score:</strong> Average = 9/10! 🎉</p>
+            </div>
+
+            <div class="key-points">
+                <h3>🔑 Two Types of Voting:</h3>
+                <ul>
+                    <li><strong>🔵 Hard Voting (Majority Vote):</strong> Count the votes, class with most votes wins!
+                        <br>Example: Cat🐱, Dog🐕, Cat🐱, Cat🐱 → Cat wins 3-1!
+                    </li>
+                    <li style="margin-top: 15px;"><strong>🟢 Soft Voting (Average Probabilities):</strong> Average the probabilities!
+                        <br>Example: Cat=0.8, Cat=0.6, Cat=0.9, Cat=0.7 → Average=0.75 → Cat wins!
+                        <br><em>Soft voting is usually more accurate! 📊</em>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="interactive-demo">
+                <h3>🎲 Try It: Voting Simulation</h3>
+                <p>Compare Hard Voting vs Soft Voting!</p>
+                <button class="demo-button" onclick="runVotingDemo('hard')">Hard Voting Demo</button>
+                <button class="demo-button" onclick="runVotingDemo('soft')">Soft Voting Demo</button>
+                <div class="demo-output" id="votingOutput">Click a button to see voting in action!</div>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Hard Voting 🔵</th>
+                        <th>Soft Voting 🟢</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Input</strong></td>
+                        <td>Class predictions</td>
+                        <td>Probability predictions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Method</strong></td>
+                        <td>Count votes</td>
+                        <td>Average probabilities</td>
+                    </tr>
+                    <tr>
+                        <td><strong>When to use</strong></td>
+                        <td>Models don't predict probabilities</td>
+                        <td>Models predict probabilities</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Accuracy</strong></td>
+                        <td>Good ✓</td>
+                        <td>Usually better ✨</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="key-points" style="background: #f8d7da; border-left-color: #dc3545;">
+                <h3>⚡ Strengths vs ⚠️ Challenges</h3>
+                <p><strong>Strengths:</strong></p>
+                <ul>
+                    <li>✅ Simple to understand and implement</li>
+                    <li>✅ Parallel training (fast!)</li>
+                    <li>✅ Reduces variance</li>
+                    <li>✅ Robust to individual errors</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Challenges:</strong></p>
+                <ul>
+                    <li>❌ Requires model diversity</li>
+                    <li>❌ All models weighted equally (by default)</li>
+                    <li>❌ No learning of optimal weights</li>
+                    <li>❌ Must wait for slowest model</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>🎯 Pro Tip: Weighted Voting!</h3>
+                <p>You can give more importance to better models!</p>
+                <p style="margin-top: 10px;"><code>weights=[3, 2, 1]</code> means Model 1 gets 3x the influence! 🎯</p>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="quiz" class="tab-content">
+            <div class="concept-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h2>📝 Ensemble Methods Quiz</h2>
+                <p style="font-size: 1.2em;">Test your knowledge! Take a screenshot of your final score for Google Classroom! 📸</p>
+            </div>
+
+            <div class="quiz-container">
+                <div id="quizQuestions"></div>
+                
+                <button class="submit-button" id="submitQuiz" onclick="submitQuiz()">
+                    Submit Quiz 🚀
+                </button>
+
+                <div class="score-display" id="scoreDisplay">
+                    <h2>🎉 Your Final Score 🎉</h2>
+                    <div class="score-number" id="scoreNumber">0/10</div>
+                    <p style="font-size: 1.3em;" id="scoreMessage">Great job!</p>
+                    <p style="font-size: 1.1em; margin-top: 20px;">📸 Take a screenshot of this screen and submit to Google Classroom!</p>
+                    <button class="demo-button" onclick="resetQuiz()" style="margin-top: 20px;">Try Again 🔄</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function openTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Boosting Demo
+        function runBoostingDemo() {
+            const output = document.getElementById('boostingOutput');
+            output.innerHTML = '<strong>🎯 Boosting in Action:</strong><br><br>';
+            
+            const models = [
+                { name: 'Model 1 (Weak)', errors: 15, focus: 'General data' },
+                { name: 'Model 2 (Weak)', errors: 10, focus: 'Previous 15 mistakes' },
+                { name: 'Model 3 (Weak)', errors: 6, focus: 'Previous 10 mistakes' },
+                { name: 'Model 4 (Weak)', errors: 3, focus: 'Previous 6 mistakes' }
+            ];
+            
+            models.forEach((model, index) => {
+                setTimeout(() => {
+                    output.innerHTML += `<div style="margin: 10px 0; padding: 10px; background: ${index === 3 ? '#d4edda' : '#fff3cd'}; border-radius: 5px;">
+                        <strong>${model.name}:</strong><br>
+                        Focus: ${model.focus}<br>
+                        Errors: ${model.errors} ❌<br>
+                        ${index === 3 ? '<strong>🎉 Strong Predictor Achieved!</strong>' : ''}
+                    </div>`;
+                }, index * 800);
+            });
+            
+            setTimeout(() => {
+                output.innerHTML += '<br><strong>Final Result: Combined all models with weighted voting → Strong Predictor! 🏆</strong>';
+            }, 3200);
+        }
+
+        // Stacking Demo
+        function runStackingDemo() {
+            const output = document.getElementById('stackingOutput');
+            output.innerHTML = '<strong>🏗️ Stacking in Action:</strong><br><br>';
+            
+            setTimeout(() => {
+                output.innerHTML += `<div style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                    <strong>Level 0 - Base Models:</strong><br>
+                    • Decision Tree → Prediction: 0.7<br>
+                    • Random Forest → Prediction: 0.8<br>
+                    • SVM → Prediction: 0.6<br>
+                    • Neural Net → Prediction: 0.9<br>
+                </div>`;
+            }, 500);
+            
+            setTimeout(() => {
+                output.innerHTML += `<div style="padding: 10px; background: #e0aaff; border-radius: 5px; margin: 10px 0;">
+                    <strong>🔄 Creating Meta-Features:</strong><br>
+                    Meta-Features = [0.7, 0.8, 0.6, 0.9]<br>
+                    <em>These predictions become NEW features!</em>
+                </div>`;
+            }, 1500);
+            
+            setTimeout(() => {
+                output.innerHTML += `<div style="padding: 10px; background: #d4edda; border-radius: 5px; margin: 10px 0;">
+                    <strong>Level 1 - Meta-Model (Logistic Regression):</strong><br>
+                    Learns: "When these models say 0.7, 0.8, 0.6, 0.9..."<br>
+                    <strong>🎯 Final Prediction: 0.82</strong>
+                </div>`;
+            }, 2500);
+            
+            setTimeout(() => {
+                output.innerHTML += '<br><strong>Result: Meta-model learned the optimal way to combine predictions! 🎉</strong>';
+            }, 3500);
+        }
+
+        // Voting Demo
+        function runVotingDemo(type) {
+            const output = document.getElementById('votingOutput');
+            
+            if (type === 'hard') {
+                output.innerHTML = '<strong>🔵 Hard Voting Demo:</strong><br><br>';
+                setTimeout(() => {
+                    output.innerHTML += `<div style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                        <strong>Model Predictions:</strong><br>
+                        • K-NN → Cat 🐱<br>
+                        • Decision Tree → Dog 🐕<br>
+                        • Logistic Regression → Cat 🐱<br>
+                        • SVM → Cat 🐱<br>
+                    </div>`;
+                }, 500);
+                
+                setTimeout(() => {
+                    output.innerHTML += `<div style="padding: 10px; background: #fff3cd; border-radius: 5px; margin: 10px 0;">
+                        <strong>Vote Count:</strong><br>
+                        Cat 🐱: 3 votes ✓<br>
+                        Dog 🐕: 1 vote<br>
+                    </div>`;
+                }, 1500);
+                
+                setTimeout(() => {
+                    output.innerHTML += `<div style="padding: 15px; background: #d4edda; border-radius: 5px; margin: 10px 0;">
+                        <strong>🎉 Winner: Cat 🐱 (Majority Vote!)</strong>
+                    </div>`;
+                }, 2500);
+            } else {
+                output.innerHTML = '<strong>🟢 Soft Voting Demo:</strong><br><br>';
+                setTimeout(() => {
+                    output.innerHTML += `<div style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                        <strong>Model Probabilities:</strong><br>
+                        • K-NN → Cat: 0.8, Dog: 0.2<br>
+                        • Decision Tree → Cat: 0.6, Dog: 0.4<br>
+                        • Logistic Regression → Cat: 0.9, Dog: 0.1<br>
+                        • SVM → Cat: 0.7, Dog: 0.3<br>
+                    </div>`;
+                }, 500);
+                
+                setTimeout(() => {
+                    output.innerHTML += `<div style="padding: 10px; background: #e0aaff; border-radius: 5px; margin: 10px 0;">
+                        <strong>Average Probabilities:</strong><br>
+                        Cat: (0.8 + 0.6 + 0.9 + 0.7) / 4 = 0.75<br>
+                        Dog: (0.2 + 0.4 + 0.1 + 0.3) / 4 = 0.25<br>
+                    </div>`;
+                }, 1500);
+                
+                setTimeout(() => {
+                    output.innerHTML += `<div style="padding: 15px; background: #d4edda; border-radius: 5px; margin: 10px 0;">
+                        <strong>🎉 Winner: Cat 🐱 (0.75 > 0.25)</strong><br>
+                        <em>Soft voting uses more information! ✨</em>
+                    </div>`;
+                }, 2500);
+            }
+        }
+
+        // Quiz Questions
+        const quizQuestions = [
+            {
+                question: "What is the main difference between Bagging and Boosting?",
+                options: [
+                    "Bagging trains models sequentially, Boosting trains in parallel",
+                    "Bagging trains in parallel, Boosting trains sequentially",
+                    "They are the same thing",
+                    "Bagging is always better than Boosting"
+                ],
+                correct: 1,
+                explanation: "Bagging (like Random Forests) trains models in parallel on different data samples. Boosting trains models sequentially, with each model focusing on previous mistakes!"
+            },
+            {
+                question: "In Boosting, what happens to data points that were incorrectly classified?",
+                options: [
+                    "They are removed from the dataset",
+                    "They get lower weight",
+                    "They get higher weight",
+                    "Nothing changes"
+                ],
+                correct: 2,
+                explanation: "In Boosting, incorrectly classified data points get HIGHER weight, so the next model focuses more on fixing these mistakes! This is the key to Boosting's power! 🎯"
+            },
+            {
+                question: "Which ensemble method often wins machine learning competitions?",
+                options: [
+                    "Bagging",
+                    "Voting",
+                    "XGBoost (a type of Boosting)",
+                    "Simple averaging"
+                ],
+                correct: 2,
+                explanation: "XGBoost (Extreme Gradient Boosting) is the champion of ML competitions! It's extremely powerful and efficient. 🏆"
+            },
+            {
+                question: "In Stacking, what does the meta-model (Level 1) learn from?",
+                options: [
+                    "The original data",
+                    "The predictions from base models",
+                    "Random noise",
+                    "Only the best base model"
+                ],
+                correct: 1,
+                explanation: "The meta-model learns from the PREDICTIONS of the base models! These predictions become new features that the meta-model uses to make the final prediction. 🏗️"
+            },
+            {
+                question: "How many levels does Stacking have?",
+                options: [
+                    "1 level",
+                    "2 levels (Base models + Meta-model)",
+                    "3 levels",
+                    "It depends on the dataset"
+                ],
+                correct: 1,
+                explanation: "Stacking has 2 levels: Level 0 (base models that make predictions) and Level 1 (meta-model that combines those predictions)!"
+            },
+            {
+                question: "What is Hard Voting?",
+                options: [
+                    "Taking the average of probabilities",
+                    "Using only the best model",
+                    "Counting votes and picking the majority class",
+                    "Weighting models by accuracy"
+                ],
+                correct: 2,
+                explanation: "Hard Voting counts the class predictions from each model and picks the class with the most votes! Like a real election! 🗳️"
+            },
+            {
+                question: "What is Soft Voting?",
+                options: [
+                    "Using only confident predictions",
+                    "Averaging the probability predictions",
+                    "Removing uncertain predictions",
+                    "Same as Hard Voting"
+                ],
+                correct: 1,
+                explanation: "Soft Voting averages the PROBABILITY predictions from each model. This uses more information and is usually more accurate than Hard Voting! 📊"
+            },
+            {
+                question: "Which is usually more accurate: Hard Voting or Soft Voting?",
+                options: [
+                    "Hard Voting",
+                    "Soft Voting",
+                    "They are always the same",
+                    "Neither is better"
+                ],
+                correct: 1,
+                explanation: "Soft Voting is usually more accurate because it uses probability information rather than just class labels! It leverages more information from each model. ✨"
+            },
+            {
+                question: "What is the main goal of Boosting?",
+                options: [
+                    "Reduce variance (overfitting)",
+                    "Reduce bias (underfitting)",
+                    "Make training faster",
+                    "Use less memory"
+                ],
+                correct: 1,
+                explanation: "Boosting's main goal is to REDUCE BIAS by sequentially fixing mistakes. It turns weak learners into strong learners! Bagging reduces variance. 🎯"
+            },
+            {
+                question: "Why is model diversity important in ensemble methods?",
+                options: [
+                    "It makes training faster",
+                    "It uses less memory",
+                    "Different models catch different patterns and mistakes",
+                    "It doesn't matter"
+                ],
+                correct: 2,
+                explanation: "Model diversity is crucial! If all models make the same mistakes, combining them doesn't help. Different models catch different patterns, making the ensemble stronger! 🎭"
+            }
+        ];
+
+        // Initialize Quiz
+        function initQuiz() {
+            const container = document.getElementById('quizQuestions');
+            container.innerHTML = '';
+            
+            quizQuestions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.innerHTML = `
+                    <h3>Question ${index + 1} of ${quizQuestions.length}</h3>
+                    <p style="font-size: 1.1em; margin: 15px 0;">${q.question}</p>
+                    ${q.options.map((option, optIndex) => `
+                        <div class="option" onclick="selectOption(${index}, ${optIndex})">
+                            ${option}
+                        </div>
+                    `).join('')}
+                    <div class="explanation" id="explanation-${index}">
+                        <strong>💡 Explanation:</strong><br>
+                        ${q.explanation}
+                    </div>
+                `;
+                container.appendChild(questionCard);
+            });
+        }
+
+        let selectedAnswers = new Array(quizQuestions.length).fill(null);
+
+        function selectOption(questionIndex, optionIndex) {
+            // Remove previous selection for this question
+            const questionCard = document.querySelectorAll('.question-card')[questionIndex];
+            const options = questionCard.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Mark new selection
+            options[optionIndex].classList.add('selected');
+            selectedAnswers[questionIndex] = optionIndex;
+        }
+
+        function submitQuiz() {
+            // Check if all questions are answered
+            if (selectedAnswers.includes(null)) {
+                alert('⚠️ Please answer all questions before submitting!');
+                return;
+            }
+
+            let score = 0;
+            
+            // Check answers and show explanations
+            quizQuestions.forEach((q, index) => {
+                const questionCard = document.querySelectorAll('.question-card')[index];
+                const options = questionCard.querySelectorAll('.option');
+                const explanation = document.getElementById(`explanation-${index}`);
+                
+                // Show explanation
+                explanation.classList.add('show');
+                
+                // Mark correct/incorrect
+                options.forEach((opt, optIndex) => {
+                    if (optIndex === q.correct) {
+                        opt.classList.add('correct');
+                    } else if (optIndex === selectedAnswers[index]) {
+                        opt.classList.add('incorrect');
+                    }
+                    opt.style.pointerEvents = 'none'; // Disable further clicks
+                });
+                
+                if (selectedAnswers[index] === q.correct) {
+                    score++;
+                }
+            });
+
+            // Show score
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreNumber = document.getElementById('scoreNumber');
+            const scoreMessage = document.getElementById('scoreMessage');
+            
+            scoreNumber.textContent = `${score}/${quizQuestions.length}`;
+            
+            if (score === quizQuestions.length) {
+                scoreMessage.textContent = '🏆 Perfect Score! You\'re an Ensemble Master! 🎉';
+            } else if (score >= 8) {
+                scoreMessage.textContent = '🌟 Excellent! You really understand ensemble methods!';
+            } else if (score >= 6) {
+                scoreMessage.textContent = '👍 Good job! Review the lessons to improve!';
+            } else {
+                scoreMessage.textContent = '📚 Keep learning! Review the material and try again!';
+            }
+            
+            scoreDisplay.classList.add('show');
+            document.getElementById('submitQuiz').disabled = true;
+            
+            // Scroll to score
+            scoreDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetQuiz() {
+            selectedAnswers = new Array(quizQuestions.length).fill(null);
+            document.getElementById('scoreDisplay').classList.remove('show');
+            document.getElementById('submitQuiz').disabled = false;
+            initQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize quiz on page load
+        window.onload = function() {
+            initQuiz();
+        };
+    </script>
+</body>
+</html>
