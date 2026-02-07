@@ -4,7 +4,6 @@
 **Program:** Learn and Help (www.learnandhelp.com)  
 **Instructor:** Siva R Jasthi  
 **Total Points:** 25 points  
-**Due Date:** [To be announced]
 
 ---
 
@@ -179,69 +178,7 @@ Want to go above and beyond? Try these extensions:
 ## 📤 Submission Requirements
 
 **What to Submit:**
-- A Google Colab notebook (.ipynb file) containing:
-  - All your code with comments
-  - All outputs (print statements, visualizations, tables)
-  - A brief conclusion paragraph (3-5 sentences) answering:
-    - Which K value worked best for your dataset?
-    - Why do you think this K value performed well?
-    - Did you notice any patterns as K increased?
-
-**How to Submit:**
-1. Make sure your Google Colab notebook runs from top to bottom without errors
-2. Download your notebook as a .ipynb file: `File → Download → Download .ipynb`
-3. Submit the .ipynb file to Google Classroom
-4. **File naming convention:** `LastName_FirstName_KFold_CV.ipynb`
-
-**Before Submitting - Checklist:**
-- [ ] My code runs without errors
-- [ ] All outputs are visible (don't clear outputs!)
-- [ ] My visualizations have proper labels and titles
-- [ ] I've included comments explaining my code
-- [ ] I've answered the conclusion questions
-- [ ] My file is named correctly
-
----
-
-## 🔧 Helpful Tips
-
-### Getting Started with Google Colab
-```python
-# First cell - Install required packages (if needed)
-# Usually sklearn, matplotlib, numpy are pre-installed in Colab
-
-# Import all necessary libraries
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.datasets import load_iris, load_wine, load_breast_cancer
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import cross_val_score
-import pandas as pd
-```
-
-### Common Issues and Solutions
-
-**Problem:** "cross_val_score is giving weird results"  
-**Solution:** Make sure you're passing the correct parameters: `cross_val_score(model, X, y, cv=k)`
-
-**Problem:** "My plot looks messy"  
-**Solution:** Use `plt.figure(figsize=(10, 6))` to make it bigger and easier to read
-
-**Problem:** "I don't know which dataset to choose"  
-**Solution:** Start with Iris - it's the simplest with only 150 samples and 3 classes
-
-### Want to Create a Nice Table?
-
-```python
-import pandas as pd
-
-# Create a results dataframe
-results_df = pd.DataFrame({
-    'K Value': list(k_values),
-    'Mean Accuracy': mean_accuracies
-})
-print(results_df)
-```
+- A Google Colab notebook (.ipynb file) 
 
 ---
 
@@ -258,29 +195,6 @@ Before starting, make sure you understand:
 - Course notes on K-Fold Cross Validation
 - Scikit-learn documentation: https://scikit-learn.org/stable/modules/cross_validation.html
 - StatQuest Cross Validation video: https://www.youtube.com/watch?v=fSytzGwwBVw
-
----
-
-## ❓ Frequently Asked Questions
-
-**Q: Which K value should I expect to be best?**  
-A: There's no single "correct" answer! It depends on your dataset. Generally, K=5 or K=10 works well, but your results might differ.
-
-**Q: Should I use the entire dataset for cross-validation?**  
-A: Yes! Cross-validation uses all the data by rotating through different train/test splits.
-
-**Q: Do I need to manually split my data into train/test?**  
-A: No! `cross_val_score` handles all the splitting automatically.
-
-**Q: Can I use a different dataset not listed?**  
-A: Stick to the three listed datasets for this assignment. They're specifically chosen to work well with this task.
-
-**Q: How long should this take?**  
-A: Most students complete this in 1-2 hours. Don't rush - take time to understand what you're doing!
-
-**Q: Can I work with a partner?**  
-A: You can discuss concepts with classmates, but everyone must submit their own unique notebook.
-
 ---
 
 ## 🎓 Learning Outcomes Assessment
@@ -326,30 +240,6 @@ For the Iris dataset, K=10 gave the highest accuracy of 96.67%.
 This makes sense because with more folds, each fold gets a better 
 representation of all three iris species...
 ```
-
----
-
-## 📞 Getting Help
-
-If you're stuck:
-1. Review the course materials on Cross Validation
-2. Check the scikit-learn documentation
-3. Post your question in the class discussion forum
-4. Attend office hours
-5. Email: Siva.Jasthi@metrostate.edu
-
-**Remember:** The goal is to learn, not just to get the right answer. Understanding the concepts is more important than getting a perfect score!
-
----
-
-## 🏆 Success Criteria
-
-You'll know you've succeeded when:
-- ✅ Your code runs without errors
-- ✅ You can explain why different K values give different accuracies
-- ✅ Your visualizations clearly show the relationship between K and accuracy
-- ✅ You can answer: "Which K would you recommend for this dataset and why?"
-
 ---
 
 **Good luck! 🚀**
