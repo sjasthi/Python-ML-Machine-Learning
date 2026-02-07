@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross Validation Quiz - Python ML</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .instructions {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+
+
+        .question {
+            background: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .options {
+            margin-left: 10px;
+        }
+
+        .option {
+            margin: 10px 0;
+            padding: 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            width: 100%;
+            display: inline-block;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            display: none;
+            background: #e7f3ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+            border: 3px solid #667eea;
+        }
+
+        .results h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .score {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .performance-message {
+            font-size: 1.3em;
+            color: #555;
+            margin: 15px 0;
+        }
+
+        .screenshot-reminder {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #ffc107;
+        }
+
+        .screenshot-reminder h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Cross Validation Quiz 📊</h1>
+            <p class="subtitle">Python for Machine Learning</p>
+            <p class="subtitle">Python ML (Learn and Help) (www.learnandhelp.com)</p>
+        </div>
+
+<div class="instructions">
+            <h3>📝 Instructions:</h3>
+            <ul>
+                <li>Read each question carefully</li>
+                <li>Select ONE answer for each question</li>
+                <li>Click "Submit Quiz" when you're done</li>
+                <li>Take a SCREENSHOT of your results</li>
+                <li>Submit the screenshot to Google Classroom</li>
+            </ul>
+        </div>
+
+        <form id="quizForm">
+            <!-- Question 1 -->
+            <div class="question">
+                <div class="question-number">Question 1</div>
+                <div class="question-text">What is the main problem that Cross Validation is designed to solve? 🎯</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1a" value="a">
+                        <label for="q1a">Underfitting</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1b" value="b">
+                        <label for="q1b">Overfitting</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1c" value="c">
+                        <label for="q1c">Data collection</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1d" value="d">
+                        <label for="q1d">Feature selection</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question">
+                <div class="question-number">Question 2</div>
+                <div class="question-text">What is the typical split ratio for Train-Validation-Test sets? 📐</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2a" value="a">
+                        <label for="q2a">50% - 25% - 25%</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2b" value="b">
+                        <label for="q2b">60% - 20% - 20%</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2c" value="c">
+                        <label for="q2c">80% - 10% - 10%</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2d" value="d">
+                        <label for="q2d">Both B and C are correct</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question">
+                <div class="question-number">Question 3</div>
+                <div class="question-text">In K-Fold Cross Validation, if K=5, how many times is the model trained? 🔄</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3a" value="a">
+                        <label for="q3a">1 time</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3b" value="b">
+                        <label for="q3b">4 times</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3c" value="c">
+                        <label for="q3c">5 times</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3d" value="d">
+                        <label for="q3d">6 times</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question">
+                <div class="question-number">Question 4</div>
+                <div class="question-text">Which Cross Validation method should you use for IMBALANCED datasets? ⚖️</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4a" value="a">
+                        <label for="q4a">Holdout method</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4b" value="b">
+                        <label for="q4b">Regular K-Fold</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4c" value="c">
+                        <label for="q4c">Stratified K-Fold</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4d" value="d">
+                        <label for="q4d">Leave-One-Out</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question">
+                <div class="question-number">Question 5</div>
+                <div class="question-text">What is the MAIN disadvantage of the Holdout method? ⚠️</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5a" value="a">
+                        <label for="q5a">It's too slow</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5b" value="b">
+                        <label for="q5b">It has high variance and wastes data</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5c" value="c">
+                        <label for="q5c">It can't work with large datasets</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5d" value="d">
+                        <label for="q5d">It's too complex to implement</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question">
+                <div class="question-number">Question 6</div>
+                <div class="question-text">Why should you NEVER use regular K-Fold CV for time series data? ⏰</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6a" value="a">
+                        <label for="q6a">It's too slow for time series</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6b" value="b">
+                        <label for="q6b">It randomly shuffles data, breaking temporal order</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6c" value="c">
+                        <label for="q6c">Time series data is too large</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6d" value="d">
+                        <label for="q6d">It can't handle dates and times</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question">
+                <div class="question-number">Question 7</div>
+                <div class="question-text">In Leave-One-Out Cross Validation (LOOCV), if you have 100 data samples, how many times will you train the model? 🔢</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7a" value="a">
+                        <label for="q7a">1 time</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7b" value="b">
+                        <label for="q7b">10 times</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7c" value="c">
+                        <label for="q7c">99 times</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7d" value="d">
+                        <label for="q7d">100 times</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback7"></div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="question">
+                <div class="question-number">Question 8</div>
+                <div class="question-text">Which of the following is a BENEFIT of using Cross Validation? ✅</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8a" value="a">
+                        <label for="q8a">It makes training faster</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8b" value="b">
+                        <label for="q8b">It helps detect overfitting and provides better performance estimates</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8c" value="c">
+                        <label for="q8c">It collects more data automatically</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8d" value="d">
+                        <label for="q8d">It removes the need for testing</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback8"></div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="question">
+                <div class="question-number">Question 9</div>
+                <div class="question-text">What is the recommended number of folds (K) for most datasets in K-Fold CV? 🎲</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9a" value="a">
+                        <label for="q9a">K = 2 or 3</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9b" value="b">
+                        <label for="q9b">K = 5 or 10</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9c" value="c">
+                        <label for="q9c">K = 20 or 30</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9d" value="d">
+                        <label for="q9d">K = 100</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback9"></div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="question">
+                <div class="question-number">Question 10</div>
+                <div class="question-text">You're building a model to predict tomorrow's stock prices. Which CV method should you use? 📈</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q10" id="q10a" value="a">
+                        <label for="q10a">Regular K-Fold CV</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q10" id="q10b" value="b">
+                        <label for="q10b">Stratified K-Fold CV</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q10" id="q10c" value="c">
+                        <label for="q10c">Time Series Cross Validation</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q10" id="q10d" value="d">
+                        <label for="q10d">Leave-One-Out CV</label>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback10"></div>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Quiz 🚀</button>
+        </form>
+
+        <div class="results" id="results">
+            <h2>Quiz Results 🎉</h2>
+            <div class="score" id="scoreDisplay"></div>
+            <div class="performance-message" id="performanceMessage"></div>
+            <div class="screenshot-reminder">
+                <h3>📸 IMPORTANT: Take a Screenshot!</h3>
+                <p>Press <strong>Print Screen</strong> (Windows) or <strong>Cmd+Shift+4</strong> (Mac)</p>
+                <p>Then submit your screenshot to <strong>Google Classroom</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Answer key
+        const answers = {
+            q1: 'b',  // Overfitting
+            q2: 'd',  // Both B and C are correct
+            q3: 'c',  // 5 times
+            q4: 'c',  // Stratified K-Fold
+            q5: 'b',  // High variance and wastes data
+            q6: 'b',  // Randomly shuffles data
+            q7: 'd',  // 100 times
+            q8: 'b',  // Helps detect overfitting
+            q9: 'b',  // K = 5 or 10
+            q10: 'c'  // Time Series CV
+        };
+
+        // Feedback messages
+        const feedbackMessages = {
+            q1: { correct: "✅ Correct! Cross Validation helps prevent overfitting by testing the model on unseen data.", incorrect: "❌ Not quite. Review the section on 'What is Cross Validation Trying to Solve?'" },
+            q2: { correct: "✅ Excellent! Both 60-20-20 and 80-10-10 are common split ratios.", incorrect: "❌ Check the material again. Both 60-20-20 and 80-10-10 are commonly used!" },
+            q3: { correct: "✅ Perfect! In K-Fold CV, the model is trained K times (once for each fold).", incorrect: "❌ Think about it: K-Fold means K different training runs, one for each fold." },
+            q4: { correct: "✅ Spot on! Stratified K-Fold preserves the class distribution in each fold.", incorrect: "❌ Remember: Stratified K-Fold is specifically designed for imbalanced datasets!" },
+            q5: { correct: "✅ Correct! Holdout method has high variance and doesn't use all data efficiently.", incorrect: "❌ The main issue with Holdout is that it wastes data and has high variance." },
+            q6: { correct: "✅ Exactly right! Regular K-Fold shuffles data randomly, which breaks temporal order.", incorrect: "❌ The key problem is that shuffling breaks the time order - you'd be training on the future!" },
+            q7: { correct: "✅ Great job! LOOCV trains the model N times (100 times for 100 samples).", incorrect: "❌ In LOOCV, you train once for each sample in your dataset." },
+            q8: { correct: "✅ Perfect! CV helps detect overfitting and gives better performance estimates.", incorrect: "❌ CV doesn't make training faster - it actually takes longer, but gives better evaluation!" },
+            q9: { correct: "✅ Correct! K=5 or K=10 is the sweet spot for most datasets.", incorrect: "❌ Review the best practices - K=5 or K=10 is most commonly recommended." },
+            q10: { correct: "✅ Excellent! Stock prices are time series data, so you need Time Series CV.", incorrect: "❌ Stock prices depend on time order! You need Time Series Cross Validation." }
+        };
+
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let score = 0;
+            let totalQuestions = 10;
+
+            // Grade each question
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionName = 'q' + i;
+                const selectedAnswer = document.querySelector(`input[name="${questionName}"]:checked`);
+                const feedbackDiv = document.getElementById('feedback' + i);
+
+                if (!selectedAnswer) {
+                    feedbackDiv.className = 'feedback incorrect';
+                    feedbackDiv.textContent = '❌ No answer selected!';
+                    feedbackDiv.style.display = 'block';
+                    continue;
+                }
+
+                if (selectedAnswer.value === answers[questionName]) {
+                    score++;
+                    feedbackDiv.className = 'feedback correct';
+                    feedbackDiv.textContent = feedbackMessages[questionName].correct;
+                } else {
+                    feedbackDiv.className = 'feedback incorrect';
+                    feedbackDiv.textContent = feedbackMessages[questionName].incorrect;
+                }
+                feedbackDiv.style.display = 'block';
+            }
+
+            // Calculate percentage
+            const percentage = (score / totalQuestions) * 100;
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const performanceMessage = document.getElementById('performanceMessage');
+
+            scoreDisplay.textContent = `${score} / ${totalQuestions} (${percentage}%)`;
+
+            // Performance message based on score
+            let message = '';
+            let emoji = '';
+            if (percentage >= 90) {
+                message = "Outstanding! You're a Cross Validation expert!";
+                emoji = "🌟";
+            } else if (percentage >= 80) {
+                message = "Excellent work! You have a solid understanding!";
+                emoji = "🎯";
+            } else if (percentage >= 70) {
+                message = "Good job! Keep reviewing to master the concepts!";
+                emoji = "👍";
+            } else if (percentage >= 60) {
+                message = "Not bad! Review the material and try again!";
+                emoji = "📚";
+            } else {
+                message = "Keep studying! Review the lessons and try again!";
+                emoji = "💪";
+            }
+
+            performanceMessage.textContent = `${emoji} ${message}`;
+
+            // Show results
+            resultsDiv.style.display = 'block';
+
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Disable submit button
+            e.target.querySelector('.submit-btn').disabled = true;
+            e.target.querySelector('.submit-btn').textContent = 'Quiz Submitted! ✓';
+        });
+    </script>
+</body>
+</html>
