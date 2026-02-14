@@ -1,8 +1,7 @@
 # Week 19: Naive Bayes Classifier
 
 **Course:** Python for Machine Learning  
-**Instructor:** Siva Jasthi (Siva.Jasthi@metrostate.edu)  
-**Week:** 19 (February 14 – February 20, 2026)  
+**Instructor:** Siva Jasthi (Siva.Jasthi@metrostate.edu)   
 **Topic:** Naive Bayes Classifier
 
 ---
@@ -30,26 +29,6 @@ By the end of this week, students will be able to:
 👉 **Colab Notebook:**  
 [ML_Naive_Bayes_Classifier.ipynb](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Colab_Notebooks/ML_Naive_Bayes_Classifier.ipynb)
 
----
-
-## 🗓️ Weekly Plan
-
-### 🔹 Before Class
-- Read through the presentation (ML_Naive_Bayes_Classifier.md)
-- Review Bayes' Theorem formula and the step-by-step example
-- Think about: How is this different from KNN or Decision Trees?
-
-### 🔹 During Class
-- Walk through the presentation together
-- Hand-calculate a Naive Bayes example as a class
-- Open the Colab notebook and code along
-- Discuss: Where does Naive Bayes shine? (text classification, spam filtering, sentiment analysis)
-- Compare results with Decision Tree and Random Forest from previous weeks
-
-### 🔹 After Class
-- Re-run the Colab notebook on your own
-- Experiment: Try changing the dataset or the type of Naive Bayes classifier
-- Review the comparison of all classifiers learned so far
 
 ---
 
@@ -90,16 +69,6 @@ By the end of this week, students will be able to:
 | Decision Tree | Classification/Regression | If-then rules (splits) |
 | Random Forest | Classification/Regression | Ensemble of many trees |
 | **Naive Bayes** | **Classification** | **Probability using Bayes' Theorem** |
-
----
-
-## ✅ Weekly Goals Checklist
-
-- [ ] Read the Naive Bayes presentation
-- [ ] Attend class and participate in the hand-calculation exercise
-- [ ] Complete the Colab notebook walkthrough
-- [ ] Experiment with different Naive Bayes variants in the notebook
-- [ ] Be ready for next week: **Support Vector Machines (SVM)** 🚀
 
 ---
 
