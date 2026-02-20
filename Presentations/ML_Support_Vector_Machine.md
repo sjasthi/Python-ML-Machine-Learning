@@ -1,4 +1,4 @@
-# 🤖 Support Vector Machines (SVM)
+# 🤖 Support Vector Machine (SVM)
 ### Python for Machine Learning — Middle School Edition
 
 ---
