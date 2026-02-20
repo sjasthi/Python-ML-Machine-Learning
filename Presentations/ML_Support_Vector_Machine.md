@@ -534,7 +534,6 @@ Before you leave today, think about these questions:
 ## 📚 Further Reading
 
 - [Scikit-learn SVM Documentation](https://scikit-learn.org/stable/modules/svm.html)
-- [Visual SVM Playground (Weka)](https://www.cs.waikato.ac.nz/ml/weka/)
 - Try searching: *"SVM interactive demo"* to find websites where you can drag points and watch the boundary update live!
 
 ---
