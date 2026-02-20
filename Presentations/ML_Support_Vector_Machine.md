@@ -845,7 +845,9 @@ Before you leave today, think about these questions:
 ## 📚 Further Reading
 
 - [Scikit-learn SVM Documentation](https://scikit-learn.org/stable/modules/svm.html)
-- Try searching: *"SVM interactive demo"* to find websites where you can drag points and watch the boundary update live!
+- [SVM in 2 minutes - Video](https://www.youtube.com/watch?v=_YPScrckx28)
+- [SVM - Kernel Trick](https://www.youtube.com/watch?v=Q7vT0--5VII)
+- - Try searching: *"SVM interactive demo"* to find websites where you can drag points and watch the boundary update live!
 
 ---
 
