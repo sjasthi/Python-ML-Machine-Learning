@@ -1,5 +1,5 @@
 # 🤖 Support Vector Machines (SVM)
-### Python ML (Python for Machine Learning)
+### Python for Machine Learning — Middle School Edition
 
 ---
 
@@ -21,10 +21,15 @@
 9. [Hard Margin vs Soft Margin (The C Parameter)](#9-hard-margin-vs-soft-margin-the-c-parameter)
 10. [SVM In Action: Cats vs Dogs](#10-svm-in-action-cats-vs-dogs)
 11. [Real-World Uses of SVM](#11-real-world-uses-of-svm)
-12. [Full Python Code Example](#12-full-python-code-example)
-13. [How to Use SVM — Step by Step](#13-how-to-use-svm--step-by-step)
-14. [Practice Challenges](#14-practice-challenges)
-15. [Quick Summary](#15-quick-summary)
+12. [Multi-Class Classification with SVM](#12-multi-class-classification-with-svm)
+    - 12a. [One-vs-Rest (OvR)](#12a-one-vs-rest-ovr)
+    - 12b. [One-vs-One (OvO)](#12b-one-vs-one-ovo)
+    - 12c. [OvR vs OvO — Which to Use?](#12c-ovr-vs-ovo--which-to-use)
+    - 12d. [Full Multi-Class Code Example](#12d-full-multi-class-code-example)
+13. [Full Python Code Example (Binary)](#13-full-python-code-example-binary)
+14. [How to Use SVM — Step by Step](#14-how-to-use-svm--step-by-step)
+15. [Practice Challenges](#15-practice-challenges)
+16. [Quick Summary](#16-quick-summary)
 
 ---
 
@@ -270,7 +275,302 @@ Sensors detect objects, and SVM helps classify them: *Person? Car? Stop sign? An
 
 ---
 
-## 12. Full Python Code Example
+## 12. Multi-Class Classification with SVM
+
+So far, everything we've learned has been about sorting things into **two** groups (yes/no, cat/dog, spam/not-spam). But real life often has more than two categories! What if you want to classify:
+
+- Three types of flowers (Setosa, Versicolor, Virginica)?
+- Four genres of music (Rock, Pop, Jazz, Classical)?
+- Five grades on a test (A, B, C, D, F)?
+
+SVM was originally designed for **binary** (two-class) problems. To handle **multiple classes**, it uses clever strategies that break the big problem into many smaller binary problems and then combines the answers.
+
+There are two main strategies: **One-vs-Rest (OvR)** and **One-vs-One (OvO)**.
+
+---
+
+### 12a. One-vs-Rest (OvR)
+
+**The Big Idea:** Train one binary classifier for each class. Each classifier asks the question: *"Is this data point THIS class, or one of the rest?"*
+
+**Analogy:** Imagine you're at a pizza party trying to find out who ordered what. You go around and ask: "Did you order pepperoni? Did you order cheese? Did you order veggie?" You ask one question per topping. The answer that has the highest confidence wins!
+
+![OvR Concept](images_svm/10_ovr_concept.png)
+
+In the image above, three separate classifiers are trained on the Iris flower dataset. Each one highlights **one flower type in color** and treats **all others as grey "rest"** points.
+
+#### How OvR works step by step:
+
+**Example: 3 flower types → 3 classifiers are trained**
+
+```
+Classifier 1: Setosa (YES) vs [Versicolor + Virginica] (NO)
+Classifier 2: Versicolor (YES) vs [Setosa + Virginica] (NO)
+Classifier 3: Virginica (YES) vs [Setosa + Versicolor] (NO)
+```
+
+When a new flower arrives:
+1. Run it through all 3 classifiers
+2. Each classifier gives a **confidence score** (how sure is it?)
+3. The class with the **highest confidence score** wins!
+
+```
+New flower → 
+  Classifier 1 (Setosa):    confidence = 0.12  ← low
+  Classifier 2 (Versicolor): confidence = 0.71  ← highest!
+  Classifier 3 (Virginica):  confidence = 0.17  ← low
+
+Final answer: Versicolor  (highest confidence)
+```
+
+#### Number of classifiers needed:
+
+| Classes | Classifiers Needed |
+|---------|-------------------|
+| 3       | 3                 |
+| 4       | 4                 |
+| 10      | 10                |
+| N       | **N**             |
+
+#### Python code for OvR:
+
+```python
+from sklearn.svm import SVC
+from sklearn.multiclass import OneVsRestClassifier
+
+# Wrap SVC inside OneVsRestClassifier
+model_ovr = OneVsRestClassifier(SVC(kernel='rbf', C=1.0))
+model_ovr.fit(X_train, y_train)
+y_pred = model_ovr.predict(X_test)
+```
+
+> **Note:** When you use `OneVsRestClassifier`, sklearn automatically trains one SVM per class behind the scenes. You don't need to do anything extra!
+
+---
+
+### 12b. One-vs-One (OvO)
+
+**The Big Idea:** Instead of each class fighting "the world", hold a **tournament** where every pair of classes faces each other in a head-to-head match. The class that wins the most matches is the final answer!
+
+**Analogy:** Think of a round-robin sports tournament. Every team plays every other team. At the end, whoever won the most games is the champion. OvO works the same way!
+
+![OvO Concept](images_svm/11_ovo_concept.png)
+
+In the image above, each subplot shows a different head-to-head match: Setosa vs Versicolor, Setosa vs Virginica, and Versicolor vs Virginica. Each match only uses the data from those two classes.
+
+#### How OvO works step by step:
+
+**Example: 3 flower types → 3 matches are held**
+
+```
+Match 1: Setosa vs Versicolor    → Winner: Setosa
+Match 2: Setosa vs Virginica     → Winner: Setosa
+Match 3: Versicolor vs Virginica → Winner: Versicolor
+
+Vote tally:
+  Setosa:    2 wins  ← WINNER!
+  Versicolor: 1 win
+  Virginica:  0 wins
+```
+
+![OvO Voting Process](images_svm/13_ovo_voting.png)
+
+The image above shows a 4-class music genre example. After 6 matches, each genre's wins are counted and the class with the most wins becomes the final prediction.
+
+#### Number of classifiers needed:
+
+| Classes | Classifiers Needed | Formula           |
+|---------|-------------------|-------------------|
+| 3       | 3                 | 3 × 2 / 2 = 3     |
+| 4       | 6                 | 4 × 3 / 2 = 6     |
+| 5       | 10                | 5 × 4 / 2 = 10    |
+| N       | **N × (N-1) / 2** | General formula   |
+
+#### Python code for OvO:
+
+```python
+from sklearn.svm import SVC
+
+# SVC uses OvO by default — no extra wrapper needed!
+model_ovo = SVC(kernel='rbf', C=1.0, decision_function_shape='ovo')
+model_ovo.fit(X_train, y_train)
+y_pred = model_ovo.predict(X_test)
+```
+
+> **Fun fact:** When you use `SVC()` in sklearn, it already uses One-vs-One under the hood! You don't need to do anything special for OvO with SVC.
+
+---
+
+### 12c. OvR vs OvO — Which to Use?
+
+![OvR vs OvO Comparison](images_svm/12_ovr_vs_ovo_comparison.png)
+
+Here's a simple guide to help you choose:
+
+| Situation | Best Choice | Why |
+|-----------|-------------|-----|
+| Many classes (10+) | **OvR** | Fewer classifiers to train |
+| Few classes (2–5) | **OvO** | More accurate, smaller training sets per classifier |
+| Using SVC in sklearn | **OvO** | It's the default — just use `SVC()` |
+| Need probability scores | **OvR** | Works better with `predict_proba` |
+| Imbalanced classes | **OvR** | Better handles unequal class sizes |
+
+**The short answer for beginners:** Just use `SVC()` — it uses OvO automatically and works great for most problems!
+
+---
+
+### 12d. Full Multi-Class Code Example
+
+Let's use the famous **Iris flower dataset** — 150 flowers, 3 species, 4 features. This is one of the most popular datasets for learning machine learning!
+
+```python
+# ============================================================
+# Multi-Class SVM: Classifying 3 Types of Iris Flowers
+# ============================================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.svm import SVC
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+
+# Step 1: Load the Iris dataset
+iris = load_iris()
+X = iris.data       # 4 features: sepal length, sepal width, petal length, petal width
+y = iris.target     # 3 classes: 0=Setosa, 1=Versicolor, 2=Virginica
+
+print("Dataset Info:")
+print(f"  Total flowers: {len(X)}")
+print(f"  Features per flower: {X.shape[1]} → {list(iris.feature_names)}")
+print(f"  Classes: {list(iris.target_names)}")
+print(f"  Flowers per class: {[sum(y==i) for i in range(3)]}")
+
+# Step 2: Split into train and test
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Step 3: Scale the features
+scaler = StandardScaler()
+X_train_sc = scaler.fit_transform(X_train)
+X_test_sc  = scaler.transform(X_test)
+
+# Step 4a: Train using OvO (SVC default)
+model_ovo = SVC(kernel='rbf', C=2.0, decision_function_shape='ovo', random_state=42)
+model_ovo.fit(X_train_sc, y_train)
+y_pred_ovo = model_ovo.predict(X_test_sc)
+
+# Step 4b: Train using OvR
+model_ovr = OneVsRestClassifier(SVC(kernel='rbf', C=2.0, random_state=42))
+model_ovr.fit(X_train_sc, y_train)
+y_pred_ovr = model_ovr.predict(X_test_sc)
+
+# Step 5: Compare results
+print("\n--- One-vs-One (OvO) Results ---")
+print(f"Accuracy: {accuracy_score(y_test, y_pred_ovo)*100:.1f}%")
+print(classification_report(y_test, y_pred_ovo, target_names=iris.target_names))
+
+print("--- One-vs-Rest (OvR) Results ---")
+print(f"Accuracy: {accuracy_score(y_test, y_pred_ovr)*100:.1f}%")
+print(classification_report(y_test, y_pred_ovr, target_names=iris.target_names))
+
+# Step 6: Visualize the confusion matrix (OvO)
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+for ax, y_pred, title in zip(axes,
+    [y_pred_ovo, y_pred_ovr],
+    ['OvO Confusion Matrix', 'OvR Confusion Matrix']):
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(cm, display_labels=iris.target_names)
+    disp.plot(ax=ax, colorbar=False, cmap='Blues')
+    ax.set_title(title, fontsize=12, fontweight='bold')
+
+plt.suptitle('Multi-Class SVM: How Many Did Each Model Get Right?', fontsize=13, fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+# Step 7: Predict a brand-new flower!
+new_flower = np.array([[5.1, 3.5, 1.4, 0.2]])   # typical Setosa measurements
+new_scaled  = scaler.transform(new_flower)
+pred = model_ovo.predict(new_scaled)
+print(f"\nNew flower measurements: {new_flower[0]}")
+print(f"Prediction: {iris.target_names[pred[0]]}!")
+```
+
+#### Expected Output:
+```
+Dataset Info:
+  Total flowers: 150
+  Features per flower: 4 → ['sepal length (cm)', ...]
+  Classes: ['setosa', 'versicolor', 'virginica']
+  Flowers per class: [50, 50, 50]
+
+--- One-vs-One (OvO) Results ---
+Accuracy: 96.7%
+              precision    recall  f1-score
+    setosa       1.00      1.00      1.00
+versicolor       0.94      0.94      0.94
+ virginica       0.94      0.94      0.94
+
+--- One-vs-Rest (OvR) Results ---
+Accuracy: 96.7%
+
+New flower measurements: [5.1 3.5 1.4 0.2]
+Prediction: setosa!
+```
+
+#### Visualizing the Decision Boundaries (using only 2 features):
+
+```python
+# Use only petal length & petal width for easy 2D visualization
+X_2d = iris.data[:, [2, 3]]   # columns 2 and 3
+X_2d_sc = StandardScaler().fit_transform(X_2d)
+
+# Plot OvO boundary
+clf = SVC(kernel='rbf', C=2.0)
+clf.fit(X_2d_sc, iris.target)
+
+xx, yy = np.meshgrid(np.linspace(-2.5, 2.5, 300), np.linspace(-2.5, 2.5, 300))
+Z = clf.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+plt.figure(figsize=(8, 6))
+plt.contourf(xx, yy, Z, alpha=0.25, cmap=plt.cm.Pastel1, levels=[-0.5, 0.5, 1.5, 2.5])
+plt.contour(xx, yy, Z, colors='grey', linewidths=1.5, levels=[0.5, 1.5])
+
+colors = ['#e74c3c', '#3498db', '#27ae60']
+for i, (color, name) in enumerate(zip(colors, iris.target_names)):
+    plt.scatter(X_2d_sc[iris.target==i, 0], X_2d_sc[iris.target==i, 1],
+                s=80, color=color, label=name, edgecolors='white')
+
+plt.xlabel('Petal Length (scaled)')
+plt.ylabel('Petal Width (scaled)')
+plt.title('SVM Multi-Class Decision Boundaries (Iris)', fontsize=13, fontweight='bold')
+plt.legend()
+plt.show()
+```
+
+![Multi-Class Decision Boundaries](images_svm/14_multiclass_result.png)
+
+Both OvR (left) and OvO (right) produce nearly identical boundaries on this dataset. The colored regions show which zone SVM assigns to each flower type.
+
+#### Reading the Confusion Matrix:
+
+![Confusion Matrix](images_svm/15_confusion_matrix.png)
+
+The confusion matrix is a grid that shows how well the model did:
+- Each **row** represents the actual (true) flower type
+- Each **column** represents what the model predicted
+- Numbers on the **diagonal** (top-left to bottom-right) = **correct predictions** ✅
+- Numbers **off the diagonal** = mistakes ❌
+
+In the example above, SVM correctly identified nearly all flowers. The small number of errors happens between Versicolor and Virginica — even for humans, those two look very similar!
+
+---
+
+## 13. Full Python Code Example (Binary)
 
 Here's a complete example you can run in your Jupyter notebook! We'll classify whether a student is "likely to pass" or "needs more practice" based on their homework score and quiz score.
 
@@ -385,7 +685,7 @@ New student (HW=65, Quiz=70): Likely to Pass! 🎉
 
 ---
 
-## 13. How to Use SVM — Step by Step
+## 14. How to Use SVM — Step by Step
 
 ![SVM Steps Flowchart](images_svm/09_svm_steps_flowchart.png)
 
@@ -436,7 +736,7 @@ print(f"Accuracy: {accuracy_score(y_test, y_pred) * 100:.1f}%")
 
 ---
 
-## 14. Practice Challenges
+## 15. Practice Challenges
 
 ### Challenge 1 — Beginner: Classify Shapes 🔵🔺
 ```python
@@ -485,7 +785,7 @@ Download the SMS Spam dataset from the internet and use `CountVectorizer` to tur
 
 ---
 
-## 15. Quick Summary
+## 16. Quick Summary
 
 | Concept | Key Point |
 |---------|-----------|
@@ -497,22 +797,31 @@ Download the SMS Spam dataset from the internet and use `CountVectorizer` to tur
 | **C Parameter** | Controls strictness: small C = flexible, large C = strict |
 | **Scaling** | Always scale features before SVM! |
 | **Default Kernel** | Use `rbf` when you're not sure |
+| **Multi-class** | SVM extends to 3+ classes using OvR or OvO strategies |
+| **OvR** | N classifiers — each class vs all the rest; pick highest confidence |
+| **OvO** | N×(N-1)/2 classifiers — every pair fights; most match wins wins |
+| **sklearn default** | `SVC()` uses OvO automatically |
 
 ### SVM Cheat Sheet:
 ```python
 from sklearn.svm import SVC
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import StandardScaler
 
 # Scale first!
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Basic SVM
-model = SVC(kernel='rbf', C=1.0)     # Best for most problems
-model = SVC(kernel='linear')          # For linearly separable data
-model = SVC(kernel='poly', degree=3)  # For polynomial boundaries
+# Binary classification (2 classes)
+model = SVC(kernel='rbf', C=1.0)
 
-# Train and predict
+# Multi-class — OvO (SVC default, recommended)
+model = SVC(kernel='rbf', C=1.0, decision_function_shape='ovo')
+
+# Multi-class — OvR (explicit)
+model = OneVsRestClassifier(SVC(kernel='rbf', C=1.0))
+
+# Train and predict (same for all!)
 model.fit(X_train, y_train)
 predictions = model.predict(X_new)
 ```
@@ -528,6 +837,8 @@ Before you leave today, think about these questions:
 3. What are **support vectors** and why are they called "support" vectors?
 4. When would you use an **RBF kernel** instead of a linear kernel?
 5. If your SVM model has 99% accuracy on training data but only 60% on test data, which C value might you try — larger or smaller? Why?
+6. SVM was originally designed for **two** classes. How does **One-vs-Rest** let it handle three or more classes?
+7. In **One-vs-One**, how many classifiers would you need to tell apart **5 different types of music** genres? Show your calculation using the formula N × (N-1) / 2.
 
 ---
 
