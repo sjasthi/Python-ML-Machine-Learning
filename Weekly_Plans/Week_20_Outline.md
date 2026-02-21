@@ -23,7 +23,7 @@ By the end of this week, students will be able to:
 | 📄 Concepts & Presentation | [ML_Support_Vector_Machine.md](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Presentations/ML_Support_Vector_Machine.md) |
 | 💻 Colab Notebook | [ML_Support_Vector_Machines.ipynb](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Colab_Notebooks/ML_Support_Vector_Machines.ipynb) |
 | 🧠 Quiz / Playbook | [ML_Support_Vector_Machines.html](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Support_Vector_Machines.html) |
-
+| 📝 Assignment (25 pts) | [ML_Support_Vector_Machines_Assignment.md](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Assignments/ML_Support_Vector_Machines_Assignment.md) |
 
 ---
 
