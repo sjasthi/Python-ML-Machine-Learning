@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaggle & Hugging Face — ML Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --kaggle: #20BEFF;
+    --kaggle-dark: #0A7EC2;
+    --hf: #FF9D00;
+    --hf-dark: #C97800;
+    --quiz: #7C3AED;
+    --quiz-dark: #5B21B6;
+    --bg: #0D0F14;
+    --surface: #161923;
+    --surface2: #1E2330;
+    --border: rgba(255,255,255,0.07);
+    --text: #E8ECF4;
+    --muted: #8892A4;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --active-color: var(--kaggle);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 2rem 2rem 0;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(32,190,255,0.06) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .course-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.9rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+    background: var(--surface);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 0.6rem;
+    background: linear-gradient(135deg, #fff 30%, var(--kaggle) 70%, var(--hf) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.8rem;
+    font-weight: 300;
+  }
+
+  /* ─── TABS ─── */
+  .tab-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  .tab-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.75rem 1.8rem;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 12px 12px 0 0;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+    position: relative;
+  }
+
+  .tab-btn .tab-icon { margin-right: 0.4rem; font-size: 1rem; }
+
+  .tab-btn[data-tab="kaggle"].active { color: var(--kaggle); background: rgba(32,190,255,0.1); }
+  .tab-btn[data-tab="huggingface"].active { color: var(--hf); background: rgba(255,157,0,0.1); }
+  .tab-btn[data-tab="quiz"].active { color: #a78bfa; background: rgba(124,58,237,0.1); }
+
+  .tab-btn:not(.active):hover { color: var(--text); background: var(--surface); }
+
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+  }
+  .tab-btn[data-tab="kaggle"].active::after { background: var(--kaggle); }
+  .tab-btn[data-tab="huggingface"].active::after { background: var(--hf); }
+  .tab-btn[data-tab="quiz"].active::after { background: #a78bfa; }
+
+  /* ─── MAIN CONTENT ─── */
+  main {
+    position: relative;
+    z-index: 5;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .tab-pane { display: none; animation: fadeUp 0.3s ease forwards; }
+  .tab-pane.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTION HERO ─── */
+  .section-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+  }
+  .kaggle-hero::before { background: var(--kaggle); }
+  .hf-hero::before { background: var(--hf); }
+
+  .hero-emoji { font-size: 3.5rem; flex-shrink: 0; }
+
+  .hero-text h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+  }
+  .kaggle-hero .hero-text h2 { color: var(--kaggle); }
+  .hf-hero .hero-text h2 { color: var(--hf); }
+
+  .hero-text p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; }
+
+  /* ─── STEPS ─── */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .step-card:hover { transform: translateY(-2px); }
+  .step-card.kaggle-card:hover { border-color: rgba(32,190,255,0.3); }
+  .step-card.hf-card:hover { border-color: rgba(255,157,0,0.3); }
+
+  .step-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+  }
+  .kaggle-card .step-number { background: rgba(32,190,255,0.1); color: var(--kaggle); }
+  .hf-card .step-number { background: rgba(255,157,0,0.1); color: var(--hf); }
+
+  .step-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+  .step-card p strong { color: var(--text); }
+
+  .step-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.9rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .kaggle-link { color: var(--kaggle); background: rgba(32,190,255,0.1); }
+  .kaggle-link:hover { background: rgba(32,190,255,0.2); }
+  .hf-link { color: var(--hf); background: rgba(255,157,0,0.1); }
+  .hf-link:hover { background: rgba(255,157,0,0.2); }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-block {
+    background: #0A0C12;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1) { background: #FF5F57; }
+  .code-dot:nth-child(2) { background: #FFBD2E; }
+  .code-dot:nth-child(3) { background: #28C840; }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .copy-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .copy-btn.copied { color: var(--success); border-color: var(--success); }
+
+  pre {
+    padding: 1.2rem;
+    overflow-x: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: #CDD6F4;
+  }
+
+  .kw { color: #CBA6F7; }
+  .fn { color: #89B4FA; }
+  .str { color: #A6E3A1; }
+  .cm { color: #585B70; font-style: italic; }
+  .num { color: #FAB387; }
+  .var { color: #F38BA8; }
+
+  /* ─── TIP BOX ─── */
+  .tip-box {
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .tip-box.tip-kaggle { background: rgba(32,190,255,0.07); border-left: 3px solid var(--kaggle); }
+  .tip-box.tip-hf { background: rgba(255,157,0,0.07); border-left: 3px solid var(--hf); }
+  .tip-box.tip-action { background: rgba(124,58,237,0.07); border-left: 3px solid var(--quiz); }
+  .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .tip-box p { font-size: 0.875rem; line-height: 1.6; color: var(--text); }
+  .tip-box p strong { display: block; margin-bottom: 0.2rem; font-family: 'Syne', sans-serif; }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── CHECKLIST ─── */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: color 0.15s;
+    user-select: none;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { color: #fff; }
+
+  .check-box {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.15s;
+  }
+  .check-item.checked .check-box { background: var(--success); border-color: var(--success); }
+  .check-item.checked .check-box::after { content: '✓'; color: white; font-weight: 700; }
+  .check-item.checked span { text-decoration: line-through; color: var(--muted); }
+
+  /* ─── TIER DISPLAY ─── */
+  .tier-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+  }
+  .tier-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.35rem 0.8rem;
+    border-radius: 100px;
+    border: 1px solid;
+    letter-spacing: 0.05em;
+  }
+  .tier-pill:nth-child(1) { color: #94A3B8; border-color: #94A3B8; background: rgba(148,163,184,0.08); }
+  .tier-pill:nth-child(2) { color: #4ADE80; border-color: #4ADE80; background: rgba(74,222,128,0.08); }
+  .tier-pill:nth-child(3) { color: #60A5FA; border-color: #60A5FA; background: rgba(96,165,250,0.08); }
+  .tier-pill:nth-child(4) { color: #F59E0B; border-color: #F59E0B; background: rgba(245,158,11,0.08); }
+  .tier-pill:nth-child(5) { color: #EC4899; border-color: #EC4899; background: rgba(236,72,153,0.08); }
+  .tier-arrow { color: var(--muted); align-self: center; font-size: 0.75rem; }
+
+  /* ─── QUIZ ─── */
+  #quiz-pane { }
+
+  .quiz-hero {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(167,139,250,0.05));
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .quiz-hero h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #a78bfa;
+    margin-bottom: 0.5rem;
+  }
+  .quiz-hero p { color: var(--muted); font-size: 0.9rem; }
+
+  .quiz-progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 6px;
+    margin: 1.5rem 0 0.4rem;
+    overflow: hidden;
+  }
+  .quiz-progress-bar {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--quiz), #a78bfa);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .quiz-progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    margin-bottom: 1.2rem;
+    transition: border-color 0.2s;
+  }
+  .question-card.answered { border-color: rgba(124,58,237,0.2); }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    background: rgba(124,58,237,0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 0.8rem;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .option-btn {
+    text-align: left;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .option-letter {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: all 0.15s;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .option-btn:hover:not(:disabled) { border-color: rgba(124,58,237,0.4); }
+  .option-btn:hover:not(:disabled) .option-letter { background: rgba(124,58,237,0.15); color: #a78bfa; border-color: #a78bfa; }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.selected-correct { background: rgba(34,197,94,0.1); border-color: var(--success); }
+  .option-btn.selected-correct .option-letter { background: var(--success); color: white; border-color: var(--success); }
+  .option-btn.selected-wrong { background: rgba(239,68,68,0.1); border-color: var(--danger); }
+  .option-btn.selected-wrong .option-letter { background: var(--danger); color: white; border-color: var(--danger); }
+  .option-btn.show-correct { background: rgba(34,197,94,0.06); border-color: rgba(34,197,94,0.3); }
+  .option-btn.show-correct .option-letter { color: var(--success); border-color: var(--success); }
+
+  .feedback-msg {
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    display: none;
+  }
+  .feedback-msg.correct { background: rgba(34,197,94,0.1); color: var(--success); display: block; }
+  .feedback-msg.wrong { background: rgba(239,68,68,0.1); color: #FCA5A5; display: block; }
+
+  /* ─── SUBMIT / SCORE ─── */
+  .quiz-submit-area {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .submit-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.9rem 3rem;
+    background: linear-gradient(135deg, var(--quiz), #a78bfa);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.3);
+    letter-spacing: 0.03em;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 32px rgba(124,58,237,0.45); }
+  .submit-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  /* ─── SCORE CARD ─── */
+  #score-card {
+    display: none;
+    background: var(--surface);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    margin-top: 2rem;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .score-display {
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, #a78bfa, #60A5FA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0.5rem 0;
+  }
+
+  .score-label { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .score-grade {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.4rem 1.4rem;
+    border-radius: 100px;
+    margin: 0.8rem 0 1.5rem;
+  }
+
+  .screenshot-instruction {
+    background: rgba(32,190,255,0.07);
+    border: 1px dashed rgba(32,190,255,0.3);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .screenshot-instruction strong {
+    display: block;
+    color: var(--kaggle);
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+  }
+
+  kbd {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    margin-top: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .retry-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  /* ─── LINKS TABLE ─── */
+  .links-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .links-table th {
+    background: var(--surface2);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .links-table td { padding: 0.65rem 1rem; border-top: 1px solid var(--border); color: var(--muted); }
+  .links-table td:first-child { color: var(--text); font-weight: 500; }
+  .links-table a { color: var(--kaggle); text-decoration: none; }
+  .links-table a:hover { text-decoration: underline; }
+  .links-table.hf-table a { color: var(--hf); }
+
+  /* ─── SCROLL TO TOP ─── */
+  @media (max-width: 640px) {
+    .steps-grid { grid-template-columns: 1fr; }
+    .tab-btn { padding: 0.6rem 1rem; font-size: 0.78rem; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="course-badge">Python for Machine Learning — Metropolitan State University</div>
+  <h1>Kaggle & Hugging Face<br>Interactive Playbook</h1>
+  <p class="subtitle">Explore the two most important platforms in ML — then prove you know them.</p>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="kaggle" onclick="switchTab('kaggle')">
+      <span class="tab-icon">🏆</span>Kaggle
+    </button>
+    <button class="tab-btn" data-tab="huggingface" onclick="switchTab('huggingface')">
+      <span class="tab-icon">🤗</span>Hugging Face
+    </button>
+    <button class="tab-btn" data-tab="quiz" onclick="switchTab('quiz')">
+      <span class="tab-icon">📝</span>Quiz
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══════════════ KAGGLE TAB ═══════════════ -->
+  <div class="tab-pane active" id="kaggle-pane">
+    <div class="section-hero kaggle-hero">
+      <div class="hero-emoji">🏆</div>
+      <div class="hero-text">
+        <h2>Kaggle — Your ML Training Ground</h2>
+        <p>The world's largest data science platform with <strong>15M+ users</strong>, free GPU notebooks, 10,000+ datasets, and real-world competitions. This is where ML practitioners learn, experiment, and prove their skills.</p>
+      </div>
+    </div>
+
+    <div class="section-title">🗺️ Step-by-Step Exploration</div>
+
+    <div class="steps-grid">
+
+      <div class="step-card kaggle-card">
+        <span class="step-number">Step 01</span>
+        <h3>Create Your Kaggle Account</h3>
+        <p>Go to <strong>kaggle.com</strong>, click <strong>Register</strong>, and sign up with your Google or university email. Complete your profile — add your school and interests. Your public profile is your first ML credential.</p>
+        <a href="https://www.kaggle.com" target="_blank" class="step-link kaggle-link">↗ Open Kaggle</a>
+      </div>
+
+      <div class="step-card kaggle-card">
+        <span class="step-number">Step 02</span>
+        <h3>Explore the Datasets Section</h3>
+        <p>Click <strong>Datasets</strong> in the top nav. Search for topics like <strong>"diabetes"</strong>, <strong>"movies"</strong>, or <strong>"housing prices"</strong>. On each dataset, explore: <strong>Overview</strong> (what it means) → <strong>Data</strong> (preview rows) → <strong>Code</strong> (see how others used it).</p>
+        <a href="https://www.kaggle.com/datasets" target="_blank" class="step-link kaggle-link">↗ Browse Datasets</a>
+      </div>
+
+      <div class="step-card kaggle-card">
+        <span class="step-number">Step 03</span>
+        <h3>Run a Free Cloud Notebook</h3>
+        <p>Go to <strong>Code → New Notebook</strong>. You get a free Jupyter-like environment with <strong>30 hrs/week of GPU</strong>. Click <strong>+ Add Data</strong> to attach any Kaggle dataset. No local setup needed!</p>
+        <a href="https://www.kaggle.com/code" target="_blank" class="step-link kaggle-link">↗ Open Notebooks</a>
+      </div>
+
+      <div class="step-card kaggle-card">
+        <span class="step-number">Step 04</span>
+        <h3>Enter the Titanic Competition</h3>
+        <p>The legendary beginner competition. Every ML practitioner has done Titanic. Click <strong>Competitions → Getting Started → Titanic</strong>. Browse 50,000+ community notebooks. Then try to beat the leaderboard!</p>
+        <a href="https://www.kaggle.com/c/titanic" target="_blank" class="step-link kaggle-link">↗ Titanic Challenge</a>
+      </div>
+
+      <div class="step-card kaggle-card">
+        <span class="step-number">Step 05</span>
+        <h3>Take a Free Kaggle Course</h3>
+        <p>Kaggle Learn offers <strong>free, hands-on micro-courses</strong> with instant coding environments. Recommended path: <strong>Intro to ML → Intermediate ML → Feature Engineering → Deep Learning</strong>.</p>
+        <a href="https://www.kaggle.com/learn" target="_blank" class="step-link kaggle-link">↗ Kaggle Learn</a>
+      </div>
+
+      <div class="step-card kaggle-card">
+        <span class="step-number">Step 06</span>
+        <h3>Download Data to Colab via API</h3>
+        <p>Use the <strong>Kaggle API</strong> to pull datasets directly into Google Colab. Go to <strong>Account → API → Create New Token</strong> to download your <code>kaggle.json</code> key file, then use the code below.</p>
+      </div>
+
+    </div>
+
+    <div class="tip-box tip-kaggle">
+      <span class="tip-icon">💡</span>
+      <p><strong>Hidden Gem: The "Code" Tab</strong>
+      Before building anything from scratch, always check the Code tab on any Kaggle dataset. You'll find hundreds of notebooks showing different approaches to the exact same problem — free education from top practitioners.</p>
+    </div>
+
+    <div class="section-title">🐍 Kaggle API — Load Data into Google Colab</div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <span>kaggle_api_colab.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      </div>
+      <pre><span class="cm"># Step 1 – Install the Kaggle API library</span>
+<span class="var">!</span>pip install kaggle
+
+<span class="cm"># Step 2 – Upload your kaggle.json API key</span>
+<span class="cm"># (Download from kaggle.com → Account → API → Create New Token)</span>
+<span class="kw">from</span> google.colab <span class="kw">import</span> files
+files.upload()  <span class="cm"># Upload kaggle.json here</span>
+
+<span class="cm"># Step 3 – Move key to the correct location</span>
+<span class="var">!</span>mkdir -p ~/.kaggle
+<span class="var">!</span>cp kaggle.json ~/.kaggle/
+<span class="var">!</span>chmod 600 ~/.kaggle/kaggle.json
+
+<span class="cm"># Step 4 – Download a dataset (Titanic example)</span>
+<span class="var">!</span>kaggle competitions download -c titanic
+<span class="var">!</span>unzip titanic.zip
+
+<span class="cm"># Step 5 – Load and explore</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+df = pd.read_csv(<span class="str">'train.csv'</span>)
+<span class="fn">print</span>(df.shape)
+df.head()</pre>
+    </div>
+
+    <div class="section-title">🏅 Kaggle Progression Tiers</div>
+    <p style="color:var(--muted); font-size:0.875rem; margin-bottom:0.8rem;">Your Kaggle profile has a public ranking. Reaching <strong style="color:var(--text)">Expert</strong> in any category is a strong signal to employers.</p>
+    <div class="tier-row">
+      <span class="tier-pill">Novice</span>
+      <span class="tier-arrow">→</span>
+      <span class="tier-pill">Contributor</span>
+      <span class="tier-arrow">→</span>
+      <span class="tier-pill">Expert</span>
+      <span class="tier-arrow">→</span>
+      <span class="tier-pill">Master</span>
+      <span class="tier-arrow">→</span>
+      <span class="tier-pill">Grandmaster</span>
+    </div>
+
+    <div class="section-title">✅ Your Kaggle Checklist</div>
+    <div class="checklist" id="kaggle-checklist">
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Create account at kaggle.com</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Complete your Kaggle profile (add university, bio)</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Browse at least 3 datasets relevant to your capstone idea</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Open the "Code" tab on a dataset and read 2 notebooks</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Create a new notebook and run at least one cell</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Visit the Titanic competition and read its overview</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Enroll in at least one Kaggle Learn course</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Download your kaggle.json API key</span></div>
+    </div>
+
+    <div class="section-title">🔗 Key Kaggle Links</div>
+    <table class="links-table">
+      <tr><th>Resource</th><th>URL</th></tr>
+      <tr><td>Kaggle Home</td><td><a href="https://www.kaggle.com" target="_blank">kaggle.com</a></td></tr>
+      <tr><td>Datasets</td><td><a href="https://www.kaggle.com/datasets" target="_blank">kaggle.com/datasets</a></td></tr>
+      <tr><td>Competitions</td><td><a href="https://www.kaggle.com/competitions" target="_blank">kaggle.com/competitions</a></td></tr>
+      <tr><td>Titanic (Start Here)</td><td><a href="https://www.kaggle.com/c/titanic" target="_blank">kaggle.com/c/titanic</a></td></tr>
+      <tr><td>Free Courses</td><td><a href="https://www.kaggle.com/learn" target="_blank">kaggle.com/learn</a></td></tr>
+      <tr><td>Your Notebooks</td><td><a href="https://www.kaggle.com/code" target="_blank">kaggle.com/code</a></td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════ HUGGING FACE TAB ═══════════════ -->
+  <div class="tab-pane" id="huggingface-pane">
+    <div class="section-hero hf-hero">
+      <div class="hero-emoji">🤗</div>
+      <div class="hero-text">
+        <h2>Hugging Face — Your ML Showcase Stage</h2>
+        <p>The GitHub of Machine Learning. Over <strong>900K models</strong>, <strong>200K datasets</strong>, and <strong>300K live apps (Spaces)</strong>. This is where your <strong>capstone project goes live</strong> — accessible to the entire world.</p>
+      </div>
+    </div>
+
+    <div class="section-title">🗺️ Step-by-Step Exploration</div>
+
+    <div class="steps-grid">
+
+      <div class="step-card hf-card">
+        <span class="step-number">Step 01</span>
+        <h3>Create Your Hugging Face Account</h3>
+        <p>Go to <strong>huggingface.co</strong> → Sign Up. Choose a professional username — your public portfolio URL will be: <strong>huggingface.co/YOUR_USERNAME</strong>. This is on your ML resume.</p>
+        <a href="https://huggingface.co" target="_blank" class="step-link hf-link">↗ Open Hugging Face</a>
+      </div>
+
+      <div class="step-card hf-card">
+        <span class="step-number">Step 02</span>
+        <h3>Explore the Model Hub</h3>
+        <p>Click <strong>Models</strong> in the nav. Filter by <strong>Task</strong> (text classification, image classification…), <strong>Library</strong> (PyTorch, sklearn…). Click any model → find the live <strong>Inference API</strong> on the right — test it in browser, no code!</p>
+        <a href="https://huggingface.co/models" target="_blank" class="step-link hf-link">↗ Browse Models</a>
+      </div>
+
+      <div class="step-card hf-card">
+        <span class="step-number">Step 03</span>
+        <h3>Test a Live Model Right Now</h3>
+        <p>Search for <strong>"sentiment-analysis"</strong> in Models. Click the top result. On the model card, find the <strong>Inference API box</strong> on the right side. Type any sentence and hit <strong>Compute</strong>. You just ran AI without writing code!</p>
+        <a href="https://huggingface.co/models?pipeline_tag=text-classification" target="_blank" class="step-link hf-link">↗ Try It Now</a>
+      </div>
+
+      <div class="step-card hf-card">
+        <span class="step-number">Step 04</span>
+        <h3>Explore Datasets</h3>
+        <p>Click <strong>Datasets</strong>. Search your topic. Each dataset has a <strong>Dataset Viewer</strong> — preview rows in your browser instantly. Click <strong>"Use in dataset library"</strong> to get Python code to load it in one line.</p>
+        <a href="https://huggingface.co/datasets" target="_blank" class="step-link hf-link">↗ Browse Datasets</a>
+      </div>
+
+      <div class="step-card hf-card">
+        <span class="step-number">Step 05</span>
+        <h3>Browse Spaces (Live ML Apps)</h3>
+        <p>Click <strong>Spaces</strong>. Browse thousands of <strong>live, interactive ML demos</strong>. Try them in your browser. Click <strong>"Files and versions"</strong> on any Space to see its source code — this is what your capstone will look like!</p>
+        <a href="https://huggingface.co/spaces" target="_blank" class="step-link hf-link">↗ Browse Spaces</a>
+      </div>
+
+      <div class="step-card hf-card">
+        <span class="step-number">Step 06</span>
+        <h3>Create Your Capstone Space</h3>
+        <p>Profile icon → <strong>New Space</strong> → name it → pick <strong>Gradio</strong> as SDK → Create. Upload <code>app.py</code> and <code>requirements.txt</code>. In minutes, your model is live at a public URL you can share with anyone.</p>
+        <a href="https://huggingface.co/new-space" target="_blank" class="step-link hf-link">↗ Create a Space</a>
+      </div>
+
+    </div>
+
+    <div class="tip-box tip-hf">
+      <span class="tip-icon">🔥</span>
+      <p><strong>Try This Right Now</strong>
+      Go to huggingface.co/models, search "sentiment-analysis", click the top result, and type any sentence into the live inference box on the right side. You just used a state-of-the-art AI model without writing a single line of code!</p>
+    </div>
+
+    <div class="section-title">🐍 Use a Pretrained Model in Colab</div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <span>transformers_pipeline.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      </div>
+      <pre><span class="var">!</span>pip install transformers
+
+<span class="kw">from</span> transformers <span class="kw">import</span> pipeline
+
+<span class="cm"># Sentiment Analysis in 3 lines</span>
+classifier = pipeline(<span class="str">"sentiment-analysis"</span>)
+result = classifier(<span class="str">"I absolutely loved this machine learning course!"</span>)
+<span class="fn">print</span>(result)
+<span class="cm"># [{'label': 'POSITIVE', 'score': 0.9998}]</span>
+
+<span class="cm"># Try other tasks:</span>
+summarizer = pipeline(<span class="str">"summarization"</span>)
+translator = pipeline(<span class="str">"translation_en_to_fr"</span>)
+generator  = pipeline(<span class="str">"text-generation"</span>, model=<span class="str">"gpt2"</span>)
+img_clf    = pipeline(<span class="str">"image-classification"</span>)</pre>
+    </div>
+
+    <div class="section-title">🚀 Deploy Your Capstone — Gradio App Template</div>
+
+    <div class="tip-box tip-action">
+      <span class="tip-icon">🎯</span>
+      <p><strong>Your Capstone Goal</strong>
+      This Gradio Iris classifier is your template. Swap the model and inputs for your own project, then deploy it to a Hugging Face Space. Your final URL will be: <code>huggingface.co/spaces/YOUR_USERNAME/YOUR_PROJECT</code></p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <span>app.py — Capstone Template</span>
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      </div>
+      <pre><span class="var">!</span>pip install gradio scikit-learn
+
+<span class="kw">import</span> gradio <span class="kw">as</span> gr
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.datasets <span class="kw">import</span> load_iris
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
+
+<span class="cm"># ── Train model ───────────────────────────────────</span>
+iris = load_iris()
+clf  = RandomForestClassifier(n_estimators=<span class="num">100</span>, random_state=<span class="num">42</span>)
+clf.fit(iris.data, iris.target)
+labels = iris.target_names
+
+<span class="cm"># ── Prediction function ───────────────────────────</span>
+<span class="kw">def</span> <span class="fn">predict_flower</span>(sepal_len, sepal_wid, petal_len, petal_wid):
+    X = np.array([[sepal_len, sepal_wid, petal_len, petal_wid]])
+    pred  = clf.predict(X)[<span class="num">0</span>]
+    proba = clf.predict_proba(X)[<span class="num">0</span>]
+    <span class="kw">return</span> {labels[i]: float(proba[i]) <span class="kw">for</span> i <span class="kw">in</span> range(<span class="fn">len</span>(labels))}
+
+<span class="cm"># ── Build UI ──────────────────────────────────────</span>
+app = gr.Interface(
+    fn      = predict_flower,
+    inputs  = [
+        gr.Slider(<span class="num">4.0</span>, <span class="num">8.0</span>, value=<span class="num">5.8</span>, label=<span class="str">"Sepal Length (cm)"</span>),
+        gr.Slider(<span class="num">2.0</span>, <span class="num">4.5</span>, value=<span class="num">3.0</span>, label=<span class="str">"Sepal Width (cm)"</span>),
+        gr.Slider(<span class="num">1.0</span>, <span class="num">7.0</span>, value=<span class="num">4.0</span>, label=<span class="str">"Petal Length (cm)"</span>),
+        gr.Slider(<span class="num">0.1</span>, <span class="num">2.5</span>, value=<span class="num">1.2</span>, label=<span class="str">"Petal Width (cm)"</span>),
+    ],
+    outputs = gr.Label(num_top_classes=<span class="num">3</span>),
+    title   = <span class="str">"🌸 Iris Flower Classifier"</span>,
+    description = <span class="str">"Adjust sliders to classify iris species with Random Forest."</span>,
+    examples = [[<span class="num">5.1</span>,<span class="num">3.5</span>,<span class="num">1.4</span>,<span class="num">0.2</span>], [<span class="num">6.7</span>,<span class="num">3.1</span>,<span class="num">4.7</span>,<span class="num">1.5</span>], [<span class="num">6.3</span>,<span class="num">3.3</span>,<span class="num">6.0</span>,<span class="num">2.5</span>]]
+)
+
+app.launch()</pre>
+    </div>
+
+    <div class="section-title">📦 requirements.txt for Your Space</div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <span>requirements.txt</span>
+        <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      </div>
+      <pre>scikit-learn
+gradio
+numpy
+pandas</pre>
+    </div>
+
+    <div class="section-title">✅ Your Hugging Face Checklist</div>
+    <div class="checklist" id="hf-checklist">
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Create account at huggingface.co with a professional username</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Test a model using the live Inference API (no code!) on 3 models</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Browse 5 Spaces and interact with them in your browser</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>View the source code ("Files" tab) of at least one Space</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Install gradio and run the Iris app in Google Colab</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Create a new Space on Hugging Face for your capstone</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Upload app.py and requirements.txt and see it build</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span>Share your Space URL with your instructor</span></div>
+    </div>
+
+    <div class="section-title">🔗 Key Hugging Face Links</div>
+    <table class="links-table hf-table">
+      <tr><th>Resource</th><th>URL</th></tr>
+      <tr><td>Hugging Face Home</td><td><a href="https://huggingface.co" target="_blank">huggingface.co</a></td></tr>
+      <tr><td>Model Hub</td><td><a href="https://huggingface.co/models" target="_blank">huggingface.co/models</a></td></tr>
+      <tr><td>Datasets</td><td><a href="https://huggingface.co/datasets" target="_blank">huggingface.co/datasets</a></td></tr>
+      <tr><td>Spaces (Live Apps)</td><td><a href="https://huggingface.co/spaces" target="_blank">huggingface.co/spaces</a></td></tr>
+      <tr><td>Create New Space</td><td><a href="https://huggingface.co/new-space" target="_blank">huggingface.co/new-space</a></td></tr>
+      <tr><td>Gradio Docs</td><td><a href="https://www.gradio.app/docs" target="_blank">gradio.app/docs</a></td></tr>
+      <tr><td>Transformers Docs</td><td><a href="https://huggingface.co/docs/transformers" target="_blank">huggingface.co/docs/transformers</a></td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════ QUIZ TAB ═══════════════ -->
+  <div class="tab-pane" id="quiz-pane">
+
+    <div class="quiz-hero">
+      <h2>📝 Knowledge Check</h2>
+      <p>10 questions covering Kaggle & Hugging Face. Answer all questions, then click <strong>Submit Quiz</strong> to see your score.<br>Take a screenshot of your final score and submit it to Google Classroom.</p>
+      <div class="quiz-progress-bar-wrap">
+        <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+      </div>
+      <div class="quiz-progress-label" id="quiz-progress-label">0 / 10 answered</div>
+    </div>
+
+    <div id="quiz-questions"></div>
+
+    <div class="quiz-submit-area">
+      <button class="submit-btn" id="submit-btn" onclick="submitQuiz()" disabled>
+        Submit Quiz →
+      </button>
+      <p style="color:var(--muted); font-size:0.8rem; margin-top:0.6rem;">Answer all 10 questions to enable submission</p>
+    </div>
+
+    <div id="score-card">
+      <div class="score-label">YOUR FINAL SCORE</div>
+      <div class="score-display" id="score-display">0/10</div>
+      <div class="score-grade" id="score-grade"></div>
+      <p id="score-msg" style="color:var(--muted); font-size:0.9rem; max-width:480px; margin:0 auto;"></p>
+      <div class="screenshot-instruction">
+        <strong>📸 Submit to Google Classroom</strong>
+        Take a screenshot of this score card and upload it to Google Classroom as proof of completion.<br><br>
+        <strong>Windows:</strong> <kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> &nbsp;|&nbsp;
+        <strong>Mac:</strong> <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd> &nbsp;|&nbsp;
+        <strong>Chromebook:</strong> <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>□</kbd>
+      </div>
+      <button class="retry-btn" onclick="retryQuiz()">↺ Retry Quiz</button>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ─── TAB SWITCHING ──────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`${tab}-pane`).classList.add('active');
+}
+
+// ─── CHECKLIST ──────────────────────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+// ─── COPY CODE ──────────────────────────────────────
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'COPIED!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ─── QUIZ DATA ──────────────────────────────────────
+const questions = [
+  {
+    q: "Kaggle is primarily owned by which technology company?",
+    options: ["Amazon", "Microsoft", "Google", "Meta"],
+    answer: 2,
+    explanation: "Kaggle was acquired by Google in 2017 and operates under Google's ecosystem."
+  },
+  {
+    q: "On Kaggle, how many free GPU hours per week does each user get for notebook execution?",
+    options: ["10 hours", "20 hours", "30 hours", "Unlimited"],
+    answer: 2,
+    explanation: "Kaggle provides 30 hours of free GPU time per week, making it a great platform for training models without local hardware."
+  },
+  {
+    q: "Which legendary Kaggle competition is recommended as the starting point for every beginner in machine learning?",
+    options: ["House Prices Prediction", "Titanic: Machine Learning from Disaster", "MNIST Digit Recognizer", "Dogs vs. Cats"],
+    answer: 1,
+    explanation: "The Titanic competition is universally recognized as the 'Hello World' of Kaggle competitions for ML beginners."
+  },
+  {
+    q: "In the Kaggle progression system, what tier comes immediately AFTER 'Contributor'?",
+    options: ["Master", "Expert", "Specialist", "Grandmaster"],
+    answer: 1,
+    explanation: "The Kaggle tier order is: Novice → Contributor → Expert → Master → Grandmaster."
+  },
+  {
+    q: "What file do you download from your Kaggle Account settings to use the Kaggle API in Google Colab?",
+    options: ["kaggle.csv", "api_key.txt", "token.json", "kaggle.json"],
+    answer: 3,
+    explanation: "You download kaggle.json from Account → API → Create New Token. This file contains your API credentials."
+  },
+  {
+    q: "On Hugging Face, what is a 'Space'?",
+    options: [
+      "A private storage area for your datasets",
+      "A live, interactive ML web app hosted for free",
+      "A section for writing documentation",
+      "A type of model card format"
+    ],
+    answer: 1,
+    explanation: "A Hugging Face Space is a free hosted web application. You push your Gradio or Streamlit code to it and it runs as a live, publicly accessible app."
+  },
+  {
+    q: "Which Python library allows you to access 900,000+ pretrained Hugging Face models in just 2-3 lines of code?",
+    options: ["scikit-learn", "keras", "transformers", "gradio"],
+    answer: 2,
+    explanation: "The `transformers` library by Hugging Face provides the `pipeline()` function that lets you use any model in just a few lines."
+  },
+  {
+    q: "Which Gradio component should you use to let a user adjust numeric inputs (like flower measurements) in a deployed ML app?",
+    options: ["gr.Textbox", "gr.Slider", "gr.Checkbox", "gr.Dropdown"],
+    answer: 1,
+    explanation: "gr.Slider creates an interactive slider for numeric inputs, perfect for continuous values like measurements or probabilities."
+  },
+  {
+    q: "What is the correct terminal command to download the Titanic competition dataset using the Kaggle API?",
+    options: [
+      "!kaggle download titanic",
+      "!kaggle dataset pull -n titanic",
+      "!kaggle competitions download -c titanic",
+      "!pip install titanic-dataset"
+    ],
+    answer: 2,
+    explanation: "The correct command is `!kaggle competitions download -c titanic`. The `-c` flag specifies the competition name."
+  },
+  {
+    q: "For your capstone project to be deployed on Hugging Face Spaces with Gradio, which TWO files are required at minimum?",
+    options: [
+      "model.pkl and dataset.csv",
+      "app.py and requirements.txt",
+      "index.html and style.css",
+      "notebook.ipynb and README.md"
+    ],
+    answer: 1,
+    explanation: "A Hugging Face Gradio Space requires app.py (your Gradio application code) and requirements.txt (listing your Python dependencies)."
+  }
+];
+
+let userAnswers = new Array(10).fill(null);
+let submitted = false;
+
+// ─── RENDER QUIZ ────────────────────────────────────
+function renderQuiz() {
+  const container = document.getElementById('quiz-questions');
+  container.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const letters = ['A','B','C','D'];
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `q-card-${qi}`;
+    card.innerHTML = `
+      <span class="q-number">Question ${qi+1} of 10</span>
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.options.map((opt, oi) => `
+          <button class="option-btn" id="q${qi}-o${oi}" onclick="selectOption(${qi},${oi})">
+            <span class="option-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback-msg" id="feedback-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (submitted) return;
+  if (userAnswers[qi] !== null) return; // already answered
+
+  userAnswers[qi] = oi;
+
+  // style all buttons
+  const q = questions[qi];
+  for (let i = 0; i < q.options.length; i++) {
+    const btn = document.getElementById(`q${qi}-o${i}`);
+    btn.disabled = true;
+    if (i === oi && oi === q.answer) {
+      btn.classList.add('selected-correct');
+    } else if (i === oi && oi !== q.answer) {
+      btn.classList.add('selected-wrong');
+    } else if (i === q.answer) {
+      btn.classList.add('show-correct');
+    }
+  }
+
+  // feedback
+  const fb = document.getElementById(`feedback-${qi}`);
+  if (oi === q.answer) {
+    fb.textContent = '✓ Correct! ' + q.explanation;
+    fb.className = 'feedback-msg correct';
+  } else {
+    fb.textContent = '✗ Not quite. ' + q.explanation;
+    fb.className = 'feedback-msg wrong';
+  }
+
+  document.getElementById(`q-card-${qi}`).classList.add('answered');
+
+  // update progress
+  const answered = userAnswers.filter(a => a !== null).length;
+  const pct = (answered / 10) * 100;
+  document.getElementById('quiz-progress-bar').style.width = pct + '%';
+  document.getElementById('quiz-progress-label').textContent = `${answered} / 10 answered`;
+
+  if (answered === 10) {
+    document.getElementById('submit-btn').disabled = false;
+  }
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  document.getElementById('submit-btn').disabled = true;
+
+  let score = 0;
+  questions.forEach((q, qi) => {
+    if (userAnswers[qi] === q.answer) score++;
+  });
+
+  const pct = Math.round((score / 10) * 100);
+
+  // grade label
+  let grade, gradeStyle, msg;
+  if (score === 10) {
+    grade = '🏆 Perfect Score!'; gradeStyle = 'background:rgba(250,191,0,0.15); color:#FBD000; border:1px solid rgba(250,191,0,0.3);';
+    msg = "Outstanding! You've mastered both Kaggle and Hugging Face. You're ready to build and deploy your capstone!";
+  } else if (score >= 8) {
+    grade = '⭐ Excellent'; gradeStyle = 'background:rgba(34,197,94,0.1); color:#22C55E; border:1px solid rgba(34,197,94,0.3);';
+    msg = "Great work! You have a strong understanding of both platforms. Review any missed questions and you'll be fully ready.";
+  } else if (score >= 6) {
+    grade = '👍 Good Job'; gradeStyle = 'background:rgba(96,165,250,0.1); color:#60A5FA; border:1px solid rgba(96,165,250,0.3);';
+    msg = "Solid foundation! Go back to the Kaggle and Hugging Face tabs to review the areas you missed.";
+  } else if (score >= 4) {
+    grade = '📖 Keep Studying'; gradeStyle = 'background:rgba(245,158,11,0.1); color:#F59E0B; border:1px solid rgba(245,158,11,0.3);';
+    msg = "You have a start, but need more practice. Review both playbook tabs carefully before retrying.";
+  } else {
+    grade = '🔄 Try Again'; gradeStyle = 'background:rgba(239,68,68,0.1); color:#EF4444; border:1px solid rgba(239,68,68,0.3);';
+    msg = "No worries — go through the Kaggle and Hugging Face tabs step by step, then come back and retry the quiz.";
+  }
+
+  document.getElementById('score-display').textContent = `${score}/10`;
+  const gradeEl = document.getElementById('score-grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.cssText = gradeStyle;
+  document.getElementById('score-msg').textContent = msg;
+  document.getElementById('score-card').style.display = 'block';
+  document.getElementById('score-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function retryQuiz() {
+  submitted = false;
+  userAnswers = new Array(10).fill(null);
+  document.getElementById('quiz-progress-bar').style.width = '0%';
+  document.getElementById('quiz-progress-label').textContent = '0 / 10 answered';
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('score-card').style.display = 'none';
+  renderQuiz();
+  window.scrollTo({ top: document.getElementById('quiz-pane').offsetTop, behavior: 'smooth' });
+}
+
+// ─── INIT ────────────────────────────────────────────
+renderQuiz();
+</script>
+</body>
+</html>
