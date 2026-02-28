@@ -15,7 +15,7 @@ Introduction to Kaggle and Hugging Face
 
 **Topic:** *A Day in the Life of a Data Scientist*
 
-**Date & Time:** March 7th, 7:00 – 8:00 PM CST
+**Date & Time:** March 7th, 8:00 – 9:00 PM CST
 
 ### Deliverable
 Attend the seminar and submit a 4-slide PowerPoint presentation summarizing your key takeaways.
