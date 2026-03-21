@@ -59,9 +59,9 @@ PCA is a **specific technique** that falls **under the umbrella** of Feature Eng
 ├── Feature Transformation→ Scaling, encoding, normalizing
 │
 └── Dimensionality Reduction ← 🧩 PCA lives here!
-    ├── PCA
-    ├── t-SNE
-    └── LDA
+    ├── PCA (Principal Component Analysis)
+    ├── t-SNE  (t-Distributed Stochastic Neighbor Embedding)
+    └── LDA (Linear Discriminant Analysis)
 ```
 
 ### Side-by-Side Comparison
