@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCA — Interactive Playbook & Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(165deg, #0b0f1a 0%, #101729 40%, #0d1522 100%);
+    color: #c8d6e5;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .container { max-width: 840px; margin: 0 auto; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding: 40px 20px 32px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(14,165,233,0.06));
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.1), transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(14,165,233,0.08), transparent 60%);
+    pointer-events: none;
+  }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #a5b4fc, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .header p { color: #7a8ba8; font-size: 0.95rem; position: relative; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 14px;
+    padding: 4px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: #5a6d85;
+    letter-spacing: 0.02em;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(14,165,233,0.15));
+    color: #e0e7ff;
+    box-shadow: 0 2px 16px rgba(99,102,241,0.15);
+  }
+  .tab-btn:hover:not(.active) { color: #8899ad; background: rgba(255,255,255,0.03); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Concepts */
+  .concept-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+  }
+  .concept-card.expanded {
+    border-color: rgba(99,102,241,0.25);
+    box-shadow: 0 4px 24px rgba(99,102,241,0.08);
+  }
+  .concept-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .concept-header:hover { background: rgba(255,255,255,0.02); }
+  .concept-icon {
+    font-size: 1.5rem;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99,102,241,0.1);
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .concept-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #e0e7ff;
+    flex: 1;
+  }
+  .chevron {
+    color: #4a5568;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+  .chevron.open { transform: rotate(180deg); }
+
+  .concept-body {
+    padding: 0 20px 20px 20px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .concept-card.expanded .concept-body { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .concept-text { color: #94a3b8; line-height: 1.7; font-size: 0.93rem; margin-bottom: 16px; }
+
+  .key-points { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .key-point {
+    background: rgba(99,102,241,0.08);
+    border: 1px solid rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .code-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .code-block {
+    background: #080c16;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: #8be9fd;
+    white-space: pre;
+  }
+
+  /* Quiz */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .quiz-progress { color: #7a8ba8; font-size: 0.9rem; }
+  .quiz-progress strong { color: #a5b4fc; }
+
+  .question-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 14px;
+    transition: all 0.3s ease;
+  }
+  .question-card.correct { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.04); }
+  .question-card.wrong { border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.04); }
+
+  .q-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: #6366f1;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-weight: 600;
+    color: #e0e7ff;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    color: #94a3b8;
+  }
+  .option:hover:not(.disabled) {
+    border-color: rgba(99,102,241,0.3);
+    background: rgba(99,102,241,0.06);
+    color: #c8d6e5;
+  }
+  .option.selected { border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.1); color: #e0e7ff; }
+  .option.correct-answer { border-color: rgba(52,211,153,0.5); background: rgba(52,211,153,0.1); color: #6ee7b7; }
+  .option.wrong-answer { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.08); color: #fca5a5; }
+  .option.disabled { cursor: default; pointer-events: none; }
+
+  .radio {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .radio.filled { border-color: #6366f1; background: #6366f1; }
+  .radio.filled::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; }
+  .radio.correct-r { border-color: #34d399; background: #34d399; }
+  .radio.wrong-r { border-color: #f87171; background: #f87171; }
+
+  .explanation-toggle {
+    margin-top: 12px;
+    font-size: 0.82rem;
+    color: #6366f1;
+    cursor: pointer;
+    font-weight: 500;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .explanation-toggle:hover { color: #818cf8; }
+  .explanation {
+    margin-top: 10px;
+    padding: 12px 16px;
+    background: rgba(99,102,241,0.06);
+    border-left: 3px solid #6366f1;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: #a5b4fc;
+    line-height: 1.6;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .submit-area { text-align: center; margin-top: 28px; padding: 24px; }
+  .submit-btn {
+    padding: 14px 40px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    color: white;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(99,102,241,0.4); }
+  .submit-btn:disabled {
+    background: rgba(255,255,255,0.06);
+    color: #4a5568;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .score-banner {
+    text-align: center;
+    padding: 32px 24px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    border: 1px solid;
+    animation: fadeIn 0.4s ease;
+    display: none;
+  }
+  .score-banner.visible { display: block; }
+  .score-banner.pass { background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(16,185,129,0.04)); border-color: rgba(52,211,153,0.25); }
+  .score-banner.fail { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.04)); border-color: rgba(251,191,36,0.25); }
+  .score-number { font-family: 'Fraunces', serif; font-size: 3rem; font-weight: 900; margin-bottom: 4px; }
+  .score-banner.pass .score-number { color: #34d399; }
+  .score-banner.fail .score-number { color: #fbbf24; }
+  .score-label { color: #7a8ba8; font-size: 0.9rem; }
+  .score-msg { margin-top: 8px; font-weight: 600; font-size: 1.05rem; }
+  .score-banner.pass .score-msg { color: #6ee7b7; }
+  .score-banner.fail .score-msg { color: #fcd34d; }
+  .score-date { margin-top: 12px; font-size: 0.78rem; color: #4a5568; font-family: 'JetBrains Mono', monospace; }
+
+  .reset-btn {
+    display: none;
+    margin: 16px auto 0;
+    padding: 10px 28px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #7a8ba8;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn.visible { display: inline-block; }
+  .reset-btn:hover { border-color: rgba(99,102,241,0.3); color: #a5b4fc; }
+
+  .screenshot-note {
+    text-align: center;
+    margin-top: 16px;
+    padding: 12px 20px;
+    background: rgba(251,191,36,0.06);
+    border: 1px solid rgba(251,191,36,0.15);
+    border-radius: 10px;
+    font-size: 0.82rem;
+    color: #fbbf24;
+    font-weight: 500;
+    display: none;
+  }
+  .screenshot-note.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Principal Component Analysis</h1>
+    <p>Interactive Playbook & Quiz — Python ML Class</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('concepts')">📖 Concepts</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">✍️ Quiz (10 Qs)</button>
+  </div>
+
+  <!-- ============ CONCEPTS TAB ============ -->
+  <div id="tab-concepts" class="tab-content active"></div>
+
+  <!-- ============ QUIZ TAB ============ -->
+  <div id="tab-quiz" class="tab-content">
+    <div id="score-banner" class="score-banner">
+      <div class="score-number" id="score-number"></div>
+      <div class="score-label" id="score-label"></div>
+      <div class="score-msg" id="score-msg"></div>
+      <div class="score-date" id="score-date"></div>
+    </div>
+    <div id="screenshot-note" class="screenshot-note">
+      📸 Take a screenshot of this score and submit it to Google Classroom
+    </div>
+    <div class="quiz-header">
+      <div class="quiz-progress">Answered: <strong id="answered-count">0</strong> / 10</div>
+    </div>
+    <div id="quiz-questions"></div>
+    <div class="submit-area">
+      <button class="submit-btn" id="submit-btn" disabled onclick="submitQuiz()">Submit Quiz</button>
+      <button class="reset-btn" id="reset-btn" onclick="resetQuiz()">Retake Quiz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const CONCEPTS = [
+  { title:"What is PCA?", icon:"🔬",
+    content:"Principal Component Analysis (PCA) is an unsupervised dimensionality reduction technique that transforms high-dimensional data into a lower-dimensional space while preserving the maximum amount of variance. It identifies the directions (principal components) along which data varies the most.",
+    keyPoints:["Unsupervised — no labels needed","Finds directions of maximum variance","Reduces dimensions while retaining information","Components are orthogonal (uncorrelated)"],
+    code:`from sklearn.decomposition import PCA\nfrom sklearn.preprocessing import StandardScaler\n\n# Step 1: Standardize features\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X)\n\n# Step 2: Apply PCA\npca = PCA(n_components=2)\nX_pca = pca.fit_transform(X_scaled)` },
+  { title:"Why Standardize First?", icon:"⚖️",
+    content:"PCA is sensitive to the scale of features. A feature measured in thousands will dominate variance over one measured in decimals — not because it's more important, but because of its units. Standardization (zero mean, unit variance) puts all features on equal footing.",
+    keyPoints:["PCA maximizes variance — scale matters","StandardScaler: mean=0, std=1","Without it, large-scale features dominate","Always standardize before PCA"],
+    code:`import numpy as np\nfrom sklearn.preprocessing import StandardScaler\n\n# Before: features have different scales\nprint(X.std(axis=0))  # e.g., [1200.5, 0.03, 45.2]\n\n# After standardization: all features ~1.0\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X)\nprint(X_scaled.std(axis=0))  # [1.0, 1.0, 1.0]` },
+  { title:"Covariance Matrix & Eigen Decomposition", icon:"🧮",
+    content:"PCA computes the covariance matrix of the standardized data, then finds its eigenvectors and eigenvalues. Eigenvectors define the directions of principal components; eigenvalues quantify the variance captured along each direction. The eigenvectors with the largest eigenvalues become the top principal components.",
+    keyPoints:["Covariance matrix captures feature relationships","Eigenvectors → direction of components","Eigenvalues → variance along each direction","Sorted by eigenvalue = ranked by importance"],
+    code:`import numpy as np\n\n# Manual PCA steps\nX_centered = X_scaled - X_scaled.mean(axis=0)\n\n# Covariance matrix\ncov_matrix = np.cov(X_centered, rowvar=False)\n\n# Eigen decomposition\neigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)\n\n# Sort descending\nidx = np.argsort(eigenvalues)[::-1]\neigenvalues = eigenvalues[idx]\neigenvectors = eigenvectors[:, idx]` },
+  { title:"Explained Variance Ratio", icon:"📊",
+    content:"The explained variance ratio tells you what fraction of total variance each principal component captures. This is how you decide how many components to keep. A cumulative explained variance of 90–95% is a common threshold.",
+    keyPoints:["Each component's share of total variance","Sum of all ratios = 1.0 (100%)","Use cumulative plot (scree plot) to choose n","90–95% cumulative variance is a common cutoff"],
+    code:`import matplotlib.pyplot as plt\n\npca_full = PCA().fit(X_scaled)\ncumulative = np.cumsum(pca_full.explained_variance_ratio_)\n\nplt.figure(figsize=(8, 4))\nplt.bar(range(len(cumulative)),\n        pca_full.explained_variance_ratio_,\n        alpha=0.6, label='Individual')\nplt.step(range(len(cumulative)),\n         cumulative, where='mid',\n         label='Cumulative', color='red')\nplt.axhline(y=0.95, color='gray', linestyle='--')\nplt.xlabel('Principal Component')\nplt.ylabel('Explained Variance Ratio')\nplt.legend()\nplt.show()` },
+  { title:"Choosing the Number of Components", icon:"🎯",
+    content:"There are several strategies: set a variance threshold (e.g., 95%), look for an 'elbow' in the scree plot, or use PCA as a preprocessing step and tune n_components via cross-validation on your downstream model.",
+    keyPoints:["Variance threshold: keep 90–95% of variance","Elbow method on scree plot","Cross-validation on downstream task","PCA(n_components=0.95) auto-selects for you"],
+    code:`# Method 1: Auto-select by variance threshold\npca_auto = PCA(n_components=0.95)\nX_reduced = pca_auto.fit_transform(X_scaled)\nprint(f"Components kept: {pca_auto.n_components_}")\n\n# Method 2: Use with a classifier pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.model_selection import GridSearchCV\n\npipe = Pipeline([\n    ('scaler', StandardScaler()),\n    ('pca', PCA()),\n    ('clf', LogisticRegression())\n])\nparams = {'pca__n_components': [2, 5, 10, 20]}\ngrid = GridSearchCV(pipe, params, cv=5)\ngrid.fit(X_train, y_train)\nprint(f"Best n: {grid.best_params_}")` },
+  { title:"PCA Loadings & Interpretation", icon:"🔍",
+    content:"Loadings are the weights each original feature contributes to a principal component. By inspecting loadings, you can understand what real-world features drive each component — making PCA more interpretable.",
+    keyPoints:["Loadings = eigenvector entries (weights)","High absolute loading → strong influence","Helps name/interpret components","pca.components_ gives the loading matrix"],
+    code:`import pandas as pd\n\n# Inspect loadings\nloadings = pd.DataFrame(\n    pca.components_.T,\n    columns=[f'PC{i+1}' for i in range(pca.n_components_)],\n    index=feature_names\n)\nprint(loadings.round(3))\n\n# Visualize top contributors to PC1\npc1 = loadings['PC1'].abs().sort_values(ascending=True)\npc1.plot(kind='barh', title='PC1 Loadings')\nplt.xlabel('Absolute Loading')\nplt.show()` },
+  { title:"PCA for Visualization", icon:"🎨",
+    content:"One of PCA's most popular uses is reducing data to 2 or 3 dimensions for visualization. This lets you spot clusters, outliers, and class separations in high-dimensional datasets.",
+    keyPoints:["Reduce to 2D or 3D for plotting","Color by class labels to see separation","Great for EDA on high-dimensional data","Often paired with clustering (KMeans, DBSCAN)"],
+    code:`from sklearn.datasets import load_iris\n\niris = load_iris()\nX_iris = StandardScaler().fit_transform(iris.data)\nX_2d = PCA(n_components=2).fit_transform(X_iris)\n\nplt.figure(figsize=(8, 6))\nfor label in np.unique(iris.target):\n    mask = iris.target == label\n    plt.scatter(X_2d[mask, 0], X_2d[mask, 1],\n                label=iris.target_names[label],\n                alpha=0.7, s=60)\nplt.xlabel('PC1')\nplt.ylabel('PC2')\nplt.legend()\nplt.title('Iris Dataset — PCA Projection')\nplt.show()` },
+  { title:"Limitations & When Not to Use PCA", icon:"⚠️",
+    content:"PCA assumes linear relationships between features. It may discard important non-linear patterns. It also creates new abstract features that can be hard to explain to stakeholders. For non-linear data, consider Kernel PCA, t-SNE, or UMAP instead.",
+    keyPoints:["Assumes linear relationships only","Components can be hard to interpret","Sensitive to outliers","Alternatives: Kernel PCA, t-SNE, UMAP"],
+    code:`# Kernel PCA for non-linear data\nfrom sklearn.decomposition import KernelPCA\n\nkpca = KernelPCA(n_components=2, kernel='rbf', gamma=0.04)\nX_kpca = kpca.fit_transform(X_scaled)\n\n# Compare with standard PCA\nfig, axes = plt.subplots(1, 2, figsize=(12, 5))\naxes[0].scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='viridis')\naxes[0].set_title('Linear PCA')\naxes[1].scatter(X_kpca[:, 0], X_kpca[:, 1], c=y, cmap='viridis')\naxes[1].set_title('Kernel PCA (RBF)')\nplt.show()` }
+];
+
+const QUESTIONS = [
+  { q:"What is the primary goal of PCA?", options:["Increase the number of features","Reduce dimensionality while preserving maximum variance","Classify data into categories","Normalize the data distribution"], answer:1, explanation:"PCA aims to reduce the number of dimensions while retaining as much variance (information) as possible." },
+  { q:"Why must you standardize features before applying PCA?", options:["PCA requires integer inputs","To make the algorithm run faster","Because PCA is sensitive to feature scale","Standardization is optional for PCA"], answer:2, explanation:"PCA maximizes variance, so features on larger scales would dominate the components. Standardization puts all features on equal footing." },
+  { q:"What do eigenvalues represent in PCA?", options:["The direction of principal components","The correlation between features","The amount of variance captured by each component","The number of data points"], answer:2, explanation:"Eigenvalues quantify how much variance each principal component captures. Larger eigenvalues mean more variance explained." },
+  { q:"If the first two principal components explain 45% and 30% of variance respectively, what is the cumulative explained variance?", options:["45%","30%","75%","15%"], answer:2, explanation:"Cumulative explained variance is the sum: 45% + 30% = 75%. This tells us PC1 and PC2 together capture 75% of total variance." },
+  { q:"What does `PCA(n_components=0.95)` do in scikit-learn?", options:["Keeps exactly 95 components","Reduces data to 95 dimensions","Automatically selects enough components to retain 95% of variance","Removes 95% of the data"], answer:2, explanation:"When n_components is a float between 0 and 1, scikit-learn selects the minimum number of components that capture at least that fraction of variance." },
+  { q:"What are PCA loadings?", options:["The transformed data points","The weights each original feature contributes to a component","The number of features removed","The training loss values"], answer:1, explanation:"Loadings are the entries of the eigenvectors — they tell you how much each original feature contributes to each principal component." },
+  { q:"Which of the following is a limitation of standard (linear) PCA?", options:["It requires labeled data","It cannot handle more than 3 features","It only captures linear relationships between features","It always overfits the data"], answer:2, explanation:"Standard PCA assumes linear relationships. Non-linear patterns may be missed. Kernel PCA, t-SNE, or UMAP can handle non-linear structure." },
+  { q:"In a scree plot, how do you determine the optimal number of components?", options:["Choose the point where explained variance drops to zero","Always pick exactly 2 components","Look for the 'elbow' where variance gains level off","Select the component with the lowest eigenvalue"], answer:2, explanation:"The elbow point is where adding more components gives diminishing returns in explained variance. Components before the elbow are typically kept." },
+  { q:"Which scikit-learn attribute gives you the explained variance ratio of each component?", options:["pca.components_","pca.explained_variance_ratio_","pca.singular_values_","pca.n_features_"], answer:1, explanation:"`pca.explained_variance_ratio_` returns an array of the fraction of total variance captured by each component." },
+  { q:"When would you prefer Kernel PCA over standard PCA?", options:["When the data has perfectly linear relationships","When you need faster computation","When the data has non-linear structure that linear PCA cannot capture","When you want more components than features"], answer:2, explanation:"Kernel PCA projects data into a higher-dimensional space using a kernel function, enabling it to capture non-linear patterns that standard PCA misses." }
+];
+
+// ── STATE ──
+let answers = Array(QUESTIONS.length).fill(null);
+let submitted = false;
+let expandedConcept = 0;
+
+// ── RENDER CONCEPTS ──
+function renderConcepts() {
+  const el = document.getElementById('tab-concepts');
+  el.innerHTML = CONCEPTS.map((c, i) => `
+    <div class="concept-card ${i === expandedConcept ? 'expanded' : ''}" id="concept-${i}">
+      <div class="concept-header" onclick="toggleConcept(${i})">
+        <div class="concept-icon">${c.icon}</div>
+        <div class="concept-title">${c.title}</div>
+        <span class="chevron ${i === expandedConcept ? 'open' : ''}">▼</span>
+      </div>
+      <div class="concept-body">
+        <p class="concept-text">${c.content}</p>
+        <div class="key-points">
+          ${c.keyPoints.map(kp => `<span class="key-point">${kp}</span>`).join('')}
+        </div>
+        <div class="code-label">Python Example</div>
+        <div class="code-block">${escapeHtml(c.code)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleConcept(i) {
+  expandedConcept = expandedConcept === i ? -1 : i;
+  renderConcepts();
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── RENDER QUIZ ──
+function renderQuiz() {
+  const el = document.getElementById('quiz-questions');
+  el.innerHTML = QUESTIONS.map((q, qi) => {
+    const isCorrect = submitted && answers[qi] === q.answer;
+    const isWrong = submitted && answers[qi] !== null && answers[qi] !== q.answer;
+    return `
+    <div class="question-card ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}" id="qcard-${qi}">
+      <div class="q-number">QUESTION ${qi + 1}</div>
+      <div class="q-text">${escapeHtml(q.q)}</div>
+      <div class="options">
+        ${q.options.map((opt, oi) => {
+          let cls = 'option';
+          let rCls = 'radio';
+          if (submitted) cls += ' disabled';
+          if (!submitted && answers[qi] === oi) { cls += ' selected'; rCls += ' filled'; }
+          if (submitted && oi === q.answer) { cls += ' correct-answer'; rCls += ' correct-r filled'; }
+          if (submitted && answers[qi] === oi && oi !== q.answer) { cls += ' wrong-answer'; rCls += ' wrong-r filled'; }
+          return `<div class="${cls}" onclick="pickAnswer(${qi},${oi})">
+            <div class="${rCls}"></div>${escapeHtml(opt)}
+          </div>`;
+        }).join('')}
+      </div>
+      ${submitted ? `
+        <button class="explanation-toggle" onclick="toggleExplanation(${qi})">Show Explanation</button>
+        <div class="explanation" id="expl-${qi}" style="display:none">${q.explanation}</div>
+      ` : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('answered-count').textContent = answers.filter(a => a !== null).length;
+  const allAnswered = answers.every(a => a !== null);
+  document.getElementById('submit-btn').disabled = !allAnswered || submitted;
+  document.getElementById('submit-btn').style.display = submitted ? 'none' : '';
+  document.getElementById('reset-btn').className = 'reset-btn' + (submitted ? ' visible' : '');
+}
+
+function pickAnswer(qi, oi) {
+  if (submitted) return;
+  answers[qi] = oi;
+  renderQuiz();
+}
+
+function submitQuiz() {
+  submitted = true;
+  const score = answers.reduce((s, a, i) => s + (a === QUESTIONS[i].answer ? 1 : 0), 0);
+  const pass = score >= 7;
+  const banner = document.getElementById('score-banner');
+  banner.className = 'score-banner visible ' + (pass ? 'pass' : 'fail');
+  document.getElementById('score-number').textContent = score + '/' + QUESTIONS.length;
+  document.getElementById('score-label').textContent = (score * 10) + '% Correct';
+  const msgs = { 10:'Perfect score! PCA master!', 7:'Great job! Solid understanding of PCA.', 5:'Good effort — review the concepts and try again.', 0:'Keep studying — revisit the Concepts tab.' };
+  document.getElementById('score-msg').textContent = score === 10 ? msgs[10] : score >= 7 ? msgs[7] : score >= 5 ? msgs[5] : msgs[0];
+  const now = new Date();
+  document.getElementById('score-date').textContent = 'Completed on ' + now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  document.getElementById('screenshot-note').className = 'screenshot-note visible';
+  renderQuiz();
+}
+
+function resetQuiz() {
+  answers = Array(QUESTIONS.length).fill(null);
+  submitted = false;
+  document.getElementById('score-banner').className = 'score-banner';
+  document.getElementById('screenshot-note').className = 'screenshot-note';
+  renderQuiz();
+}
+
+function toggleExplanation(qi) {
+  const el = document.getElementById('expl-' + qi);
+  const btn = el.previousElementSibling;
+  if (el.style.display === 'none') { el.style.display = 'block'; btn.textContent = 'Hide Explanation'; }
+  else { el.style.display = 'none'; btn.textContent = 'Show Explanation'; }
+}
+
+// ── TABS ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', (i === 0 && name === 'concepts') || (i === 1 && name === 'quiz'));
+  });
+  document.getElementById('tab-concepts').classList.toggle('active', name === 'concepts');
+  document.getElementById('tab-quiz').classList.toggle('active', name === 'quiz');
+}
+
+// ── INIT ──
+renderConcepts();
+renderQuiz();
+</script>
+</body>
+</html>
