@@ -30,7 +30,7 @@ An **artificial neural network** works the same way, but with math instead of bi
 
 ### Brain Neuron vs. Artificial Neuron
 
-![Brain Neuron vs. Artificial Neuron](images_neural_networks/01_brain_vs_artificial_neuron.svg)
+![Brain Neuron vs. Artificial Neuron](images_neural_networks/01_brain_vs_artificial_neuron.png)
 
 **How they compare:**
 
@@ -55,7 +55,7 @@ Imagine a **talent show** where a performer (the data) goes on stage, and the ju
 
 But here's the twist — instead of one panel of judges, there are **multiple rounds**.
 
-![Talent Show Judges Analogy](images_neural_networks/02_talent_show_judges_analogy.svg)
+![Talent Show Judges Analogy](images_neural_networks/02_talent_show_judges_analogy.png)
 
 ### How It Works, Step by Step
 
@@ -92,7 +92,7 @@ But here's the twist — instead of one panel of judges, there are **multiple ro
 
 Every neural network has the same basic architecture: layers of neurons connected by weighted edges.
 
-![Neural Network Layers](images_neural_networks/03_neural_network_layers.svg)
+![Neural Network Layers](images_neural_networks/03_neural_network_layers.png)
 
 ### The Three Types of Layers
 
@@ -120,7 +120,7 @@ Every neural network has the same basic architecture: layers of neurons connecte
 
 Neural networks learn the same way you do — by making mistakes and improving.
 
-![How Networks Learn](images_neural_networks/04_how_networks_learn.svg)
+![How Networks Learn](images_neural_networks/04_how_networks_learn.png)
 
 ### The Training Process (Like Studying for a Test)
 
@@ -159,7 +159,7 @@ Each neuron needs to decide: *"Is my signal strong enough to pass along?"*
 
 This is called an **activation function**.
 
-![Activation Function Analogy](images_neural_networks/05_activation_function_analogy.svg)
+![Activation Function Analogy](images_neural_networks/05_activation_function_analogy.png)
 
 ### Two Ways to Think About It
 
@@ -175,7 +175,7 @@ This is called an **activation function**.
 
 You already know classic ML algorithms — so when should you use them, and when should you use neural networks?
 
-![Classic ML vs Neural Networks](images_neural_networks/06_classic_ml_vs_neural_networks.svg)
+![Classic ML vs Neural Networks](images_neural_networks/06_classic_ml_vs_neural_networks.png)
 
 ### The Rule of Thumb
 
