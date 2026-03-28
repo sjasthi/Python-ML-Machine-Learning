@@ -14,7 +14,7 @@ By the end of this lesson, you will be able to:
 3. Understand how a neural network *learns* from data (training)
 4. Know when to use a neural network vs. classic ML algorithms
 5. Experiment with a neural network using TensorFlow Playground
-6. Run a simple neural network in Python using Keras
+6. Build the same neural network using three tools: **scikit-learn**, **Keras**, and **TensorFlow**
 
 ---
 
@@ -234,116 +234,360 @@ This is an interactive website where you can build and train a neural network ri
 
 ---
 
-### Activity 2: Your First Neural Network in Python (Keras)
+### Activity 2: Same Problem, Three Tools! 🔥
 
-Here's a complete, runnable script that trains a neural network on the famous **MNIST handwritten digits** dataset — 70,000 images of handwritten numbers (0–9).
+We'll solve the **exact same problem** — classifying handwritten digits (0–9) from the famous **MNIST dataset** (70,000 images) — using three different tools. This lets you see how the same neural network idea looks in different frameworks.
 
-```python
-# ===========================================
-# My First Neural Network - MNIST Digits
-# ===========================================
-
-# Step 1: Import libraries
-import numpy as np
-from tensorflow import keras
-from tensorflow.keras import layers
-
-# Step 2: Load the MNIST dataset
-# This dataset has 60,000 training images and 10,000 test images
-# Each image is 28x28 pixels of a handwritten digit (0-9)
-(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-
-# Step 3: Prepare the data
-# Flatten each 28x28 image into a single row of 784 numbers
-x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
-x_test = x_test.reshape(-1, 784).astype("float32") / 255.0
-# We divide by 255 to scale pixel values from 0-255 to 0.0-1.0
-
-# Step 4: Build the Neural Network
-model = keras.Sequential([
-    layers.Dense(128, activation="relu", input_shape=(784,)),  # Hidden Layer 1: 128 neurons
-    layers.Dense(64, activation="relu"),                        # Hidden Layer 2: 64 neurons
-    layers.Dense(10, activation="softmax")                      # Output Layer: 10 neurons (digits 0-9)
-])
-
-# Step 5: Compile the model (set up the training process)
-model.compile(
-    optimizer="adam",           # The algorithm that adjusts weights
-    loss="sparse_categorical_crossentropy",  # How we measure errors
-    metrics=["accuracy"]       # What we want to track
-)
-
-# Step 6: Train the model!
-print("Training the neural network...")
-print("=" * 50)
-model.fit(x_train, y_train, epochs=5, batch_size=32, validation_split=0.1)
-
-# Step 7: Test the model
-print("\n" + "=" * 50)
-print("Testing on images the network has NEVER seen...")
-test_loss, test_accuracy = model.evaluate(x_test, y_test)
-print(f"\n🎯 Test Accuracy: {test_accuracy * 100:.2f}%")
-
-# Step 8: Make some predictions
-predictions = model.predict(x_test[:5])
-print("\nFirst 5 predictions:")
-for i in range(5):
-    predicted_digit = np.argmax(predictions[i])
-    actual_digit = y_test[i]
-    confidence = predictions[i][predicted_digit] * 100
-    status = "✅" if predicted_digit == actual_digit else "❌"
-    print(f"  {status} Predicted: {predicted_digit} | Actual: {actual_digit} | Confidence: {confidence:.1f}%")
-```
-
-**🧪 Experiments to Try:**
-
-After running the basic script, try changing these things one at a time:
-
-| What to Change | How to Change It | What to Observe |
-|---|---|---|
-| Number of neurons | Change `128` to `32` or `256` | Does accuracy go up or down? |
-| Number of layers | Add another `layers.Dense(32, activation="relu")` | Better or worse? |
-| Number of epochs | Change `epochs=5` to `epochs=1` or `epochs=20` | More training = better? |
-| Activation function | Change `"relu"` to `"sigmoid"` | Any difference in accuracy? |
+> 🎯 **The MNIST Dataset:** 70,000 grayscale images of handwritten digits. Each image is 28×28 pixels. Your job: look at the pixels and predict which digit (0–9) it is.
 
 ---
 
-### Activity 3: Compare Neural Net vs. Classic ML
+#### Approach 1: scikit-learn (MLPClassifier) — The Familiar Way 🟢
 
-Train a classic ML model on the same MNIST data to compare!
+You already know scikit-learn! It has a built-in neural network called `MLPClassifier` (Multi-Layer Perceptron). Same `.fit()` and `.predict()` you've used all year.
 
 ```python
 # ===========================================
-# Classic ML (Random Forest) on MNIST
+# Neural Network with scikit-learn
 # ===========================================
+# Uses the SAME API you already know!
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from tensorflow import keras
+from sklearn.neural_network import MLPClassifier
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
 import time
 
-# Load same data
+# Step 1: Load the MNIST dataset
+print("Loading MNIST dataset...")
+X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
+
+# Step 2: Prepare the data
+X = X / 255.0  # Scale pixel values from 0-255 to 0.0-1.0
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 3: Build and train the Neural Network
+# hidden_layer_sizes=(128, 64) means:
+#   - Hidden Layer 1: 128 neurons
+#   - Hidden Layer 2: 64 neurons
+print("\n🧠 Training Neural Network (scikit-learn)...")
+print("=" * 50)
+
+start = time.time()
+mlp = MLPClassifier(
+    hidden_layer_sizes=(128, 64),   # Two hidden layers
+    activation='relu',               # Activation function (dimmer switch!)
+    max_iter=20,                     # Maximum training epochs
+    random_state=42,
+    verbose=True                     # Show progress while training
+)
+mlp.fit(X_train, y_train)
+train_time = time.time() - start
+
+# Step 4: Test the model
+y_pred = mlp.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+print(f"\n{'=' * 50}")
+print(f"🎯 Test Accuracy: {accuracy * 100:.2f}%")
+print(f"⏱️  Training Time: {train_time:.1f} seconds")
+print(f"\nFirst 10 predictions vs actual:")
+for i in range(10):
+    status = "✅" if y_pred[i] == y_test[i] else "❌"
+    print(f"  {status} Predicted: {y_pred[i]} | Actual: {y_test[i]}")
+```
+
+**What's familiar:** `fit()`, `predict()`, `accuracy_score()` — exactly like Random Forest or KNN!
+
+**What's new:** `MLPClassifier` with `hidden_layer_sizes` to define the network shape.
+
+---
+
+#### Approach 2: Keras — The Beginner-Friendly Deep Learning Way 🟡
+
+Keras is designed to make deep learning simple. It's the most popular way to build neural networks in industry.
+
+```python
+# ===========================================
+# Neural Network with Keras
+# ===========================================
+# Keras makes deep learning feel simple!
+
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras import layers
+import time
+
+# Step 1: Load the MNIST dataset (Keras has it built-in!)
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-x_train_flat = x_train.reshape(-1, 784)
-x_test_flat = x_test.reshape(-1, 784)
 
-# Use a smaller subset (Random Forest is slower on big data)
-x_train_small = x_train_flat[:10000]
-y_train_small = y_train[:10000]
+# Step 2: Prepare the data
+x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
+x_test = x_test.reshape(-1, 784).astype("float32") / 255.0
 
-# Train Random Forest
-print("Training Random Forest...")
+# Step 3: Build the Neural Network layer by layer
+model = keras.Sequential([
+    layers.Dense(128, activation="relu", input_shape=(784,)),  # Hidden Layer 1
+    layers.Dense(64, activation="relu"),                        # Hidden Layer 2
+    layers.Dense(10, activation="softmax")                      # Output Layer (10 digits)
+])
+
+# Step 4: Compile — tell Keras HOW to train
+model.compile(
+    optimizer="adam",                          # Weight adjustment algorithm
+    loss="sparse_categorical_crossentropy",    # Error measurement for classification
+    metrics=["accuracy"]
+)
+
+# Step 5: Train!
+print("🧠 Training Neural Network (Keras)...")
+print("=" * 50)
+start = time.time()
+model.fit(x_train, y_train, epochs=5, batch_size=32, validation_split=0.1)
+train_time = time.time() - start
+
+# Step 6: Test
+test_loss, test_accuracy = model.evaluate(x_test, y_test)
+print(f"\n{'=' * 50}")
+print(f"🎯 Test Accuracy: {test_accuracy * 100:.2f}%")
+print(f"⏱️  Training Time: {train_time:.1f} seconds")
+
+# Step 7: Predictions with confidence scores
+predictions = model.predict(x_test[:10])
+print(f"\nFirst 10 predictions:")
+for i in range(10):
+    predicted = np.argmax(predictions[i])
+    confidence = predictions[i][predicted] * 100
+    actual = y_test[i]
+    status = "✅" if predicted == actual else "❌"
+    print(f"  {status} Predicted: {predicted} | Actual: {actual} | Confidence: {confidence:.1f}%")
+```
+
+**What's different from scikit-learn:**
+- You build the model layer-by-layer with `Sequential()`
+- You must `compile()` before training (choose optimizer + loss function)
+- You get **confidence scores** for each prediction (e.g., "92% sure it's a 7")
+- Training shows a progress bar with live accuracy updates
+
+---
+
+#### Approach 3: TensorFlow (Low-Level) — The "Under the Hood" Way 🔴
+
+TensorFlow gives you full control. This is what researchers and engineers use when they need maximum flexibility. It's more code, but you see every step.
+
+```python
+# ===========================================
+# Neural Network with TensorFlow (Low-Level)
+# ===========================================
+# More control — you see every step!
+
+import numpy as np
+import tensorflow as tf
+import time
+
+# Step 1: Load and prepare data
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
+x_test = x_test.reshape(-1, 784).astype("float32") / 255.0
+
+# Convert labels to one-hot encoding
+# Instead of label "3", we use [0,0,0,1,0,0,0,0,0,0]
+y_train_onehot = tf.one_hot(y_train, depth=10)
+y_test_onehot = tf.one_hot(y_test, depth=10)
+
+# Step 2: Create the dataset pipeline
+train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train_onehot))
+train_dataset = train_dataset.shuffle(10000).batch(32)
+
+# Step 3: Define network parameters (weights and biases)
+# These are the numbers the network will LEARN!
+W1 = tf.Variable(tf.random.normal([784, 128], stddev=0.1))  # Weights: Input -> Hidden 1
+b1 = tf.Variable(tf.zeros([128]))                            # Biases: Hidden 1
+
+W2 = tf.Variable(tf.random.normal([128, 64], stddev=0.1))   # Weights: Hidden 1 -> Hidden 2
+b2 = tf.Variable(tf.zeros([64]))                             # Biases: Hidden 2
+
+W3 = tf.Variable(tf.random.normal([64, 10], stddev=0.1))    # Weights: Hidden 2 -> Output
+b3 = tf.Variable(tf.zeros([10]))                             # Biases: Output
+
+# Step 4: Define how data flows through the network (forward pass)
+def neural_network(x):
+    # Layer 1: multiply inputs by weights, add bias, apply ReLU
+    layer1 = tf.nn.relu(tf.matmul(x, W1) + b1)
+    # Layer 2: same thing
+    layer2 = tf.nn.relu(tf.matmul(layer1, W2) + b2)
+    # Output: use softmax to get probabilities
+    output = tf.nn.softmax(tf.matmul(layer2, W3) + b3)
+    return output
+
+# Step 5: Define the optimizer (how to adjust weights)
+optimizer = tf.optimizers.Adam(learning_rate=0.001)
+
+# Step 6: Training loop — this is what Keras hides from you!
+print("🧠 Training Neural Network (TensorFlow)...")
+print("=" * 50)
+start = time.time()
+
+for epoch in range(5):
+    epoch_loss = 0
+    num_batches = 0
+
+    for batch_x, batch_y in train_dataset:
+        with tf.GradientTape() as tape:
+            # Forward pass: make predictions
+            predictions = neural_network(batch_x)
+            # Calculate loss (how wrong are we?)
+            loss = -tf.reduce_mean(tf.reduce_sum(batch_y * tf.math.log(predictions + 1e-7), axis=1))
+
+        # Backward pass: calculate gradients and update weights
+        gradients = tape.gradient(loss, [W1, b1, W2, b2, W3, b3])
+        optimizer.apply_gradients(zip(gradients, [W1, b1, W2, b2, W3, b3]))
+
+        epoch_loss += loss.numpy()
+        num_batches += 1
+
+    avg_loss = epoch_loss / num_batches
+    print(f"  Epoch {epoch+1}/5 — Loss: {avg_loss:.4f}")
+
+train_time = time.time() - start
+
+# Step 7: Test
+test_predictions = neural_network(x_test)
+predicted_labels = tf.argmax(test_predictions, axis=1).numpy()
+accuracy = np.mean(predicted_labels == y_test)
+
+print(f"\n{'=' * 50}")
+print(f"🎯 Test Accuracy: {accuracy * 100:.2f}%")
+print(f"⏱️  Training Time: {train_time:.1f} seconds")
+
+print(f"\nFirst 10 predictions:")
+for i in range(10):
+    pred = predicted_labels[i]
+    conf = test_predictions[i][pred].numpy() * 100
+    actual = y_test[i]
+    status = "✅" if pred == actual else "❌"
+    print(f"  {status} Predicted: {pred} | Actual: {actual} | Confidence: {conf:.1f}%")
+```
+
+**What's different from Keras:**
+- YOU define the weights and biases as variables
+- YOU write the forward pass function (`neural_network()`)
+- YOU write the training loop (Keras does this behind the scenes)
+- You can see the **exact math** happening: `matmul` (matrix multiply), `relu`, `softmax`
+
+---
+
+#### 🏆 Comparing All Three Approaches
+
+| Feature | scikit-learn | Keras | TensorFlow |
+|---|---|---|---|
+| **Lines of code** | ~15 | ~25 | ~50 |
+| **Difficulty** | ⭐ Easy | ⭐⭐ Medium | ⭐⭐⭐ Advanced |
+| **API style** | `fit()` / `predict()` | Layer-by-layer + `compile()` | Write everything yourself |
+| **Best for** | Quick experiments, learning | Most real projects | Custom research, max control |
+| **GPU support** | ❌ No | ✅ Yes | ✅ Yes |
+| **CNNs, RNNs, Transformers** | ❌ No | ✅ Yes | ✅ Yes |
+| **Expected accuracy** | ~97% | ~97-98% | ~97-98% |
+| **You already know it?** | ✅ Yes! | 🆕 New | 🆕 New |
+
+> 💡 **Key Takeaway:** All three solve the same problem with similar accuracy! The difference is how much control (and code) you want. Think of it as: **scikit-learn = automatic car**, **Keras = manual car**, **TensorFlow = building the engine yourself**.
+
+---
+
+### Activity 3: The Ultimate Comparison Script 🏁
+
+Run all three approaches back-to-back and compare results!
+
+```python
+# ===========================================
+# ULTIMATE COMPARISON: scikit-learn vs Keras vs TensorFlow
+# ===========================================
+# Same problem. Same data. Three tools. Who wins?
+
+import numpy as np
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score
+from tensorflow import keras
+from tensorflow.keras import layers
+import time
+
+# ---- Load Data ----
+print("📦 Loading MNIST dataset...")
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+x_train_flat = x_train.reshape(-1, 784).astype("float32") / 255.0
+x_test_flat = x_test.reshape(-1, 784).astype("float32") / 255.0
+
+results = {}
+
+# ---- 1. SCIKIT-LEARN ----
+print("\n" + "=" * 60)
+print("🟢 APPROACH 1: scikit-learn MLPClassifier")
+print("=" * 60)
+start = time.time()
+mlp = MLPClassifier(hidden_layer_sizes=(128, 64), activation='relu',
+                    max_iter=20, random_state=42, verbose=False)
+mlp.fit(x_train_flat, y_train)
+sklearn_time = time.time() - start
+sklearn_acc = accuracy_score(y_test, mlp.predict(x_test_flat))
+results['scikit-learn'] = (sklearn_acc, sklearn_time)
+print(f"   🎯 Accuracy: {sklearn_acc * 100:.2f}%")
+print(f"   ⏱️  Time: {sklearn_time:.1f}s")
+
+# ---- 2. KERAS ----
+print("\n" + "=" * 60)
+print("🟡 APPROACH 2: Keras Sequential")
+print("=" * 60)
+model = keras.Sequential([
+    layers.Dense(128, activation="relu", input_shape=(784,)),
+    layers.Dense(64, activation="relu"),
+    layers.Dense(10, activation="softmax")
+])
+model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+start = time.time()
+model.fit(x_train_flat, y_train, epochs=5, batch_size=32, verbose=0)
+keras_time = time.time() - start
+keras_loss, keras_acc = model.evaluate(x_test_flat, y_test, verbose=0)
+results['Keras'] = (keras_acc, keras_time)
+print(f"   🎯 Accuracy: {keras_acc * 100:.2f}%")
+print(f"   ⏱️  Time: {keras_time:.1f}s")
+
+# ---- 3. SCIKIT-LEARN (Random Forest — for reference) ----
+print("\n" + "=" * 60)
+print("🌲 BONUS: Random Forest (Classic ML — not a neural network)")
+print("=" * 60)
+from sklearn.ensemble import RandomForestClassifier
 start = time.time()
 rf = RandomForestClassifier(n_estimators=100, random_state=42)
-rf.fit(x_train_small, y_train_small)
+rf.fit(x_train_flat[:10000], y_train[:10000])  # Smaller subset
 rf_time = time.time() - start
+rf_acc = accuracy_score(y_test, rf.predict(x_test_flat))
+results['Random Forest'] = (rf_acc, rf_time)
+print(f"   🎯 Accuracy: {rf_acc * 100:.2f}%  (trained on 10K samples)")
+print(f"   ⏱️  Time: {rf_time:.1f}s")
 
-# Test
-rf_accuracy = accuracy_score(y_test, rf.predict(x_test_flat))
-print(f"🌲 Random Forest Accuracy: {rf_accuracy * 100:.2f}%  (trained in {rf_time:.1f}s)")
-print(f"🧠 Neural Network Accuracy: ~97-98%  (from Activity 2)")
-print(f"\nBoth work well! The neural net is slightly better on image data.")
+# ---- FINAL SCOREBOARD ----
+print("\n" + "=" * 60)
+print("🏆 FINAL SCOREBOARD")
+print("=" * 60)
+print(f"{'Approach':<20} {'Accuracy':<12} {'Time':<10} {'Type'}")
+print("-" * 60)
+for name, (acc, t) in results.items():
+    ntype = "Neural Net" if name != "Random Forest" else "Classic ML"
+    print(f"{name:<20} {acc*100:.2f}%       {t:.1f}s       {ntype}")
+print("-" * 60)
+winner = max(results, key=lambda k: results[k][0])
+print(f"\n🥇 Highest Accuracy: {winner}")
+print(f"\n💡 Notice: All approaches get similar accuracy on this task!")
+print(f"   Neural networks shine more on complex tasks like full images, text, and audio.")
 ```
+
+**📝 Fill in your results after running:**
+
+| Approach | Accuracy | Training Time | Type |
+|---|---|---|---|
+| scikit-learn (MLP) | ____% | ____s | Neural Network |
+| Keras | ____% | ____s | Neural Network |
+| Random Forest | ____% | ____s | Classic ML |
 
 ---
 
@@ -387,15 +631,32 @@ Complete the experiment table from **Activity 1** and answer these questions:
 4. What happens when the learning rate is too high? Too low?
 5. In your own words, explain what "training" a neural network means.
 
-### Task 2: Python Neural Network (Required)
+### Task 2: Run All Three Approaches (Required)
 
-Run the MNIST neural network code from **Activity 2** and:
+Run the **Ultimate Comparison Script** from **Activity 3** and:
 
-1. Take a screenshot of your training output showing the accuracy
-2. Try at least 2 of the experiments from the table (change neurons, layers, epochs, etc.)
-3. Write a short paragraph: How does the neural network's accuracy compare to the Random Forest you trained in Activity 3?
+1. Take a screenshot of the final scoreboard showing accuracy and training time for all approaches
+2. Fill in the results table at the bottom of Activity 3
+3. Answer these questions:
+   - Which approach got the highest accuracy? By how much?
+   - Which approach trained the fastest? Why do you think that is?
+   - Look at the scikit-learn code vs. the Keras code vs. the TensorFlow code. Which was easiest to read and understand? Why?
+   - Why does Random Forest use a smaller training set (10K) while the neural networks use the full set (60K)?
 
-### Task 3: Teachable Machine (Bonus — Extra Credit)
+### Task 3: Experiment with Keras (Required)
+
+Using the **Keras code from Activity 2 (Approach 2)**, try changing these things **one at a time** and record what happens:
+
+| What to Change | How to Change It | Your Result |
+|---|---|---|
+| Number of neurons | Change `128` to `32` or `256` | Accuracy: ____% |
+| Number of layers | Add another `layers.Dense(32, activation="relu")` | Accuracy: ____% |
+| Number of epochs | Change `epochs=5` to `epochs=1` or `epochs=20` | Accuracy: ____% |
+| Activation function | Change `"relu"` to `"sigmoid"` | Accuracy: ____% |
+
+Write 2–3 sentences: What had the biggest impact on accuracy?
+
+### Task 4: Teachable Machine (Bonus — Extra Credit)
 
 Go to [Teachable Machine](https://teachablemachine.withgoogle.com/) and train a model to recognize 3 different hand gestures (like rock/paper/scissors) using your webcam. Take a screenshot of it working and write 2–3 sentences about your experience.
 
@@ -416,6 +677,8 @@ Go to [Teachable Machine](https://teachablemachine.withgoogle.com/) and train a 
 6. **Deep Learning** = neural networks with 2+ hidden layers. That's it — it's not as scary as it sounds!
 
 7. A single artificial neuron is essentially **logistic regression** — something you already know. Neural networks are just *lots* of them working together.
+
+8. **Three tools, same idea:** scikit-learn (familiar, simple), Keras (industry standard, beginner-friendly), TensorFlow (full control, advanced). Think: automatic car → manual car → building the engine yourself.
 
 ---
 
