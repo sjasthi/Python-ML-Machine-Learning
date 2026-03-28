@@ -11,9 +11,10 @@ Introduction to Neural Networks
 ## Resources
 
 1. [Introduction to Neural Networks – Presentation](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Presentations/ML_Neural_Networks.md)
-2. [TensorFlow Playground – Student Guide](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/python_ml_neural_networks_playground.md)
-3. [Neural Networks Assignment (25 Points)](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Assignments/Python_ML_Neural_Networks_Assignment.md)
-4. [Neural Networks Colab Notebook](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Colab_Notebooks/ML_Neural_Networks.ipynb)
+2. [Neural Networks Colab Notebook](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Colab_Notebooks/ML_Neural_Networks.ipynb)
+3. [TensorFlow Playground – Student Guide](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/python_ml_neural_networks_playground.md)
+4. [Neural Networks Assignment (25 Points)](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Assignments/Python_ML_Neural_Networks_Assignment.md)
+
 
 ## Class Plan
 
