@@ -351,6 +351,8 @@ Answer these after completing the experiments above.
 
 7. If you were building a neural network to tell cats from dogs in photos, what settings would you start with and why? (Think about layers, neurons, learning rate, and activation function.)
 
+8. Try the Spiral dataset with ReLU activation, then switch to Linear activation (keeping everything else the same). What difference do you notice in the output? Why do you think activation functions matter so much?
+
 ---
 
 ## Key Takeaways
