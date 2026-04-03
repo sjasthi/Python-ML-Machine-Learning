@@ -61,9 +61,9 @@ This course introduces middle and high school students to Machine Learning conce
 | Class # | Week Start | Week End (Due Date) | Topic |
 |---------|------------|---------------------|-------|
 | 22 | 3/21/2026 | 3/27/2026 | Principal Component Analysis (PCA)|
-| 23 | 3/28/2026 | 4/3/2026 | Recommender Systems |
+| 23 | 3/28/2026 | 4/3/2026 | Introduction to Neural Networks |
 | 24 | 4/4/2026 | 4/10/2026 | Image Classification using CNNs  |
-| 25 | 4/11/2026 | 4/17/2026 | ML Certifications / Competitions |
+| 25 | 4/11/2026 | 4/17/2026 | Recommender Systems, ML Certifications / Competitions |
 | 26 | 4/18/2026 | 4/24/2026 | Final Project - Working Session 1 |
 | 27 | 4/25/2026 | 5/1/2026 | Final Project - Working Session 2 |
 | 28 | 5/2/2026 | 5/8/2026 | Final Project - Working Session 3 |
