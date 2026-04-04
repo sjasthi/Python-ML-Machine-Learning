@@ -465,7 +465,7 @@ print("\n💡 Notice how the CNN beats the regular NN — especially on images!"
 
 ## 📝 Part 9: Assignment
 
-### Task 1: CNN Explainer Exploration (Required)
+### Task 1: CNN Explainer Exploration (Play)
 
 Visit **[CNN Explainer](https://poloclub.github.io/cnn-explainer/)** and answer these questions:
 
@@ -475,7 +475,7 @@ Visit **[CNN Explainer](https://poloclub.github.io/cnn-explainer/)** and answer 
 4. In your own words, explain what "pooling" does and why it's useful.
 5. What is the final prediction, and how confident is the network?
 
-### Task 2: Quick, Draw! Competition (Required)
+### Task 2: Quick, Draw! Competition (Play)
 
 Play 3 rounds of **[Google Quick, Draw!](https://quickdraw.withgoogle.com/)** and answer:
 
@@ -483,7 +483,7 @@ Play 3 rounds of **[Google Quick, Draw!](https://quickdraw.withgoogle.com/)** an
 2. Pick one drawing the AI got wrong. Why do you think it failed?
 3. How is Quick, Draw!'s neural network similar to the CNN you learned about today?
 
-### Task 3: Build and Run a CNN (Required)
+### Task 3: Build and Run a CNN (Colab Notebook - Run the Code)
 
 Run the **MNIST CNN code from Activity 1** and the **Showdown script from Activity 3**, then:
 
@@ -492,7 +492,7 @@ Run the **MNIST CNN code from Activity 1** and the **Showdown script from Activi
 3. Try changing the CNN: add a third `Conv2D(128, (3,3))` layer. Does accuracy improve?
 4. Try changing the number of filters: change `32` to `16`. What happens?
 
-### Task 4: Fashion-MNIST Challenge (Bonus — Extra Credit)
+### Task 4: Fashion-MNIST Challenge (Colab Notebook - Run the Code)
 
 Run the **Fashion-MNIST code from Activity 2** and:
 
