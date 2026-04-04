@@ -144,6 +144,8 @@ Here's how the Artificial Neural Network (ANN) from Week 23 compares to a Convol
 | **MNIST Accuracy** | ~97% | ~99% |
 | **Real Photo Accuracy** | Poor | Excellent |
 
+![ANN vs CNN Comparion](images_cnn/ann_vs_cnn_comparison.png)
+
 **Parameter sharing** is CNNs' secret weapon: the same 3×3 filter is reused across the entire image. An ANN needs separate weights for every single pixel. This makes CNNs far more efficient.
 
 > 💡 **Key Takeaway:** CNNs are ANNs with a special front end designed for images. The Conv + Pool layers are like an expert image preprocessor that feeds the best features into a regular dense network.
