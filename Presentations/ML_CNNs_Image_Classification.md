@@ -438,8 +438,8 @@ print("\n💡 Notice how the CNN beats the regular NN — especially on images!"
 
 | Video | Length | Why Watch It |
 | --- | --- | --- |
-| [3Blue1Brown: But What Is a Convolution?](https://www.youtube.com/watch?v=KuXjwB4LzSA) | 23 min | Beautiful visual explanation of convolution — the math behind CNN filters |
 | [Codebasics: Simple Explanation of CNN](https://www.youtube.com/watch?v=zfiSAzpy9NM) | 26 min | Beginner-friendly explanation using analogies — covers filters, convolution, ReLU, and pooling |
+| [3Blue1Brown: But What Is a Convolution?](https://www.youtube.com/watch?v=KuXjwB4LzSA) | 23 min | Beautiful visual explanation of convolution — the math behind CNN filters |
 | [Brandon Rohrer: How CNNs Work](https://www.youtube.com/watch?v=FmpDIaiMIeA) | 26 min | Excellent step-by-step walkthrough with clear diagrams |
 | [Deeplizard: CNNs Explained](https://www.youtube.com/watch?v=YRhxdVk_sIs) | 15 min | Beginner-friendly with good examples and visualizations |
 
