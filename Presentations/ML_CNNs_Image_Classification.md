@@ -24,6 +24,8 @@ Last week you built a regular neural network (MLP) that classified MNIST handwri
 
 ![Why CNNs Are Needed](images_cnn/01_why_cnns.png)
 
+![Understanding CNNs](images_cnn/understanding_cnns.png)
+
 The core problem is that a regular neural network **flattens** the image into a long line of numbers. A 28×28 image becomes a list of 784 numbers. A small phone photo (224×224×3 colors) becomes **150,528 numbers**. This creates two major issues:
 
 **Issue 1: Spatial information is destroyed.** When you flatten an image, the network no longer knows that pixel (1,1) is *next to* pixel (1,2). It's as if someone cut a photo into confetti and dumped it in a pile — you lost all the structure.
