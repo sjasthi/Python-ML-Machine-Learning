@@ -23,6 +23,7 @@ By the end of this lesson, you will be able to:
 Last week you built a regular neural network (MLP) that classified MNIST handwritten digits with ~97% accuracy. That's great! But try giving that same network a **photo of a real cat** and it falls apart. Why?
 
 ![Why CNNs Are Needed](images_cnn/01_why_cnns.png)
+![Why CNNs Are Needed](images_cnn/understanding_cnns.png)
 
 The core problem is that a regular neural network **flattens** the image into a long line of numbers. A 28×28 image becomes a list of 784 numbers. A small phone photo (224×224×3 colors) becomes **150,528 numbers**. This creates two major issues:
 
