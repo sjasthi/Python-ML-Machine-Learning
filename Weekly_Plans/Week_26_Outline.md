@@ -22,8 +22,15 @@ Transformers, the Attention Mechanism, and How ChatGPT/Claude Work
 * Live demo: use pretrained Transformers for sentiment analysis, text generation, and summarization [2]
 * Compare classic ML (Week 25) vs. pretrained Transformer on the same sentiment task [2]
 * Discussion: how ChatGPT/Claude work, why they hallucinate, and the scale of modern LLMs
-* Review the assignment and expectations [3]
+* Take the Quiz during the classtime
+* Review the assignment and expectations 
 
+## Quiz
+
+* Play with the interactive playbook
+* Complete the Transformers Quiz 
+* Submit the final score to Google classroom
+  
 ## Assignment
 
 * Complete the Transformers Assignment [3]
