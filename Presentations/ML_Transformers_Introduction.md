@@ -417,6 +417,7 @@ print(f'  Answer: "{result["answer"]}" (confidence: {result["score"]:.1%})')
 
 | Tool | Link | What You Can Do |
 |------|------|----------------|
+| **Transformers Visualized** | [https://poloclub.github.io/transformer-explainer/](https://poloclub.github.io/transformer-explainer/) | See exactly how the transformers work |
 | **OpenAI Tokenizer** | [platform.openai.com/tokenizer](https://platform.openai.com/tokenizer) | See exactly how text gets split into tokens for GPT models |
 | **Hugging Face Models** | [huggingface.co/models](https://huggingface.co/models) | Browse thousands of pretrained Transformer models you can use for free |
 | **BertViz** | [github.com/jessevig/bertviz](https://github.com/jessevig/bertviz) | Visualize the attention patterns in a real Transformer model |
