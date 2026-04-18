@@ -12,7 +12,8 @@ Transformers, the Attention Mechanism, and How ChatGPT/Claude Work
 
 1. [Transformers and LLMs – Presentation](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Presentations/ML_Transformers_Introduction.md)
 2. [Transformers Colab Notebook](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Colab_Notebooks/ML_Transformers_Introduction.ipynb)
-3. [Transformers Assignment (25 Points)](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Assignments/ML_Transformers_Assignment.md)
+3. [Transformers Quiz (10 Points)](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Play/ML_Transformers_Quiz.html)
+4. [Transformers Assignment (25 Points)](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Assignments/ML_Transformers_Assignment.md)
 
 ## Class Plan
 
