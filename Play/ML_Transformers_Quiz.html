@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 26 — Transformers & LLMs | Learn and Help</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --accent4: #fb923c;
+    --danger: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --gold: #fbbf24;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0a0e1a 0%, #0f172a 50%, #0a0e1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(167,139,250,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(56,189,248,0.1);
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: 4px;
+    padding: 4px 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .course-name {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+  .header h1 {
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-top: 18px;
+    background: linear-gradient(120deg, #e2e8f0 30%, #38bdf8 70%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-sub {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 520px;
+    line-height: 1.5;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-top: 28px;
+  }
+  .tab-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 12px 32px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .tab-btn:first-child { border-radius: 8px 0 0 0; }
+  .tab-btn:last-child  { border-radius: 0 8px 0 0; }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #0a0e1a;
+  }
+  .tab-btn:not(.active) {
+    background: var(--surface2);
+    color: var(--muted);
+  }
+  .tab-btn:not(.active):hover { background: var(--surface); color: var(--text); }
+
+  /* ── MAIN ── */
+  .main { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ── SECTION CARDS ── */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .section-card:hover { border-color: rgba(56,189,248,0.25); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 17px; font-weight: 600; flex: 1; }
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .chevron {
+    transition: transform 0.25s;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .section-card.open .chevron { transform: rotate(180deg); }
+
+  .section-body {
+    display: none;
+    padding: 0 24px 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section-card.open .section-body { display: block; }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+  /* ── CONCEPT CONTENT STYLES ── */
+  .concept-text { font-size: 15px; line-height: 1.7; color: #cbd5e1; }
+  .concept-text + .concept-text { margin-top: 12px; }
+
+  .highlight-box {
+    margin: 16px 0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .highlight-box.blue  { background: rgba(56,189,248,0.08); border-left: 3px solid var(--accent); }
+  .highlight-box.purple{ background: rgba(167,139,250,0.08); border-left: 3px solid var(--accent2); }
+  .highlight-box.green { background: rgba(52,211,153,0.08); border-left: 3px solid var(--accent3); }
+  .highlight-box.orange{ background: rgba(251,146,60,0.08); border-left: 3px solid var(--accent4); }
+  .highlight-box strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
+
+  .analogy-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    position: relative;
+  }
+  .analogy-box::before {
+    content: 'ANALOGY';
+    position: absolute;
+    top: -10px; left: 16px;
+    background: var(--gold);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+
+  .steps-list {
+    counter-reset: step;
+    list-style: none;
+    margin: 16px 0;
+  }
+  .steps-list li {
+    counter-increment: step;
+    display: flex;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #cbd5e1;
+  }
+  .steps-list li::before {
+    content: counter(step);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0a0e1a;
+    background: var(--accent);
+    min-width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ── MODEL TYPE CARDS ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .model-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .model-card .model-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .model-card h4 { font-size: 15px; margin-bottom: 6px; }
+  .model-card .examples { font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  .model-card .use-case { font-size: 13px; line-height: 1.5; color: #94a3b8; }
+
+  /* ── SCALE TABLE ── */
+  .scale-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .scale-table th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .scale-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: #cbd5e1;
+  }
+  .scale-table tr:last-child td { border-bottom: none; }
+  .scale-table tr:hover td { background: rgba(56,189,248,0.04); }
+
+  /* ── INTERACTIVE TOKENIZER ── */
+  .tokenizer-demo {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .tokenizer-demo label {
+    font-size: 13px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'Space Mono', monospace;
+  }
+  .tokenizer-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    font-family: 'Space Mono', monospace;
+    transition: border-color 0.2s;
+  }
+  .tokenizer-input:focus { border-color: var(--accent); }
+  .token-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+    min-height: 36px;
+  }
+  .token-chip {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    animation: popIn 0.15s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+  /* ── NEXT-TOKEN DEMO ── */
+  .token-gen-demo {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .gen-input {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+  }
+  .gen-input:focus { border-color: var(--accent); }
+  .gen-btn {
+    margin-top: 10px;
+    background: var(--accent);
+    color: #0a0e1a;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .gen-btn:hover { opacity: 0.85; }
+  .gen-output {
+    margin-top: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 24px;
+  }
+  .gen-word { display: inline; }
+  .gen-word.new {
+    color: var(--accent3);
+    animation: wordPop 0.3s ease;
+  }
+  @keyframes wordPop { from { opacity:0; transform:translateY(-4px); } to { opacity:1; } }
+  .prob-bar-wrap { margin-top: 14px; display: none; }
+  .prob-label { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 6px; }
+  .prob-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .prob-word { font-family: 'Space Mono', monospace; font-size: 13px; width: 90px; }
+  .prob-bar { height: 18px; border-radius: 3px; transition: width 0.4s ease; }
+  .prob-pct { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  /* ── QUIZ ── */
+  #tab-quiz { display: none; }
+  .quiz-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .quiz-header h2 { font-size: 28px; font-weight: 700; }
+  .quiz-header p { color: var(--muted); margin-top: 8px; font-size: 15px; }
+
+  .quiz-progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .progress-bar-outer {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .score-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 18px;
+    transition: border-color 0.2s;
+  }
+  .question-card.answered.correct { border-color: var(--accent3); }
+  .question-card.answered.wrong   { border-color: var(--danger); }
+
+  .question-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .question-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .options-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .option-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    text-align: left;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(56,189,248,0.05); }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { background: rgba(52,211,153,0.1); border-color: var(--accent3); color: var(--accent3); }
+  .option-btn.wrong   { background: rgba(248,113,113,0.1); border-color: var(--danger); color: var(--danger); }
+  .option-btn.reveal  { background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.4); color: var(--accent3); }
+  .option-letter {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+  .option-btn.correct .option-letter { background: var(--accent3); color: #000; }
+  .option-btn.wrong   .option-letter { background: var(--danger); color: #000; }
+  .option-btn.reveal  .option-letter { background: rgba(52,211,153,0.3); }
+
+  .feedback-msg {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback-msg.correct { background: rgba(52,211,153,0.1); color: var(--accent3); }
+  .feedback-msg.wrong   { background: rgba(248,113,113,0.1); color: var(--danger); }
+  .feedback-msg.show    { display: block; animation: fadeIn 0.2s ease; }
+
+  /* ── RESULTS ── */
+  .results-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+  .results-panel.show { display: block; animation: fadeIn 0.3s ease; }
+  .score-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--accent);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    background: rgba(56,189,248,0.07);
+  }
+  .score-num { font-size: 38px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--accent); }
+  .score-denom { font-size: 14px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .results-msg { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+  .results-sub { font-size: 14px; color: var(--muted); max-width: 380px; margin: 0 auto; line-height: 1.6; }
+  .retry-btn {
+    margin-top: 28px;
+    background: var(--accent);
+    color: #0a0e1a;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .retry-btn:hover { opacity: 0.85; }
+
+  /* ── KEY TAKEAWAYS ── */
+  .takeaways-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .takeaway-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #cbd5e1;
+  }
+  .takeaway-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    min-width: 24px;
+    font-weight: 700;
+  }
+
+  /* ── MISC ── */
+  strong.hl { color: var(--accent); }
+  strong.hl2 { color: var(--accent2); }
+  strong.hl3 { color: var(--accent3); }
+  strong.hl4 { color: var(--accent4); }
+  em { color: var(--gold); font-style: normal; font-weight: 500; }
+
+  @media (max-width: 600px) {
+    .header { padding: 20px 16px 0; }
+    .main { padding: 24px 14px 60px; }
+    .model-grid { grid-template-columns: 1fr; }
+    .tab-btn { padding: 12px 18px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="course-name">Learn and Help · Python ML Course · 2025–2026</div>
+    </div>
+    <span class="badge">Week 26</span>
+  </div>
+  <h1>Transformers &amp; LLMs</h1>
+  <p class="header-sub">The architecture that powers ChatGPT, Claude, and nearly every modern AI system you've heard of.</p>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('concepts', this)">📖 Concepts</button>
+    <button class="tab-btn" onclick="switchTab('quiz', this)">🧠 Quiz</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════ CONCEPTS TAB ═══════════ -->
+<div id="tab-concepts">
+
+  <!-- SECTION 1: Journey -->
+  <div class="section-card open">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(56,189,248,0.12)">🗺️</div>
+      <div>
+        <div class="section-num">PART 1</div>
+        <div class="section-title">The Road to Transformers</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <p class="concept-text">You've come a long way this year! Before Transformers, here's what you learned:</p>
+      <div style="margin:16px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:14px;border-left:3px solid var(--accent)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px;">WEEKS 1–22</div>
+          <div style="font-size:14px;font-weight:600;">Classic ML</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">KNN, Trees, SVM, Random Forests — great for structured data (tables & numbers)</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:14px;border-left:3px solid var(--accent2)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px;">WEEK 23</div>
+          <div style="font-size:14px;font-weight:600;">Neural Networks</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Layers of neurons learning complex patterns by adjusting weights</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:14px;border-left:3px solid var(--accent3)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px;">WEEK 24</div>
+          <div style="font-size:14px;font-weight:600;">CNNs</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Neural networks that "see" images using filters for edges, shapes, patterns</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:14px;border-left:3px solid var(--accent4)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px;">WEEK 25</div>
+          <div style="font-size:14px;font-weight:600;">NLP</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Turning text into numbers via tokenization and TF-IDF so models can work with language</div>
+        </div>
+      </div>
+      <div class="highlight-box blue">
+        <strong>🔑 The Final Piece</strong>
+        Now comes <strong class="hl">Transformers</strong> — the architecture invented in 2017 that powers ChatGPT, Claude, Google Translate, and nearly every modern AI you've heard of.
+      </div>
+      <p class="concept-text">Before Transformers, AI processed words <em>one at a time</em> in order, making it slow and forgetful on long sentences. Transformers changed everything with one powerful idea: <strong class="hl">let every word look at every other word at the same time.</strong> This is called <strong class="hl">attention</strong>.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Attention -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(167,139,250,0.12)">👀</div>
+      <div>
+        <div class="section-num">PART 2</div>
+        <div class="section-title">The Attention Mechanism</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <div class="highlight-box purple">
+        <strong>The Core Idea</strong>
+        Read this sentence: <em>"The cat sat on the mat because <strong class="hl2">it</strong> was tired."</em><br>
+        What does "it" refer to? Your brain instantly knows — <strong class="hl3">the cat</strong>! You paid more <em>attention</em> to "cat" than to "mat" when processing "it." That's exactly what the attention mechanism does.
+      </div>
+      <div class="analogy-box" style="margin-top:20px;">
+        <p style="font-size:15px;font-weight:600;margin-bottom:12px;color:var(--gold);">🏫 The Classroom Analogy</p>
+        <p class="concept-text">Think of a classroom where every student (word) can pass notes to every other student:</p>
+        <ol class="steps-list" style="margin-top:12px;">
+          <li>Each student writes a <strong class="hl">Question</strong>: "What am I related to?" → called the <em>Query</em></li>
+          <li>Each student wears a <strong class="hl2">Name Tag</strong> describing what they are → called the <em>Key</em></li>
+          <li>Each student holds <strong class="hl3">Information</strong> about their meaning → called the <em>Value</em></li>
+        </ol>
+        <p class="concept-text" style="margin-top:12px;">When "it" wants to figure out what it means, it sends its Question to every word, compares against each word's Key for a match score, then absorbs the highest-scoring word's Value. <strong class="hl3">"cat"</strong> wins → "it" means the cat!</p>
+      </div>
+      <div class="highlight-box green">
+        <strong>💡 Key Insight</strong>
+        You don't need to memorize Query / Key / Value. The important thing: <strong class="hl3">attention lets every word look at every other word simultaneously</strong> to figure out context. That's what makes Transformers so powerful.
+      </div>
+      <p class="concept-text">Before Transformers, models called RNNs processed words one at a time, left to right — by the time they reached "it" in a long sentence, they might have forgotten "the cat." Attention solves this completely.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Architecture -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(52,211,153,0.12)">⚙️</div>
+      <div>
+        <div class="section-num">PART 3</div>
+        <div class="section-title">The Transformer Architecture</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <p class="concept-text">A Transformer has a clear structure. Here's the simplified pipeline:</p>
+      <ol class="steps-list" style="margin-top:16px;">
+        <li>
+          <div>
+            <strong class="hl">Tokenize &amp; Embed</strong><br>
+            <span style="color:#94a3b8;font-size:13px;">Break text into tokens, convert each to a number vector (embedding). You already learned this in Week 25!</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong class="hl2">Add Position Info</strong><br>
+            <span style="color:#94a3b8;font-size:13px;">Since the Transformer sees all words at once, we add <em>positional encoding</em> so the model knows word order. Think of numbering seats in a classroom.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong class="hl3">Self-Attention</strong><br>
+            <span style="color:#94a3b8;font-size:13px;">Every word calculates attention scores with every other word. Transformers use <em>multi-head attention</em> — running attention multiple times in parallel, each looking for different relationship types (grammatical, semantic, positional…). Like multiple study groups each focused on a different aspect!</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong class="hl4">Feed-Forward Neural Network</strong><br>
+            <span style="color:#94a3b8;font-size:13px;">After attention, each word's updated representation passes through a regular neural network (like your Week 23 work) for additional processing.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong style="color:var(--gold)">Repeat!</strong><br>
+            <span style="color:#94a3b8;font-size:13px;">Steps 3–4 stack many times. GPT-2 has 12 layers. GPT-3 has 96 layers. GPT-4 ~120 layers. More layers = more capacity to learn complex patterns.</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Next Token Prediction INTERACTIVE -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(251,146,60,0.12)">🔮</div>
+      <div>
+        <div class="section-num">PART 4</div>
+        <div class="section-title">How ChatGPT Generates Text</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <div class="highlight-box orange">
+        <strong>🤯 The Surprising Secret</strong>
+        ChatGPT, Claude, and all modern LLMs do one incredibly simple thing over and over: <strong class="hl4">Predict the next word.</strong> That's it. When ChatGPT writes a paragraph, it's not planning ahead — it predicts one token, adds it, and repeats.
+      </div>
+      <p class="concept-text" style="margin-top:12px;">Here's the process:</p>
+      <ol class="steps-list">
+        <li>You type: <em>"The cat sat on the"</em></li>
+        <li>The model assigns probabilities to every possible next word</li>
+        <li><em>"mat"</em> wins (highest probability) → it picks "mat"</li>
+        <li>Input becomes <em>"The cat sat on the mat"</em> — predict again!</li>
+        <li>Repeat hundreds of times to generate a full response</li>
+      </ol>
+
+      <!-- INTERACTIVE NEXT-TOKEN DEMO -->
+      <div class="token-gen-demo">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em;">▶ Interactive Demo — Watch a Transformer "Think"</div>
+        <input class="gen-input" id="genInput" placeholder="Type a sentence starter (e.g. The cat sat on the)" value="The cat sat on the" />
+        <button class="gen-btn" onclick="runGenDemo()">Predict Next Token</button>
+        <div class="gen-output" id="genOutput"></div>
+        <div class="prob-bar-wrap" id="probWrap">
+          <div class="prob-label">Probability Distribution for Next Token:</div>
+          <div id="probBars"></div>
+        </div>
+      </div>
+
+      <p class="concept-text"><strong class="hl">Why does it sometimes make mistakes?</strong> The model picks one word at a time using probabilities. There's built-in randomness called <em>"temperature"</em> to keep responses creative. And since the model always picks the most "plausible sounding" next word, it can sometimes <em>hallucinate</em> — say something confidently that isn't true.</p>
+      <div class="highlight-box blue">
+        <strong>📊 Fun Fact</strong>
+        When Claude writes you a 500-word response, it has made roughly 500+ individual next-token predictions, one after another, each using your entire conversation as context.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Tokenization INTERACTIVE -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(251,191,36,0.12)">🔤</div>
+      <div>
+        <div class="section-num">PART 5</div>
+        <div class="section-title">Subword Tokenization</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <p class="concept-text">In Week 25, you learned tokenization (splitting text into words). LLMs use a more advanced version: <strong class="hl">subword tokenization</strong> — uncommon or long words get split into smaller pieces.</p>
+      <div class="tokenizer-demo">
+        <label>Try the tokenizer — type any word or sentence:</label>
+        <input class="tokenizer-input" id="tokInput" placeholder="e.g. strawberry, transformer, unbelievable" oninput="runTokenizer(this.value)">
+        <div class="token-display" id="tokenDisplay"></div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;" id="tokCount"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:4px;">
+        <div class="highlight-box blue" style="margin:0">
+          <strong>📚 Vocabulary Size</strong>
+          A typical LLM uses ~50,000–100,000 tokens. By combining smaller pieces, it can represent any word in any language without needing a separate entry for each one.
+        </div>
+        <div class="highlight-box purple" style="margin:0">
+          <strong>🍓 Why "Strawberry" Tricks LLMs</strong>
+          The model sees <em>["straw", "berry"]</em> — never the individual letters! That's why counting letters or spelling backwards is hard for LLMs.
+        </div>
+        <div class="highlight-box orange" style="margin:0">
+          <strong>🔢 Context Windows</strong>
+          When GPT-4 has a "128K context window," that means 128,000 <em>tokens</em> — roughly 96,000 words.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Family Tree -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(52,211,153,0.12)">🌳</div>
+      <div>
+        <div class="section-num">PART 6</div>
+        <div class="section-title">The Transformer Family Tree</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <p class="concept-text" style="margin-bottom:16px;">Not all Transformer models are the same! There are three main types:</p>
+      <div class="model-grid">
+        <div class="model-card" style="border-top:3px solid var(--accent)">
+          <div class="model-type" style="color:var(--accent)">Encoder-Only</div>
+          <h4>Understanding Text</h4>
+          <div class="examples">Example: <strong>BERT</strong> (Google)</div>
+          <div class="use-case">Used for sentiment analysis, search ranking, text classification.</div>
+          <div style="margin-top:12px;font-size:12px;background:rgba(56,189,248,0.08);border-radius:6px;padding:8px;color:#94a3b8;">
+            📖 <em>Like a great reader who analyzes text deeply, but can't write new content from scratch.</em>
+          </div>
+        </div>
+        <div class="model-card" style="border-top:3px solid var(--accent2)">
+          <div class="model-type" style="color:var(--accent2)">Encoder-Decoder</div>
+          <h4>Transforming Text</h4>
+          <div class="examples">Example: <strong>T5</strong> (Google)</div>
+          <div class="use-case">Used for translation (English → French), summarization, Q&amp;A.</div>
+          <div style="margin-top:12px;font-size:12px;background:rgba(167,139,250,0.08);border-radius:6px;padding:8px;color:#94a3b8;">
+            🌍 <em>Like a translator who reads in one language and writes in another.</em>
+          </div>
+        </div>
+        <div class="model-card" style="border-top:3px solid var(--accent3)">
+          <div class="model-type" style="color:var(--accent3)">Decoder-Only</div>
+          <h4>Generating Text</h4>
+          <div class="examples">Examples: <strong>GPT-4, Claude, Gemini, Llama</strong></div>
+          <div class="use-case">Used for chatbots, code generation, creative writing, reasoning.</div>
+          <div style="margin-top:12px;font-size:12px;background:rgba(52,211,153,0.08);border-radius:6px;padding:8px;color:#94a3b8;">
+            ✍️ <em>Like a great writer who can continue any story or answer any question.</em>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box green" style="margin-top:16px;">
+        <strong>🔑 Key Insight</strong>
+        ChatGPT and Claude are <strong class="hl3">decoder-only</strong> Transformers. Being really good at predicting the next word requires deep understanding of language, logic, and even reasoning!
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Scale -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(251,146,60,0.12)">📏</div>
+      <div>
+        <div class="section-num">PART 7</div>
+        <div class="section-title">The Scale of Modern LLMs</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <p class="concept-text">Your Week 23 neural network had about 100,000 parameters. Modern LLMs are astronomically larger:</p>
+      <table class="scale-table" style="margin-top:16px;">
+        <thead>
+          <tr><th>Model</th><th>Year</th><th>Parameters</th><th>Training Data</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong style="color:var(--accent3)">Your Week 23 NN</strong></td><td>2026</td><td>~100,000</td><td>70,000 images</td></tr>
+          <tr><td><strong>BERT</strong></td><td>2018</td><td>110 million</td><td>~3 billion words</td></tr>
+          <tr><td><strong>GPT-2</strong></td><td>2019</td><td>1.5 billion</td><td>~40 GB of text</td></tr>
+          <tr><td><strong>GPT-3</strong></td><td>2020</td><td>175 billion</td><td>~570 GB of text</td></tr>
+          <tr><td><strong style="color:var(--accent)">GPT-4</strong></td><td>2023</td><td>~1.8 trillion (est.)</td><td>Trillions of words</td></tr>
+        </tbody>
+      </table>
+      <div class="highlight-box orange" style="margin-top:16px;">
+        <strong>🏖️ Sand Perspective</strong>
+        If each parameter were a grain of sand, your Week 23 network would fill a small cup. GPT-4 would fill several <em>Olympic swimming pools</em>.
+      </div>
+      <p class="concept-text">Training GPT-4 cost an estimated $100 million in computing, using thousands of specialized GPUs running for months.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Hugging Face -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(251,191,36,0.12)">🤗</div>
+      <div>
+        <div class="section-num">PART 8</div>
+        <div class="section-title">Using Transformers in Python</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <p class="concept-text">The <strong class="hl">Hugging Face</strong> library makes it incredibly easy to use powerful pretrained models. No training required!</p>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;font-family:'Space Mono',monospace;font-size:13px;line-height:1.7;overflow-x:auto;">
+        <div style="color:var(--muted);margin-bottom:8px;"># Sentiment Analysis in 3 lines!</div>
+        <div><span style="color:#a78bfa">from</span> <span style="color:#38bdf8">transformers</span> <span style="color:#a78bfa">import</span> pipeline</div>
+        <div style="margin-top:4px;"><span style="color:#94a3b8">classifier</span> = pipeline(<span style="color:#34d399">"sentiment-analysis"</span>)</div>
+        <div><span style="color:#94a3b8">result</span> = classifier(<span style="color:#34d399">"I absolutely loved this movie!"</span>)</div>
+      </div>
+      <p class="concept-text"><strong class="hl">Compare to Week 25:</strong> Last week you had to tokenize text, extract TF-IDF features, train a model, then predict. With a pretrained Transformer, all of that is done for you — and the accuracy is usually much higher!</p>
+      <p class="concept-text" style="margin-top:12px;">The pipeline also supports many other tasks:</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:12px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;border:1px solid var(--border)"><span style="color:var(--accent)">text-generation</span><br><span style="color:#64748b;">GPT-2 text writing</span></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;border:1px solid var(--border)"><span style="color:var(--accent2)">summarization</span><br><span style="color:#64748b;">Shrink long text</span></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;border:1px solid var(--border)"><span style="color:var(--accent3)">ner</span><br><span style="color:#64748b;">Find people, places, orgs</span></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;border:1px solid var(--border)"><span style="color:var(--accent4)">question-answering</span><br><span style="color:#64748b;">Answer from context</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Key Takeaways -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-icon" style="background:rgba(56,189,248,0.12)">⭐</div>
+      <div>
+        <div class="section-num">REVIEW</div>
+        <div class="section-title">Key Takeaways</div>
+      </div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="section-body">
+      <div class="takeaways-grid">
+        <div class="takeaway-item"><div class="takeaway-num">01</div>Transformers are the architecture behind ChatGPT, Claude, GPT-4, Gemini, and nearly every modern AI. Invented in <strong class="hl">2017</strong>.</div>
+        <div class="takeaway-item"><div class="takeaway-num">02</div><strong class="hl2">Self-attention</strong> lets every word look at every other word simultaneously to understand context.</div>
+        <div class="takeaway-item"><div class="takeaway-num">03</div>ChatGPT generates text by <strong class="hl3">predicting the next token</strong> one at a time, adding it, and repeating. Called autoregressive generation.</div>
+        <div class="takeaway-item"><div class="takeaway-num">04</div>LLMs use <strong class="hl4">subword tokenization</strong> — words get split into chunks. That's why counting letters and math can be tricky for them.</div>
+        <div class="takeaway-item"><div class="takeaway-num">05</div>Three types: <strong class="hl">Encoder-only</strong> (BERT, for understanding), <strong class="hl2">Encoder-Decoder</strong> (T5, for translating), <strong class="hl3">Decoder-only</strong> (GPT-4, Claude, for generating).</div>
+        <div class="takeaway-item"><div class="takeaway-num">06</div>Modern LLMs have <strong class="hl">billions to trillions of parameters</strong>. Your Week 23 NN had ~100,000 — GPT-4 has roughly 18 million times more.</div>
+        <div class="takeaway-item"><div class="takeaway-num">07</div>With <strong class="hl2">Hugging Face</strong>, you can use a state-of-the-art Transformer in <strong class="hl3">3 lines of Python</strong> — no training required. This is transfer learning!</div>
+        <div class="takeaway-item"><div class="takeaway-num">08</div>Everything connects — tokenization, embeddings, neural networks, loss functions from your previous weeks all come together in Transformers.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end tab-concepts -->
+
+
+<!-- ═══════════ QUIZ TAB ═══════════ -->
+<div id="tab-quiz" style="display:none">
+  <div class="quiz-header">
+    <h2>🧠 Week 26 Quiz</h2>
+    <p>10 questions on Transformers &amp; LLMs — let's see what you've got!</p>
+  </div>
+
+  <div class="quiz-progress-wrap">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+    <div class="progress-text" id="progressText">0 / 10 answered</div>
+    <div class="score-badge" id="scoreBadge">Score: 0</div>
+  </div>
+
+  <div id="quizContainer"></div>
+
+  <div class="results-panel" id="resultsPanel">
+    <div class="score-circle">
+      <div class="score-num" id="finalScore">0</div>
+      <div class="score-denom">out of 10</div>
+    </div>
+    <div class="results-msg" id="resultsMsg"></div>
+    <div class="results-sub" id="resultsSub"></div>
+    <button class="retry-btn" onclick="initQuiz()">Try Again</button>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<script>
+// ──────────────────────────────────────────────
+//  TAB SWITCHING
+// ──────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.getElementById('tab-concepts').style.display = tab === 'concepts' ? 'block' : 'none';
+  document.getElementById('tab-quiz').style.display     = tab === 'quiz'     ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ──────────────────────────────────────────────
+//  ACCORDION
+// ──────────────────────────────────────────────
+function toggle(header) {
+  const card = header.parentElement;
+  card.classList.toggle('open');
+}
+
+// ──────────────────────────────────────────────
+//  TOKENIZER DEMO (simple simulated tokenizer)
+// ──────────────────────────────────────────────
+const colors = ['#38bdf8','#a78bfa','#34d399','#fb923c','#fbbf24','#f87171','#60a5fa','#4ade80','#e879f9'];
+function simpleTokenize(text) {
+  if (!text.trim()) return [];
+  // Simple subword-ish tokenizer simulation
+  const subwordMap = {
+    'strawberry':['straw','berry'],
+    'transformer':['transform','er'],
+    'transformers':['transform','ers'],
+    'unbelievable':['un','believe','able'],
+    'artificial':['artif','icial'],
+    'intelligence':['intel','ligence'],
+    'naturally':['natural','ly'],
+    'tokenization':['token','ization'],
+    'classification':['class','ification'],
+    'unfortunately':['un','fortunate','ly'],
+    'programming':['program','ming'],
+    'python':['python'],
+    'learning':['learn','ing'],
+    'machine':['machine'],
+    'language':['lang','uage'],
+    'attention':['attention'],
+    'incredible':['incred','ible'],
+    'impossible':['im','possible'],
+    'beautiful':['beautiful'],
+    'processing':['process','ing'],
+  };
+  const words = text.toLowerCase().split(/\s+/);
+  let tokens = [];
+  words.forEach(w => {
+    const clean = w.replace(/[^a-z]/g,'');
+    if (subwordMap[clean]) { tokens = tokens.concat(subwordMap[clean]); }
+    else if (clean.length > 8) {
+      const mid = Math.ceil(clean.length/2);
+      tokens.push(clean.slice(0,mid), clean.slice(mid));
+    } else { tokens.push(clean || w); }
+  });
+  return tokens.filter(t => t.length > 0);
+}
+function runTokenizer(val) {
+  const display = document.getElementById('tokenDisplay');
+  const count   = document.getElementById('tokCount');
+  const tokens  = simpleTokenize(val);
+  display.innerHTML = '';
+  tokens.forEach((t, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'token-chip';
+    chip.textContent = t;
+    chip.style.background = colors[i % colors.length] + '22';
+    chip.style.border = `1px solid ${colors[i % colors.length]}55`;
+    chip.style.color = colors[i % colors.length];
+    display.appendChild(chip);
+  });
+  count.textContent = tokens.length > 0 ? `${tokens.length} token${tokens.length!==1?'s':''} (simulated)` : '';
+}
+
+// ──────────────────────────────────────────────
+//  NEXT-TOKEN PREDICTION DEMO
+// ──────────────────────────────────────────────
+const continuations = {
+  default: [
+    {word:'is', prob:0.38},
+    {word:'can', prob:0.22},
+    {word:'has', prob:0.18},
+    {word:'will', prob:0.14},
+    {word:'was', prob:0.08},
+  ]
+};
+const contextMap = [
+  { match: /cat sat on the$/i,  preds: [{word:'mat',prob:0.72},{word:'floor',prob:0.14},{word:'table',prob:0.09},{word:'chair',prob:0.05}] },
+  { match: /sat on the$/i,      preds: [{word:'mat',prob:0.55},{word:'bench',prob:0.22},{word:'floor',prob:0.15},{word:'grass',prob:0.08}] },
+  { match: /future of/i,        preds: [{word:'artificial',prob:0.45},{word:'machine',prob:0.25},{word:'deep',prob:0.18},{word:'neural',prob:0.12}] },
+  { match: /intelligence is/i,  preds: [{word:'transforming',prob:0.41},{word:'incredible',prob:0.29},{word:'here',prob:0.19},{word:'evolving',prob:0.11}] },
+  { match: /attention mechanism/i, preds: [{word:'allows',prob:0.52},{word:'is',prob:0.28},{word:'enables',prob:0.13},{word:'makes',prob:0.07}] },
+  { match: /machine learning/i, preds: [{word:'models',prob:0.44},{word:'algorithms',prob:0.27},{word:'is',prob:0.18},{word:'can',prob:0.11}] },
+  { match: /transformers are/i, preds: [{word:'very',prob:0.33},{word:'incredibly',prob:0.28},{word:'the',prob:0.25},{word:'really',prob:0.14}] },
+];
+
+let genHistory = '';
+function runGenDemo() {
+  const input = document.getElementById('genInput');
+  const out   = document.getElementById('genOutput');
+  const wrap  = document.getElementById('probWrap');
+  const bars  = document.getElementById('probBars');
+  const text  = input.value.trim();
+  if (!text) return;
+  if (!genHistory) genHistory = text;
+
+  // Pick predictions
+  let preds = continuations.default;
+  for (const c of contextMap) {
+    if (c.match.test(genHistory)) { preds = c.preds; break; }
+  }
+
+  // Show probability bars
+  wrap.style.display = 'block';
+  bars.innerHTML = '';
+  preds.forEach((p,i) => {
+    const row = document.createElement('div');
+    row.className = 'prob-row';
+    row.innerHTML = `<span class="prob-word">"${p.word}"</span>
+      <div style="flex:1;height:18px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div class="prob-bar" style="width:0%;background:${colors[i]};height:100%;border-radius:3px;"></div>
+      </div>
+      <span class="prob-pct">${Math.round(p.prob*100)}%</span>`;
+    bars.appendChild(row);
+    setTimeout(() => { row.querySelector('.prob-bar').style.width = (p.prob * 100) + '%'; }, 50 + i*80);
+  });
+
+  // Pick top word (with slight randomness)
+  const r = Math.random();
+  let cum = 0, chosen = preds[0].word;
+  for (const p of preds) {
+    cum += p.prob;
+    if (r < cum) { chosen = p.word; break; }
+  }
+
+  // Display
+  genHistory += ' ' + chosen;
+  out.innerHTML = '';
+  const words = genHistory.split(' ');
+  words.forEach((w, i) => {
+    const span = document.createElement('span');
+    span.className = 'gen-word' + (i === words.length-1 ? ' new' : '');
+    span.textContent = w + ' ';
+    out.appendChild(span);
+  });
+  input.value = genHistory;
+}
+
+// ──────────────────────────────────────────────
+//  QUIZ
+// ──────────────────────────────────────────────
+const questions = [
+  {
+    q: "What year was the Transformer architecture invented?",
+    opts: ["2013", "2015", "2017", "2019"],
+    ans: 2,
+    explanation: "The Transformer was introduced in 2017 in the famous paper 'Attention Is All You Need' by researchers at Google."
+  },
+  {
+    q: "What is the KEY innovation of the Transformer that makes it different from older models like RNNs?",
+    opts: [
+      "It processes words one at a time, left to right",
+      "It uses convolution filters to detect patterns",
+      "The attention mechanism lets every word look at every other word simultaneously",
+      "It only works on images, not text"
+    ],
+    ans: 2,
+    explanation: "The self-attention mechanism is the key innovation — it allows every word to look at every other word at the same time, giving the model full context regardless of sentence length."
+  },
+  {
+    q: "In the classroom analogy for attention, what does the 'Query' represent?",
+    opts: [
+      "The meaning a word holds",
+      "The question a word asks: 'What am I related to?'",
+      "The name tag describing what a word is",
+      "The position number of each word"
+    ],
+    ans: 1,
+    explanation: "In the classroom analogy, the Query is the question each word (student) sends out: 'What am I related to?' The Key is the name tag, and the Value is the information the word holds."
+  },
+  {
+    q: "How do ChatGPT and Claude generate text?",
+    opts: [
+      "They plan the entire response before writing a single word",
+      "They copy text directly from the training dataset",
+      "They predict one token at a time, then add it and repeat",
+      "They use a search engine to find the best answer"
+    ],
+    ans: 2,
+    explanation: "LLMs generate text autoregressively — they predict the next token, append it to the input, and repeat this process until the response is complete. There's no advance planning!"
+  },
+  {
+    q: "What type of Transformer is ChatGPT (and Claude)?",
+    opts: [
+      "Encoder-only (like BERT)",
+      "Encoder-Decoder (like T5)",
+      "Decoder-only",
+      "Convolutional Transformer"
+    ],
+    ans: 2,
+    explanation: "ChatGPT, Claude, Gemini, and Llama are all decoder-only Transformers. They generate text by predicting the next token and are the most versatile type."
+  },
+  {
+    q: "BERT (by Google) is an example of which type of Transformer?",
+    opts: [
+      "Decoder-only",
+      "Encoder-Decoder",
+      "Encoder-only",
+      "Recurrent Transformer"
+    ],
+    ans: 2,
+    explanation: "BERT is an encoder-only Transformer. It's great at understanding and analyzing text (sentiment analysis, search, classification) but doesn't generate new text from scratch."
+  },
+  {
+    q: "Why can LLMs struggle with counting the letters in a word like 'strawberry'?",
+    opts: [
+      "LLMs have no memory and forget letters immediately",
+      "Subword tokenization splits 'strawberry' into chunks like ['straw','berry'], hiding individual letters",
+      "LLMs are designed only for spoken language, not written text",
+      "The word 'strawberry' is too long for any LLM to process"
+    ],
+    ans: 1,
+    explanation: "Because of subword tokenization, 'strawberry' becomes tokens like ['straw','berry']. The model never sees individual letters — so counting them is tricky!"
+  },
+  {
+    q: "Approximately how many parameters does GPT-4 have?",
+    opts: [
+      "~100,000 (like your Week 23 NN)",
+      "~1.5 billion (like GPT-2)",
+      "~175 billion (like GPT-3)",
+      "~1.8 trillion (estimated)"
+    ],
+    ans: 3,
+    explanation: "GPT-4 is estimated to have around 1.8 trillion parameters — roughly 18 million times more than the ~100,000 parameters in the neural network you built in Week 23!"
+  },
+  {
+    q: "What Python library lets you use a powerful pretrained Transformer in just 3 lines of code?",
+    opts: [
+      "scikit-learn",
+      "Hugging Face Transformers (the pipeline API)",
+      "OpenCV",
+      "matplotlib"
+    ],
+    ans: 1,
+    explanation: "The Hugging Face library's `pipeline` API makes it extremely easy: `from transformers import pipeline; classifier = pipeline('sentiment-analysis'); result = classifier('I love this!')`"
+  },
+  {
+    q: "What does 'temperature' control in an LLM's text generation?",
+    opts: [
+      "How fast the GPU runs during inference",
+      "The maximum length of the generated response",
+      "The amount of randomness/creativity in word selection",
+      "The size of the model's context window"
+    ],
+    ans: 2,
+    explanation: "Temperature controls randomness. High temperature → more creative and varied outputs. Low temperature → more predictable and focused outputs. It's the built-in randomness that keeps responses interesting!"
+  }
+];
+
+let score = 0;
+let answered = 0;
+let answeredArr = [];
+
+function initQuiz() {
+  score = 0; answered = 0; answeredArr = new Array(questions.length).fill(false);
+  document.getElementById('resultsPanel').classList.remove('show');
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressText').textContent = '0 / 10 answered';
+  document.getElementById('scoreBadge').textContent = 'Score: 0';
+  renderQuestions();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'qcard-' + qi;
+    const letters = ['A','B','C','D'];
+    const optHtml = q.opts.map((opt, oi) => `
+      <button class="option-btn" onclick="selectAnswer(${qi},${oi})" id="opt-${qi}-${oi}">
+        <span class="option-letter">${letters[oi]}</span>
+        ${opt}
+      </button>
+    `).join('');
+    card.innerHTML = `
+      <div class="question-num">Question ${qi+1} of ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options-grid">${optHtml}</div>
+      <div class="feedback-msg" id="feedback-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, selected) {
+  if (answeredArr[qi]) return;
+  answeredArr[qi] = true;
+  answered++;
+  const q = questions[qi];
+  const card = document.getElementById('qcard-' + qi);
+  const feedback = document.getElementById('feedback-' + qi);
+  const correct = selected === q.ans;
+  if (correct) score++;
+
+  // Disable all buttons
+  for (let i = 0; i < q.opts.length; i++) {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add(correct ? 'correct' : 'reveal');
+  }
+  if (!correct) {
+    document.getElementById(`opt-${qi}-${selected}`).classList.add('wrong');
+  }
+
+  card.classList.add('answered', correct ? 'correct' : 'wrong');
+  feedback.textContent = (correct ? '✅ ' : '❌ ') + q.explanation;
+  feedback.className = 'feedback-msg show ' + (correct ? 'correct' : 'wrong');
+
+  // Update progress
+  const pct = (answered / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${questions.length} answered`;
+  document.getElementById('scoreBadge').textContent = `Score: ${score}`;
+
+  // Show results when all answered
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function showResults() {
+  const panel = document.getElementById('resultsPanel');
+  document.getElementById('finalScore').textContent = score;
+  const msg  = document.getElementById('resultsMsg');
+  const sub  = document.getElementById('resultsSub');
+  if (score === 10) {
+    msg.textContent = '🏆 Perfect Score! Transformer Expert!';
+    sub.textContent = 'Incredible! You aced all 10 questions. You truly understand how Transformers, attention, and LLMs work. ChatGPT has nothing on you!';
+  } else if (score >= 8) {
+    msg.textContent = '🌟 Almost Perfect! Amazing Work!';
+    sub.textContent = 'You clearly understand the key concepts. Review the questions you missed and you\'ll be a Transformer expert in no time.';
+  } else if (score >= 6) {
+    msg.textContent = '👍 Solid Understanding!';
+    sub.textContent = 'Good effort! A few concepts need a quick review. Head back to the Concepts tab to reinforce what you missed.';
+  } else if (score >= 4) {
+    msg.textContent = '📚 Keep Studying!';
+    sub.textContent = 'You\'ve got the basics but some key ideas need more practice. Re-read the Concepts sections and try the quiz again!';
+  } else {
+    msg.textContent = '🔄 Let\'s Try Again!';
+    sub.textContent = 'Don\'t worry — Transformers are complex! Go through the Concepts tab carefully and come back for another attempt.';
+  }
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Init on load
+initQuiz();
+// Open first section by default
+document.addEventListener('DOMContentLoaded', () => {
+  const first = document.querySelector('.section-card');
+  if (first) first.classList.add('open');
+});
+</script>
+</body>
+</html>
