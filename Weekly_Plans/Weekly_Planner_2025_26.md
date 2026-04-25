@@ -51,8 +51,8 @@ This course introduces middle and high school students to Machine Learning conce
 | 27 | 4/25/2026 | 5/1/2026 | ML Certifications and ML Projects |
 | 28 | 5/2/2026 | 5/8/2026 | Final Project - Working Session 1 |
 | 29 | 5/9/2026 | 5/15/2026 | Final Project - Working Session 2 |
-| - | 5/16/2026 | 5/22/2026 | Final Project - Working Session 3 |
-| 30 | 5/23/2026 | - | **Demonstrations to External Judges** |
+| 30 | 5/16/2026 | 5/22/2026 | Final Project - Working Session 3 |
+| 31 | 5/23/2026 | - | **Demonstrations to External Judges** |
 
 ---
 
