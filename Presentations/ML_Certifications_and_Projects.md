@@ -197,9 +197,9 @@ Everything from this year lives here — notebooks, presentations, assignments:
 ### Learning Resources
 - **Kaggle Learn** — [kaggle.com/learn](https://www.kaggle.com/learn) — free, bite-sized ML courses with certificates
 - **Google ML Crash Course** — [developers.google.com/machine-learning/crash-course](https://developers.google.com/machine-learning/crash-course)
-- **3Blue1Brown (YouTube)** — visual explanations of neural networks (search "Neural Networks 3Blue1Brown")
-- **StatQuest with Josh Starmer (YouTube)** — clear, friendly ML concept explanations
-- **sentdex (YouTube)** — hands-on Python + ML tutorials for beginners
+- **3Blue1Brown (YouTube)** — [youtube.com/@3blue1brown](https://www.youtube.com/@3blue1brown) — visual explanations of neural networks
+- **StatQuest with Josh Starmer (YouTube)** — [ML playlist](https://www.youtube.com/watch?v=Gv9_4yMHFhI&list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF) — clear, friendly ML concept explanations
+- **sentdex (YouTube)** — [Python + ML tutorials](https://www.youtube.com/watch?v=OGxgnH8y2NM) — hands-on Python + ML tutorials for beginners
 
 ---
 
@@ -286,7 +286,7 @@ These competitions are free to enter, open to your age group, and look great on 
 - **Kaggle Monthly Playground Series** — monthly, beginner-friendly tabular competitions
 
 ### For Middle / High School Students
-- **Google Science Fair** — [sciencefair.withgoogle.com](https://sciencefair.withgoogle.com) — open to ages 13–18 globally
+- **Google Science Fair** — [competitionsciences.org](https://www.competitionsciences.org/competitions/google-science-fair/) — open to ages 13–18 globally
 - **Conrad Challenge** — [conradchallenge.org](https://www.conradchallenge.org) — innovation + entrepreneurship + STEM
 - **MIT THINK Scholars** — [think.mit.edu](https://think.mit.edu) — for high school students with research projects
 - **Davidson Fellows Scholarship** — high-impact projects by students under 18
