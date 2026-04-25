@@ -94,14 +94,26 @@ Think of a question you have wondered about. For example:
 
 If you have wondered it, you can probably build a model to explore it.
 
-### Strategy 4 — Start with a Dataset You Already Used
+### Strategy 4 — Ask an LLM (Claude, Gemini, or ChatGPT)
+You have been learning how LLMs work since Week 26 — now use them as your brainstorming partner! Describe what you are interested in and ask for project ideas. Here are prompts that actually work:
+
+- *"I am a middle school student who loves soccer. Give me 5 beginner ML project ideas using soccer data."*
+- *"What datasets exist for predicting music popularity? What features would I use?"*
+- *"I want to build an image classifier about animals. Walk me through the steps and what algorithm to use."*
+- *"What are some surprising things you can predict with publicly available data?"*
+
+The LLM will not build the project for you — but it is an incredible **idea generator, explainer, and debugging helper**. Think of it as a tutor available 24/7. Try Claude at [claude.ai](https://claude.ai), Gemini at [gemini.google.com](https://gemini.google.com), or ChatGPT at [chatgpt.com](https://chatgpt.com).
+
+> **Pro tip:** If you get an idea you like, follow up with *"What dataset should I use for this?"* and *"What scikit-learn model is best for this problem?"* — you will have a full project plan in minutes.
+
+### Strategy 5 — Start with a Dataset You Already Used
 Pick any dataset from class (Iris, Titanic, MNIST, IMDB) and go deeper:
 - Add a new feature
 - Try a different algorithm
 - Build a web UI around it
 - Explain *why* the model makes each decision
 
-### Strategy 5 — Look at Past Winning Projects
+### Strategy 6 — Look at Past Winning Projects
 - Kaggle Competitions: [kaggle.com/competitions](https://www.kaggle.com/competitions)
 - Google Science Fair: [sciencefair.withgoogle.com](https://sciencefair.withgoogle.com)
 - MIT THINK Scholars: [think.mit.edu](https://think.mit.edu)
