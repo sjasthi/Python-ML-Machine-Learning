@@ -115,7 +115,7 @@ Pick any dataset from class (Iris, Titanic, MNIST, IMDB) and go deeper:
 
 ### Strategy 6 — Look at Past Winning Projects
 - Kaggle Competitions: [kaggle.com/competitions](https://www.kaggle.com/competitions)
-- Google Science Fair: [sciencefair.withgoogle.com](https://sciencefair.withgoogle.com)
+- Google Science Fair: [https://www.competitionsciences.org/competitions/google-science-fair/](https://www.competitionsciences.org/competitions/google-science-fair/)
 - MIT THINK Scholars: [think.mit.edu](https://think.mit.edu)
 
 You are not copying — you are getting inspired by what is possible at your age.
