@@ -289,11 +289,10 @@ These competitions are free to enter, open to your age group, and look great on 
 - **Google Science Fair** — [competitionsciences.org](https://www.competitionsciences.org/competitions/google-science-fair/) — open to ages 13–18 globally
 - **Conrad Challenge** — [conradchallenge.org](https://www.conradchallenge.org) — innovation + entrepreneurship + STEM
 - **MIT THINK Scholars** — [think.mit.edu](https://think.mit.edu) — for high school students with research projects
-- **Davidson Fellows Scholarship** — high-impact projects by students under 18
-
 ### For Coding Competitions
 - **USACO (USA Computing Olympiad)** — [usaco.org](https://usaco.org) — algorithms + programming
-- **CodingBat / LeetCode** — great for building general coding skills before competitions
+- **LeetCode** — [leetcode.com](https://leetcode.com) — coding challenges that sharpen problem-solving skills
+- **HackerRank** — [hackerrank.com](https://www.hackerrank.com) — coding challenges with a dedicated ML and AI track
 
 > You do NOT have to win to benefit. Simply submitting a Kaggle competition gives you a public leaderboard score and a notebook you can show others.
 
