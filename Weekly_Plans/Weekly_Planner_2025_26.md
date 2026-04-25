@@ -44,14 +44,14 @@ This course introduces middle and high school students to Machine Learning conce
 | - | 3/7/2026 | 3/13/2026 | **No Class - Spring Break** |
 | - | 3/14/2026 | 3/20/2026 | **No Class - Spring Break** |
 | 22 | 3/21/2026 | 3/27/2026 | Principal Component Analysis (PCA) |
-| 23 | 3/28/2026 | 4/3/2026 | Recommender Systems |
+| 23 | 3/28/2026 | 4/3/2026 | Neural Networks |
 | 24 | 4/4/2026 | 4/10/2026 | Image Classification using CNNs |
-| 25 | 4/11/2026 | 4/17/2026 | ML Certifications / Competitions |
-| 26 | 4/18/2026 | 4/24/2026 | Final Project - Working Session 1 |
-| 27 | 4/25/2026 | 5/1/2026 | Final Project - Working Session 2 |
-| 28 | 5/2/2026 | 5/8/2026 | Final Project - Working Session 3 |
-| 29 | 5/9/2026 | 5/15/2026 | Final Project - Working Session 4 |
-| - | 5/16/2026 | 5/22/2026 | **Demonstrations to External Judges** |
+| 25 | 4/11/2026 | 4/17/2026 | Introduction to NLP |
+| 26 | 4/18/2026 | 4/24/2026 | Transformers and LLMs |
+| 27 | 4/25/2026 | 5/1/2026 | ML Certifications and ML Projects |
+| 28 | 5/2/2026 | 5/8/2026 | Final Project - Working Session 1 |
+| 29 | 5/9/2026 | 5/15/2026 | Final Project - Working Session 2 |
+| - | 5/16/2026 | 5/22/2026 | Final Project - Working Session 3 |
 | 30 | 5/23/2026 | - | **Demonstrations to External Judges** |
 
 ---
