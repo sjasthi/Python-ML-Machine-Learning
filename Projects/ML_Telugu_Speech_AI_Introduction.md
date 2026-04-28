@@ -1,10 +1,7 @@
 # Telugu Speech AI — Capstone Final Project
 
-### Learn and Help | Python Machine Learning Course | Week 27
-
----
-
-## Project Author: Ahala
+### Learn and Help | Python for Machine Learning
+### www.learnandhelp.com
 
 ---
 
