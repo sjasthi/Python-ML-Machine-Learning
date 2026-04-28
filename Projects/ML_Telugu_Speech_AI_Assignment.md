@@ -14,7 +14,7 @@ evaluation metrics, and AI APIs — applied to a real-world problem:
 **making AI understand and speak Telugu**.
 
 Reference the [Project Introduction](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Projects/ML_Telugu_Speech_AI_Introduction.md) and the
-[Colab Notebook](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Colab_Notebooks/ML_Telugu_Speech_AI_Project.ipynb) as you work through the tasks.
+[Colab Notebook](https://github.com/sjasthi/Python-ML-Machine-Learning/blob/main/Projects/ML_Telugu_ASR_and_TTS.ipynb) as you work through the tasks.
 
 ---
 
